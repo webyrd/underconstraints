@@ -1,8 +1,13 @@
 # underconstraints
 
-Underconstraints for miniKanren, inspired by a conversation with Youyou Cong about the `presento` constraint (a dual to the `absento` constraint) in miniKanren, from the mkTut tutorial I gave at <Programming 2023> in Tokyo.
+Underconstraints for miniKanren, inspired by a conversation with
+Youyou Cong about the `presento` constraint (a dual to the `absento`
+constraint) in miniKanren, from the mkTut tutorial I gave at
+<Programming 2023> in Tokyo.
 
-The `faster-minikanren-with-underconstraints` code is modified from Michael Ballantyne's `https://github.com/michaelballantyne/faster-miniKanren`.
+The `faster-minikanren-with-underconstraints` code is modified from
+Michael Ballantyne's
+`https://github.com/michaelballantyne/faster-miniKanren`.
 
 An `underconstraint` is a constraint that is *necessary*, but not
 *sufficient*.  An underconstaint may (or may not!) result in a
@@ -42,7 +47,8 @@ in Barliman, but it could be made available at the user level, and
 would be much more useful.  Basically it's a constraint to try to fail
 fast.  I think it could help with Barliman synthesis, maybe.
 
-For a Barliman typed synthesis program, for example, might write the following:
+For a Barliman typed synthesis program, for example, might write the
+following:
 
 ```
 (fresh (prog)
