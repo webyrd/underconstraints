@@ -137,7 +137,7 @@
 (define (c-T c) (car c))
 (define (c-D c) (cadr c))
 (define (c-A c) (caddr c))
-(define (c-A c) (cadddr c))
+(define (c-U c) (cadddr c))
 
 (define (c-with-T c T) (list T (c-D c) (c-A c) (c-U c)))
 (define (c-with-D c D) (list (c-T c) D (c-A c) (c-U c)))
