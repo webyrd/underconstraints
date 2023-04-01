@@ -2,8 +2,13 @@
 
 Underconstraints for miniKanren, inspired by a conversation with Youyou Cong about the `presento` constraint (a dual to the `absento` constraint) in miniKanren, from the mkTut tutorial I gave at <Programming 2023> in Tokyo.
 
-`underconstraint` -- a constraint that is necessary, but not
-sufficient.
+The `faster-minikanren-with-underconstraints` code is modified from Michael Ballantyne's `https://github.com/michaelballantyne/faster-miniKanren`.
+
+An `underconstraint` is a constraint that is *necessary*, but not
+*sufficient*.  An underconstaint may (or may not!) result in a
+computation with no answer "failing fast".  Otherwise, a sound use of
+underconstraints should not affect the semantics of a relational
+program in any way.
 
 Underconstrained constraints can be safely checked independently of
 each other, without worrying about constraint interaction.  This may
