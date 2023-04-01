@@ -417,18 +417,18 @@
 (define (apply-type-constraint tc)
   (lambda (u)
     (lambda (st)
-      (let ((type-pred (type-constraint-predicate tc)))
-        (let ((term (walk u (state-S st))))
-          (cond
-            ((type-pred term) st)
-            ((var? term)
-             (let* ((c (lookup-c st term))
-                    (T (c-T c)))
-               (cond
-                 ((eq? T tc) st)
-                 ((not T) (set-c st term (c-with-T c tc)))
-                 (else #f))))
-            (else #f)))))))
+      (let ((type-pred (type-constraint-predicate tc))
+            (term (walk u (state-S st))))
+        (cond
+          ((type-pred term) st)
+          ((var? term)
+           (let* ((c (lookup-c st term))
+                  (T (c-T c)))
+             (cond
+               ((eq? T tc) st)
+               ((not T) (set-c st term (c-with-T c tc)))
+               (else #f))))
+          (else #f))))))
 
 (define-syntax declare-type-constraints
   (syntax-rules ()
