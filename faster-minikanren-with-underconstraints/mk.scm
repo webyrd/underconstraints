@@ -132,7 +132,11 @@
 ;   U - list of underconstraints. Each constraint is a goal.
 ;         The list may contain duplicates.
 
-(define empty-c '(#f () ()))
+(define empty-c '(#f ; T
+                  () ; D
+                  () ; A
+                  () ; U
+                  ))
 
 (define (c-T c) (car c))
 (define (c-D c) (cadr c))
