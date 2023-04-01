@@ -143,10 +143,10 @@
 (define (c-A c) (caddr c))
 (define (c-U c) (cadddr c))
 
-(define (c-with-T c T) (list T (c-D c) (c-A c) (c-U c)))
-(define (c-with-D c D) (list (c-T c) D (c-A c) (c-U c)))
-(define (c-with-A c A) (list (c-T c) (c-D c) A (c-U c)))
-(define (c-with-U c U) (list (c-T c) (c-D c) (c-A c) U))
+(define (c-with-T c T) (list     T     (c-D c)  (c-A c)  (c-U c)))
+(define (c-with-D c D) (list  (c-T c)     D     (c-A c)  (c-U c)))
+(define (c-with-A c A) (list  (c-T c)  (c-D c)     A     (c-U c)))
+(define (c-with-U c U) (list  (c-T c)  (c-D c)  (c-A c)     U   ))
 
 ; Constraint store object.
 ; Mapping of representative variable to constraint record. Constraints
