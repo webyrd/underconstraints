@@ -1,0 +1,5 @@
+Underconstraints TODO
+
+* create examples/tests file, including motivating examples, and sound/unsound use cases
+* closely read through the existing `faster-miniKanren` implementation
+* add underconstraints to the `faster-miniKanren` implementation
