@@ -43,17 +43,17 @@ The following use of the `numeralo` underconstraint would be unsound:
 ```
 (run* (n m o)
   (== '() n)
-  (== 'this-definitely-isnt-a-legal-numeral m)
+  (== 'cat m)
   (numeralo n)
   (numeralo m)
   (*o n m o))
 ```
 
-since the `(numeralo m)` would fail, meaning the `run*` would
-return `()`.  However, removing `(numeralo m)` would result in the
-`run*` returning `(() this-definitely-isnt-a-legal-numeral ())`, since
-the `*o` relation encodes the rule that 0 times any value is 0,
-regardless of whether the second argument to `*o` is a legal numeral.
+With the `(numeralo m)` underconstraint present, the `run*`
+returns `()`.  However, removing the `(numeralo m)` underconstraint
+would result in the `run*` returning `(() cat ())`, since the `*o`
+relation encodes the rule that 0 times any value is 0, regardless of
+whether the second argument to `*o` is a legal numeral.
 
 Underconstraints are safe to check independently of each other without
 extending the constraint store.  I use this trick in Barliman, but it
