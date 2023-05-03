@@ -62,8 +62,8 @@ could be made available at the user level, and would be much more
 useful.  Basically it's a constraint to try to fail fast.  I think it
 could help with Barliman synthesis, maybe.
 
-For a Barliman typed synthesis program, for example, might write the
-following:
+For a Barliman typed synthesis program, for example, we might write
+the following:
 
 ```
 (fresh (prog)
