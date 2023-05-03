@@ -9,7 +9,7 @@ The `faster-minikanren-with-underconstraints` code is modified from
 Michael Ballantyne's
 `https://github.com/michaelballantyne/faster-miniKanren`.
 
-An `underconstraint` (short for "underconstrained constraint") is a
+An *underconstraint* (short for "underconstrained constraint") is a
 constraint that is *necessary*, but not *sufficient*.  An
 underconstaint may (or may not!) result in a computation with no
 answer "failing fast".  Otherwise, a sound use of underconstraints
