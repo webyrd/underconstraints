@@ -55,11 +55,11 @@ return `()`.  However, removing `(numeralo m)` would result in the
 the `*o` relation encodes the rule that 0 times any value is 0,
 regardless of whether the second argument to `*o` is a legal numeral.
 
-These underconstraints are safe to check independently of each other
-without extending the constraint store.  I use this trick in Barliman,
-but it could be made available at the user level, and would be much
-more useful.  Basically it's a constraint to try to fail fast.  I
-think it could help with Barliman synthesis, maybe.
+Underconstraints are safe to check independently of each other without
+extending the constraint store.  I use this trick in Barliman, but it
+could be made available at the user level, and would be much more
+useful.  Basically it's a constraint to try to fail fast.  I think it
+could help with Barliman synthesis, maybe.
 
 For a Barliman typed synthesis program, for example, might write the
 following:
