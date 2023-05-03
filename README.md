@@ -15,11 +15,10 @@ computation with no answer "failing fast".  Otherwise, a sound use of
 underconstraints should not affect the semantics of a relational
 program in any way.
 
-Underconstrained constraints can be safely checked independently of
-each other, without worrying about constraint interaction.  This may
-be useful for failing fast, but not for ensuring correctness.
-Underconstraints could give us *some* improved commutative conjunction
-behavior.
+Underconstraints can be safely checked independently of each other,
+without worrying about constraint interaction.  This may be useful for
+failing fast, but not for ensuring correctness.  Underconstraints
+could give us *some* improved commutative conjunction behavior.
 
 It is not necessary to reify underconstraints, since underconstraints
 are supposed to be no more constraining than the constraints that are
@@ -28,18 +27,33 @@ add any information to the declarative meaning of the program, but can
 allow miniKanren to fail faster in some cases.
 
 Removing all underconstraints from a program should never result in
-additional answers to a run* query, assuming that the query terminated
-with the underconstraints present.  The implementation does not check,
-however, whether the use of underconstraints is sound---proper use of
-underconstraints is the responsibility of the author of the program.
-It should be possible to automatically generate sound underconstraints
-in many (all?) cases, though, from the "normal" miniKanren code.
+additional answers to a run* query, assuming that the query terminates
+when the underconstraints are present.  The implementation does not
+check, however, whether the use of underconstraints is sound---proper
+use of underconstraints is the responsibility of the author of the
+program.  It should be possible to automatically generate sound
+underconstraints in many (all?) cases, though, from the "normal"
+miniKanren code.
 
-An incorrect use of underconstraints would be to ensure that a term is
-a legal Oleg numeral: (1) and (0 1) succeed, (0) and (1 0) fail.  This
-use of underconstraints is incorrect, since a run* that returns ()
-when a term is instantiated to (0) might return an answer if the
-underconstraint were to be removed.
+Consider a `numeralo` underconstraint that ensures a term is a legal
+Oleg numeral: `(numeralo '(1))` and `(numeralo '(0 1))` would succeed,
+while `(numeralo '(0))` and `(numeralo '(1 0))` would fail.
+The following use of the `numeralo` underconstraint would be unsound:
+
+```
+(run* (n m o)
+  (== '() n)
+  (== 'this-definitely-isnt-a-legal-numeral m)
+  (numeralo n)
+  (numeralo m)
+  (*o n m o))
+```
+
+since the `(numeralo m)` would fail, meaning the `run*` would
+return `()`.  However, removing `(numeralo m)` would result in the
+`run*` returning `(() this-definitely-isnt-a-legal-numeral ())`, since
+the `*o` relation encodes the rule that 0 times any value is 0,
+regardless of whether the second argument to `*o` is a legal numeral.
 
 These underconstrained constraints are safe to check independently of
 each other without extending the constraint store.  I use this trick
