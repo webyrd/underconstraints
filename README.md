@@ -18,7 +18,7 @@ should not affect the semantics of a relational program in any way.
 Underconstraints can be safely checked independently of each other,
 without worrying about constraint interaction.  This may be useful for
 failing fast, but not for ensuring correctness.  Underconstraints
-could give us *some* improved commutative conjunction behavior.
+might give us *some* improved commutative conjunction behavior.
 
 It is not necessary to reify underconstraints, since underconstraints
 are supposed to be no more constraining than the constraints that are
