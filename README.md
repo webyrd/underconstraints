@@ -22,9 +22,10 @@ could give us *some* improved commutative conjunction behavior.
 
 It is not necessary to reify underconstraints, since underconstraints
 are supposed to be no more constraining than the constraints that are
-already imposed by the "normal" miniKanren constraints.  They do not
-add any information to the declarative meaning of the program, but can
-allow miniKanren to fail faster in some cases.
+already imposed by the "normal" miniKanren
+constraints. Underconstraints do not add any information to the
+declarative meaning of the program, but can allow miniKanren to fail
+faster in some cases.
 
 Removing all underconstraints from a program should never result in
 additional answers to a `run*` query, assuming that the query
