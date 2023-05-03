@@ -27,13 +27,13 @@ add any information to the declarative meaning of the program, but can
 allow miniKanren to fail faster in some cases.
 
 Removing all underconstraints from a program should never result in
-additional answers to a run* query, assuming that the query terminates
-when the underconstraints are present.  The implementation does not
-check, however, whether the use of underconstraints is sound---proper
-use of underconstraints is the responsibility of the author of the
-program.  It should be possible to automatically generate sound
-underconstraints in many (all?) cases, though, from the "normal"
-miniKanren code.
+additional answers to a `run*` query, assuming that the query
+terminates when the underconstraints are present.  The implementation
+does not check, however, whether the use of underconstraints is
+sound---proper use of underconstraints is the responsibility of the
+author of the program.  It should be possible to automatically
+generate sound underconstraints in many (all?) cases, though, from
+the "normal" miniKanren code.
 
 Consider a `numeralo` underconstraint that ensures a term is a legal
 Oleg numeral: `(numeralo '(1))` and `(numeralo '(0 1))` would succeed,
