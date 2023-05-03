@@ -9,11 +9,11 @@ The `faster-minikanren-with-underconstraints` code is modified from
 Michael Ballantyne's
 `https://github.com/michaelballantyne/faster-miniKanren`.
 
-An `underconstraint` is a constraint that is *necessary*, but not
-*sufficient*.  An underconstaint may (or may not!) result in a
-computation with no answer "failing fast".  Otherwise, a sound use of
-underconstraints should not affect the semantics of a relational
-program in any way.
+An `underconstraint` (short for "underconstrained constraint") is a
+constraint that is *necessary*, but not *sufficient*.  An
+underconstaint may (or may not!) result in a computation with no
+answer "failing fast".  Otherwise, a sound use of underconstraints
+should not affect the semantics of a relational program in any way.
 
 Underconstraints can be safely checked independently of each other,
 without worrying about constraint interaction.  This may be useful for
@@ -55,11 +55,11 @@ return `()`.  However, removing `(numeralo m)` would result in the
 the `*o` relation encodes the rule that 0 times any value is 0,
 regardless of whether the second argument to `*o` is a legal numeral.
 
-These underconstrained constraints are safe to check independently of
-each other without extending the constraint store.  I use this trick
-in Barliman, but it could be made available at the user level, and
-would be much more useful.  Basically it's a constraint to try to fail
-fast.  I think it could help with Barliman synthesis, maybe.
+These underconstraints are safe to check independently of each other
+without extending the constraint store.  I use this trick in Barliman,
+but it could be made available at the user level, and would be much
+more useful.  Basically it's a constraint to try to fail fast.  I
+think it could help with Barliman synthesis, maybe.
 
 For a Barliman typed synthesis program, for example, might write the
 following:
@@ -78,7 +78,7 @@ following:
   )
 ```
 
-The idea is that each underconstrained constraint is run: 1) when the
-constraint is introduced; and 2) when the contraint store is extended.
+The idea is that each underconstraint is run: 1) when the constraint
+is introduced; and 2) when the contraint store is extended.
 
 Running the underconstraints at the end is harmless but useless.
