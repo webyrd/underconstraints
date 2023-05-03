@@ -81,4 +81,5 @@ following:
 The idea is that each underconstraint is run: 1) when the constraint
 is introduced; and 2) when the contraint store is extended.
 
-Running the underconstraints at the end is harmless but useless.
+Running underconstraints at the end of a `run` is harmless but
+useless (assuming the use of underconstraints is sound).
