@@ -37,60 +37,7 @@ author of the program.  It should be possible to automatically
 generate sound underconstraints in many (all?) cases, though, from the
 "normal" miniKanren code.
 
-Consider a `numeralo` relation that ensures a term is a legal "Oleg
-numeral" (a little-endian list of binary digits that must end with a
-'1' if non-empty), used in the pure relational arithmetic code in *The
-Reasoned Schemer*:
-
-```
-(define numeralo
-  (lambda (n)
-    (conde
-      ((== '() n))
-      ((fresh (n^)
-         (== `(1 . ,n^) n)
-         (numeralo n^)))
-      ((fresh (n^)
-         (== `(0 . ,n^) n)
-         (positive-numeralo n^))))))
-
-(define positive-numeralo
-  (lambda (n)
-    (conde
-      ((fresh (n^)
-         (== `(1 . ,n^) n)
-         (numeralo n^)))
-      ((fresh (n^)
-         (== `(0 . ,n^) n)
-         (positive-numeralo n^))))))
-```
-
-`(numeralo '())`, `(numeralo '(1))`, and `(numeralo '(0 1))` succeed,
-while `(numeralo '(0))`, `(numeralo '(1 0))`, and `(numeralo 'cat)` fail.
-
-The following use of `numeralo` as an underconstraint would be
-unsound:
-
-```
-(run* (n m o)
-  (== '() n)
-  (== 'cat m)
-  (underconstraino (numeralo n))
-  (underconstraino (numeralo m))
-  (*o n m o))
-```
-
-With the `(underconstraino (numeralo m))` underconstraint present, the
-`run*` returns `()` (since `m` is associated with the symbol `cat`,
-which is not a legal numeral).  However, removing
-the `(underconstraino (numeralo m))` underconstraint would result in
-the `run*` returning `(() cat ())`, since `(*o '() 'cat '())`
-succeeds (the `*o` relation encodes the rule that 0 times any value is
-0, regardless of whether the second argument to `*o` is a legal
-numeral).
-
-
-Why is it unsound to use underconstraints alone to constrain a computation?  Because underconstraints are checked individually, and do not interact with each other.  For example, consider the `run*` expression:
+It is unsound to use underconstraints alone to constrain the possible answers from a computation.  This is because underconstraints are checked individually, and do not interact with each other.  For example, consider the `run*` expression:
 
 ```
 (run* (x)
@@ -136,6 +83,90 @@ or the equivalent:
 The point of underconstraints is *not* to constrain the set of
 possible answers; rather, the point of underconstraints is to have a
 chance to fail fast without prematurely grounding logic variables.
+
+Here is a more sophisticated example on the sound use of
+underconstraints.  Consider a `numeralo` relation that ensures a term
+is a legal "Oleg numeral" (a little-endian list of binary digits that
+must end with a '1' if non-empty), used in the pure relational
+arithmetic code in *The Reasoned Schemer*:
+
+```
+(define numeralo
+  (lambda (n)
+    (conde
+      ((== '() n))
+      ((fresh (n^)
+         (== `(1 . ,n^) n)
+         (numeralo n^)))
+      ((fresh (n^)
+         (== `(0 . ,n^) n)
+         (positive-numeralo n^))))))
+
+(define positive-numeralo
+  (lambda (n)
+    (conde
+      ((fresh (n^)
+         (== `(1 . ,n^) n)
+         (numeralo n^)))
+      ((fresh (n^)
+         (== `(0 . ,n^) n)
+         (positive-numeralo n^))))))
+```
+
+`(numeralo '())`, `(numeralo '(1))`, and `(numeralo '(0 1))` succeed,
+while `(numeralo '(0))`, `(numeralo '(1 0))`, and `(numeralo 'cat)` fail.
+
+```
+(run* (n m o)
+  (== '() n)
+  (== 'cat m)
+  (numeralo n)
+  (numeralo m)
+  (*o n m o))
+```
+
+
+The following use of `numeralo` as an underconstraint would be
+unsound:
+
+```
+(run* (n m o)
+  (== '() n)
+  (== 'cat m)
+  (underconstraino (numeralo n))
+  (underconstraino (numeralo m))
+  (*o n m o))
+```
+
+With the `(underconstraino (numeralo m))` underconstraint present, the
+`run*` returns `()` (since `m` is associated with the symbol `cat`,
+which is not a legal numeral).  However, removing
+the `(underconstraino (numeralo m))` underconstraint would result in
+the `run*` returning `(() cat ())`, since `(*o '() 'cat '())`
+succeeds (the `*o` relation encodes the rule that 0 times any value is
+0, regardless of whether the second argument to `*o` is a legal
+numeral).
+
+```
+(run* (n m o)
+  (underconstraino (numeralo n))
+  (underconstraino (numeralo m))  
+  (== '() n)
+  (== 'cat m)  
+  (*o n m o)
+  (numeralo n)
+  (numeralo m))
+```
+
+General rules for using underconstraints:
+
+1. for each underconstraint used, there should be a corresponding relation that enforces the underconstraint, to ensure soundness;
+
+2. underconstraints should come early in the conjunction, possibly at the very end;
+
+3. the normal relations corresponding to underconstraints should come late in the conjuntion, possible at the very end.
+
+
 
 Underconstraints are safe to check independently of each other without
 extending the constraint store, similarly to the trick used in
