@@ -66,7 +66,7 @@ Reasoned Schemer*:
 ```
 
 `(numeralo '())`, `(numeralo '(1))`, and `(numeralo '(0 1))` succeed,
-while `(numeralo '(0))` and `(numeralo '(1 0))` fail.
+while `(numeralo '(0))`, `(numeralo '(1 0))`, and `(numeralo 'cat)` fail.
 
 The following use of `numeralo` as an underconstraint would be
 unsound:
@@ -81,7 +81,8 @@ unsound:
 ```
 
 With the `(underconstraino (numeralo m))` underconstraint present, the
-`run*` returns `()`.  However, removing
+`run*` returns `()` (since `m` is associated with the symbol `cat`,
+which is not a legal numeral).  However, removing
 the `(underconstraino (numeralo m))` underconstraint would result in
 the `run*` returning `(() cat ())`, since the `*o` relation encodes
 the rule that 0 times any value is 0, regardless of whether the second
