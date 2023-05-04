@@ -43,9 +43,10 @@ author of the program.  It should be possible to automatically
 generate sound underconstraints in many (all?) cases, though, from the
 "normal" miniKanren code.
 
-It is unsound to use underconstraints alone to constrain the possible answers from a computation.  This is because underconstraints are checked individually, and do not interact with each other.  For example, consider the `run*` expression:
-
-normal miniKanren:
+It is unsound to use underconstraints alone to constrain the possible
+answers from a computation.  This is because underconstraints are
+checked individually, and do not interact with each other.  For
+example, consider the `run*` expression:
 
 ```
 (run* (x)
@@ -54,7 +55,7 @@ normal miniKanren:
 => ()
 ```
 
-unsound use:
+Replacing the calls to `==` with underconstrained calls to `==` is unsound: 
 
 ```
 (run* (x)
@@ -63,7 +64,9 @@ unsound use:
 => (_.0)
 ```
 
-sound version:
+This `run*` returns an answer because the underconstraints are checked individually and independently, and do not extend the constraint store upon success.
+
+The sound way to use underconstraints is to augment the existing relations or constraints with underconstraints that are *no stronger* than the existing constraints:
 
 ```
 (run* (x)
@@ -74,7 +77,7 @@ sound version:
 => ()
 ```
 
-equivalent to:
+or the equivalent:
 
 ```
 (run* (x)
@@ -85,7 +88,7 @@ equivalent to:
 => ()
 ```
 
-typical usage:
+In typical usage, the underconstraints would come first:
 
 ```
 (run* (x)
@@ -96,8 +99,22 @@ typical usage:
 => ()
 ```
 
+or even more typically:
 
-A slightly more complex example:
+```
+(run* (x)
+  (underconstraino (== 4 x))
+  (== 3 x)
+  (== 4 x))
+=> ()
+```
+
+However, this underconstraint usage isn't useful, since there is no
+branching/choices/`condes` in any of the non-understrained relations.
+
+
+
+A slightly more realistic example:
 
 ```
 (define one-or-two-choiceo
@@ -113,7 +130,7 @@ A slightly more complex example:
       ((== 4 x)))))
 ```
 
-normal miniKanren:
+This `run*` returns `()`, since `x` cannot be two different numbers simultaneously:
 
 ```
 (run* (x)
@@ -122,7 +139,7 @@ normal miniKanren:
 => ()
 ```
 
-unsound use:
+Replacing the relations with underconstraints is unsound, and results in the `run*` producing an answer:
 
 ```
 (run* (x)
@@ -131,7 +148,7 @@ unsound use:
 => (_.0)
 ```
 
-sound use:
+A sound use of underconstraints would be:
 
 ```
 (run* (x)
@@ -142,7 +159,7 @@ sound use:
 => ()
 ```
 
-typical usage:
+However, a more typical usage, which might benefit from failing fast, might be:
 
 ```
 (run* (x)
@@ -153,6 +170,18 @@ typical usage:
 => ()
 ```
 
+or:
+
+```
+(run* (x)
+  (underconstraino (three-or-four-choiceo x))
+  (one-or-two-choiceo x)
+  (three-or-four-choiceo x))
+=> ()
+```
+
+since there is no need to underconstrain `one-or-two-choiceo` if we
+are going to call that relation first.  
 
 
 
@@ -205,6 +234,18 @@ typical usage (although pointless in this case, since `symbolo` and `numbero` ar
 =>
 ()
 ```
+
+or the simpler:
+
+```
+(run* (x)
+  (underconstraino (numbero x))
+  (symbolo x)
+  (numbero x))
+=>
+()
+```
+
 
 [TODO give an example of underconstraints that make use of `symbolo`, `numbero`, and/or `absento`, but in an intellegent way as part of a more complex relation that might benefit from underconstraints]
 
