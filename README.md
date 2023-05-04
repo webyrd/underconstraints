@@ -11,9 +11,15 @@ Michael Ballantyne's
 
 An *underconstraint* (short for "underconstrained constraint") is a
 constraint that is *necessary*, but not *sufficient*.  An
-underconstaint may (or may not!) result in a computation with no
+underconstraint may (or may not!) result in a computation with no
 answer "failing fast".  Otherwise, a sound use of underconstraints
 should not affect the semantics of a relational program in any way.
+
+The point of underconstraints is *not* to constrain the set of
+possible answers; rather, the point of underconstraints is to have a
+chance to fail fast without prematurely grounding logic variables.
+The actual constraining of values should be done using
+non-underconstrained relations and constraints.
 
 Underconstraints can be safely checked independently of each other,
 without worrying about constraint interaction.  This may be useful for
@@ -205,12 +211,6 @@ typical usage (although pointless in this case, since `symbolo` and `numbero` ar
 
 
 
-
-
-
-The point of underconstraints is *not* to constrain the set of
-possible answers; rather, the point of underconstraints is to have a
-chance to fail fast without prematurely grounding logic variables.
 
 Here is a more sophisticated example on the sound use of
 underconstraints.  Consider a `numeralo` relation that ensures a term
