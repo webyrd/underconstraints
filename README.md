@@ -89,6 +89,54 @@ succeeds (the `*o` relation encodes the rule that 0 times any value is
 0, regardless of whether the second argument to `*o` is a legal
 numeral).
 
+
+Why is it unsound to use underconstraints alone to constrain a computation?  Because underconstraints are checked individually, and do not interact with each other.  For example, consider the `run*` expression:
+
+```
+(run* (x)
+  (symbolo x)
+  (numbero x))
+=> ()
+```
+
+This `run*` expression returns `()` because no value can simultaneously be both a symbol and a number.  However, the pure underconstraint equivalent returns `(_.0)`:
+
+```
+(run* (x)
+  (underconstraino (symbolo x))
+  (underconstraino (numbero x)))
+=>
+(_.0)
+```
+
+Since both underconstraints succeed individually, and since underconstraints do not interact with each other, the `run*` produces an answer.  For this reason, underconstraints should only be used in conjunction with non-underconstrained predicates or constraints, such as:
+
+```
+(run* (x)
+  (underconstraino (symbolo x))
+  (underconstraino (numbero x))
+  (symbolo x)
+  (numbero x))
+=>
+()
+```
+
+or the equivalent:
+
+```
+(run* (x)
+  (symbolo x)
+  (underconstraino (symbolo x))
+  (numbero x)
+  (underconstraino (numbero x)))
+=>
+()
+```
+
+The point of underconstraints is *not* to constrain the set of
+possible answers; rather, the point of underconstraints is to have a
+chance to fail fast without prematurely grounding logic variables.
+
 Underconstraints are safe to check independently of each other without
 extending the constraint store, similarly to the trick used in
 Barliman to check that each input/output example pair is consistent
