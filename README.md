@@ -37,10 +37,38 @@ author of the program.  It should be possible to automatically
 generate sound underconstraints in many (all?) cases, though, from the
 "normal" miniKanren code.
 
-Consider a `numeralo` underconstraint that ensures a term is a legal
-Oleg numeral: `(numeralo '(1))` and `(numeralo '(0 1))` would succeed,
+Consider a `numeralo` relation that ensures a term is a legal Oleg
+numeral:
+
+```
+(define numeralo
+  (lambda (n)
+    (conde
+      ((== '() n))
+      ((fresh (n^)
+         (== `(1 . ,n^) n)
+         (numeralo n^)))
+      ((fresh (n^)
+         (== `(0 . ,n^) n)
+         (positive-numeralo n^))))))
+
+(define positive-numeralo
+  (lambda (n)
+    (conde
+      ((== '(1) n))
+      ((fresh (n^)
+         (== `(1 . ,n^) n)
+         (numeralo n^)))
+      ((fresh (n^)
+         (== `(0 . ,n^) n)
+         (positive-numeralo n^))))))
+```
+
+`(numeralo '(1))` and `(numeralo '(0 1))` would succeed,
 while `(numeralo '(0))` and `(numeralo '(1 0))` would fail.
-The following use of the `numeralo` underconstraint would be unsound:
+
+The following use of `numeralo` as an underconstraint would be
+unsound:
 
 ```
 (run* (n m o)
