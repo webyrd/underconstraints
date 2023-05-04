@@ -69,18 +69,57 @@ the following:
 (fresh (prog)
   (underconstraino (!-exampleo prog inputN outputN))
   ...
-  (underconstraino (eval-exampleo prog input1 output1))
-  (underconstraino (eval-exampleo prog input2 output2))
-  (underconstraino (eval-exampleo prog input3 output3))
+  (underconstraino (eval-exampleo prog input-expr1 output-val11))
+  (underconstraino (eval-exampleo prog input-expr2 output-val12))
+  (underconstraino (eval-exampleo prog input-expr3 output-val13))
   ...
-  (underconstraino (eval-exampleo prog inputN outputN))
+  (underconstraino (eval-exampleo prog input-exprN output-val1N))
   <normal evalo call>
-  <normal !-o call>
   )
 ```
 
 The idea is that each underconstraint is run: 1) when the constraint
 is introduced; and 2) when the contraint store is extended.
 
-Running underconstraints at the end of a `run` is harmless but
-useless (assuming the use of underconstraints is sound).
+Running underconstraints at the end of a `run` is harmless but useless
+(assuming the use of underconstraints is sound).  For example:
+
+```
+(fresh (prog)
+  <normal evalo call>
+  (underconstraino (eval-exampleo prog input-expr1 output-val1))
+  (underconstraino (eval-exampleo prog input-expr2 output-val2))
+  (underconstraino (eval-exampleo prog input-expr3 output-val3))
+  ...
+  (underconstraino (eval-exampleo prog input-exprN output-valN))
+  )
+```
+
+has the same declarative meaning as the previous program above, as the
+same declarative meaning as:
+
+```
+(fresh (prog)
+  <normal evalo call>)
+```
+
+
+Adding a type inferencer for synthesis might work well now:
+
+```
+(fresh (prog)
+  (underconstraino (!-exampleo prog input-expr1 output-type1))
+  (underconstraino (!-exampleo prog input-expr2 output-type2))
+  (underconstraino (!-exampleo prog input-expr3 output-type3))
+  ...
+  (underconstraino (!-exampleo prog input-exprN output-typeN))
+  ...
+  (underconstraino (eval-exampleo prog input-expr1 output-val1))
+  (underconstraino (eval-exampleo prog input-expr2 output-val2))
+  (underconstraino (eval-exampleo prog input-expr3 output-val3))
+  ...
+  (underconstraino (eval-exampleo prog input-exprN output-typeN))
+  <normal evalo call>
+  <normal !-o call>
+  )
+```
