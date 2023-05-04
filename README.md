@@ -39,6 +39,123 @@ generate sound underconstraints in many (all?) cases, though, from the
 
 It is unsound to use underconstraints alone to constrain the possible answers from a computation.  This is because underconstraints are checked individually, and do not interact with each other.  For example, consider the `run*` expression:
 
+normal miniKanren:
+
+```
+(run* (x)
+  (== 3 x)
+  (== 4 x))
+=> ()
+```
+
+unsound use:
+
+```
+(run* (x)
+  (underconstraino (== 3 x))
+  (underconstraino (== 4 x)))
+=> (_.0)
+```
+
+sound version:
+
+```
+(run* (x)
+  (== 3 x)
+  (== 4 x)
+  (underconstraino (== 3 x))
+  (underconstraino (== 4 x)))
+=> ()
+```
+
+equivalent to:
+
+```
+(run* (x)
+  (underconstraino (== 3 x))
+  (== 3 x)
+  (== 4 x)
+  (underconstraino (== 4 x)))
+=> ()
+```
+
+typical usage:
+
+```
+(run* (x)
+  (underconstraino (== 3 x))
+  (underconstraino (== 4 x))
+  (== 3 x)
+  (== 4 x))
+=> ()
+```
+
+
+A slightly more complex example:
+
+```
+(define one-or-two-choiceo
+  (lambda (x)
+    (conde
+      ((== 1 x))
+      ((== 2 x)))))
+
+(define three-or-four-choiceo
+  (lambda (x)
+    (conde
+      ((== 3 x))
+      ((== 4 x)))))
+```
+
+normal miniKanren:
+
+```
+(run* (x)
+  (one-or-two-choiceo x)
+  (three-or-four-choiceo x))
+=> ()
+```
+
+unsound use:
+
+```
+(run* (x)
+  (underconstraino (one-or-two-choiceo x))
+  (underconstraino (three-or-four-choiceo x)))
+=> (_.0)
+```
+
+sound use:
+
+```
+(run* (x)
+  (one-or-two-choiceo x)
+  (three-or-four-choiceo x)
+  (underconstraino (one-or-two-choiceo x))
+  (underconstraino (three-or-four-choiceo x)))
+=> ()
+```
+
+typical usage:
+
+```
+(run* (x)
+  (underconstraino (one-or-two-choiceo x))
+  (underconstraino (three-or-four-choiceo x))
+  (one-or-two-choiceo x)
+  (three-or-four-choiceo x))
+=> ()
+```
+
+
+
+
+
+
+A silly/useless example.
+
+normal miniKanren:
+
 ```
 (run* (x)
   (symbolo x)
@@ -58,15 +175,6 @@ This `run*` expression returns `()` because no value can simultaneously be both 
 
 Since both underconstraints succeed individually, and since underconstraints do not interact with each other, the `run*` produces an answer.  For this reason, underconstraints should only be used in conjunction with non-underconstrained predicates or constraints, such as:
 
-```
-(run* (x)
-  (underconstraino (symbolo x))
-  (underconstraino (numbero x))
-  (symbolo x)
-  (numbero x))
-=>
-()
-```
 
 or the equivalent:
 
@@ -79,6 +187,26 @@ or the equivalent:
 =>
 ()
 ```
+
+typical usage (although pointless in this case, since `symbolo` and `numbero` are already lazy constaints, so underconstraints are no use in this particular example):
+
+```
+(run* (x)
+  (underconstraino (symbolo x))
+  (underconstraino (numbero x))
+  (symbolo x)
+  (numbero x))
+=>
+()
+```
+
+[TODO give an example of underconstraints that make use of `symbolo`, `numbero`, and/or `absento`, but in an intellegent way as part of a more complex relation that might benefit from underconstraints]
+
+
+
+
+
+
 
 The point of underconstraints is *not* to constrain the set of
 possible answers; rather, the point of underconstraints is to have a
@@ -162,9 +290,11 @@ General rules for using underconstraints:
 
 1. for each underconstraint used, there should be a corresponding relation that enforces the underconstraint, to ensure soundness;
 
-2. underconstraints should come early in the conjunction, possibly at the very end;
+2. while it is sound to use `symbolo`, `numbero`, and `absento` contraints within an underconstraint, keep in mind that these constraints are already lazy, and already fail fast;
 
-3. the normal relations corresponding to underconstraints should come late in the conjuntion, possible at the very end.
+3. underconstraints should come early in the conjunction, possibly at the very end;
+
+4. the normal relations corresponding to underconstraints should come late in the conjuntion, possible at the very end.
 
 
 
