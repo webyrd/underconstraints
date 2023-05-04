@@ -37,8 +37,10 @@ author of the program.  It should be possible to automatically
 generate sound underconstraints in many (all?) cases, though, from the
 "normal" miniKanren code.
 
-Consider a `numeralo` relation that ensures a term is a legal Oleg
-numeral:
+Consider a `numeralo` relation that ensures a term is a legal "Oleg
+numeral" (a little-endian list of binary digits that must end with a
+'1' if non-empty), used in the pure relational arithmetic code in *The
+Reasoned Schemer*:
 
 ```
 (define numeralo
