@@ -57,10 +57,10 @@ relation encodes the rule that 0 times any value is 0, regardless of
 whether the second argument to `*o` is a legal numeral.
 
 Underconstraints are safe to check independently of each other without
-extending the constraint store.  I use this trick in Barliman, but it
-could be made available at the user level, and would be much more
-useful.  Basically it's a constraint to try to fail fast.  I think it
-could help with Barliman synthesis, maybe.
+extending the constraint store, similarly to the trick used in
+Barliman to check that each input/output example pair is consistent
+individually before trying the full synthesis problem, but made
+available at the user level.
 
 For a Barliman typed synthesis program, for example, we might write
 the following:
