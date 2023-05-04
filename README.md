@@ -1,5 +1,13 @@
 # underconstraints
 
+[Would the cons case in evalo benefit from underconstraints?]
+
+[How much overhead does an underconstraint impose in practice?]
+
+[How should you use underconstraints with dynamic goal reordering?
+Simple: the underconstraints should be dynamically generated in that
+case, with only the desired unconstrained created.]
+
 Underconstraints for miniKanren, inspired by a conversation with
 Youyou Cong about the `presento` constraint (a dual to the `absento`
 constraint) in miniKanren, from the mkTut tutorial I gave at
