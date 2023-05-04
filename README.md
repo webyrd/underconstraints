@@ -30,7 +30,7 @@ faster in some cases.
 Removing all underconstraints from a program *must never* result in
 additional answers to a `run*` query, assuming that the query
 terminates when the underconstraints are present---otherwise, the use
-of undersconstraints in that program is *unsound*.  The implementation
+of undersconstraints in that program is unsound.  The implementation
 does not check, however, whether the use of underconstraints is
 sound---proper use of underconstraints is the responsibility of the
 author of the program.  It should be possible to automatically
@@ -46,16 +46,17 @@ The following use of the `numeralo` underconstraint would be unsound:
 (run* (n m o)
   (== '() n)
   (== 'cat m)
-  (numeralo n)
-  (numeralo m)
+  (underconstraino (numeralo n))
+  (underconstraino (numeralo m))
   (*o n m o))
 ```
 
-With the `(numeralo m)` underconstraint present, the `run*`
-returns `()`.  However, removing the `(numeralo m)` underconstraint
-would result in the `run*` returning `(() cat ())`, since the `*o`
-relation encodes the rule that 0 times any value is 0, regardless of
-whether the second argument to `*o` is a legal numeral.
+With the `(underconstraino (numeralo m))` underconstraint present, the
+`run*` returns `()`.  However, removing
+the `(underconstraino (numeralo m))` underconstraint would result in
+the `run*` returning `(() cat ())`, since the `*o` relation encodes
+the rule that 0 times any value is 0, regardless of whether the second
+argument to `*o` is a legal numeral.
 
 Underconstraints are safe to check independently of each other without
 extending the constraint store, similarly to the trick used in
