@@ -55,7 +55,6 @@ numeral:
 (define positive-numeralo
   (lambda (n)
     (conde
-      ((== '(1) n))
       ((fresh (n^)
          (== `(1 . ,n^) n)
          (numeralo n^)))
@@ -64,8 +63,8 @@ numeral:
          (positive-numeralo n^))))))
 ```
 
-`(numeralo '(1))` and `(numeralo '(0 1))` would succeed,
-while `(numeralo '(0))` and `(numeralo '(1 0))` would fail.
+`(numeralo '())`, `(numeralo '(1))`, and `(numeralo '(0 1))` succeed,
+while `(numeralo '(0))` and `(numeralo '(1 0))` fail.
 
 The following use of `numeralo` as an underconstraint would be
 unsound:
