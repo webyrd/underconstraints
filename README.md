@@ -84,9 +84,10 @@ With the `(underconstraino (numeralo m))` underconstraint present, the
 `run*` returns `()` (since `m` is associated with the symbol `cat`,
 which is not a legal numeral).  However, removing
 the `(underconstraino (numeralo m))` underconstraint would result in
-the `run*` returning `(() cat ())`, since the `*o` relation encodes
-the rule that 0 times any value is 0, regardless of whether the second
-argument to `*o` is a legal numeral.
+the `run*` returning `(() cat ())`, since `(*o '() 'cat '())`
+succeeds (the `*o` relation encodes the rule that 0 times any value is
+0, regardless of whether the second argument to `*o` is a legal
+numeral).
 
 Underconstraints are safe to check independently of each other without
 extending the constraint store, similarly to the trick used in
