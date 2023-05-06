@@ -34,6 +34,11 @@ without worrying about constraint interaction.  This may be useful for
 failing fast, but not for ensuring correctness.  Underconstraints
 might give us *some* improved commutative conjunction behavior.
 
+The goals wrapped in an `underconstraino` behave according to `onceo`
+semantics, which means that upon failure, there is no danger of two
+adjacent `underconstraino` goals entering a generate-and-test
+divergence loop.
+
 It is not necessary to reify underconstraints, since underconstraints
 are supposed to be no more constraining than the constraints that are
 already imposed by the "normal" miniKanren

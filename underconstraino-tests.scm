@@ -1,5 +1,6 @@
 (load "faster-minikanren-with-underconstraints/mk-vicare.scm")
 (load "faster-minikanren-with-underconstraints/mk.scm")
+(load "faster-minikanren-with-underconstraints/numbers.scm")
 (load "faster-minikanren-with-underconstraints/test-check.scm")
 
 ;; ** These examples do not run yet, since I have not yet implemented
@@ -73,6 +74,60 @@
   '(_.0))
 
 
+;; Another silly and useless trivial example.  Useless since `symbolo`
+;; and `numbero` are already lazy constraints that don't ground their
+;; arguments.
+
+(test "underconstraino-silly-classic"
+  ;; classic miniKanren
+  (run* (x)
+    (symbolo x)
+    (numbero x))
+  '())
+
+(test "underconstraino-silly-unsound"
+  ;; unsound!
+  (run* (x)
+    (underconstraino (symbolo x))
+    (underconstraino (numbero x)))
+  '(_.0))
+
+(test "underconstraino-silly-sound-but-useless"
+  ;; sound but with a useless ordering of goals
+  (run* (x)
+    (symbolo x)
+    (underconstraino (symbolo x))
+    (numbero x)
+    (underconstraino (numbero x)))
+  '())
+
+(test "underconstraino-silly-typical"
+  ;; sound, with a typical goal ordering for underconstraints:
+  ;; underconstraints should normally come first
+  (run* (x)
+    (underconstraino (symbolo x))
+    (underconstraino (numbero x))
+    (symbolo x)
+    (numbero x))
+  '())
+
+(test "underconstraino-silly-optimized"
+  ;; sound, with a typical goal ordering for underconstraints, and
+  ;; with the underconstraint for the first non-constrained goal
+  ;; removed, since it is not helpful with this particular goal
+  ;; ordering
+  ;;
+  ;; it may be desirable to keep both underconstraints, if the goals
+  ;; might be reordered in the future, or if the goals might be
+  ;; dynamically reordered at runtime
+  (run* (x)
+    (underconstraino (numbero x))
+    (symbolo x)
+    (numbero x))
+  '())
+
+
+
 ;; Now for a slightly more realistic example.
 
 (define one-or-two-choiceo
@@ -133,4 +188,168 @@
     (underconstraino (three-or-four-choiceo x))
     (one-or-two-choiceo x)
     (three-or-four-choiceo x))
+  '())
+
+
+;; Here is a more sophisticated example on the sound use of
+;; underconstraints.
+;;
+;; Consider a `numeralo` relation that ensures a term is a legal "Oleg
+;; numeral" (a little-endian list of binary digits that must end with
+;; a '1' if non-empty), used in the pure relational arithmetic code in
+;; 'The Reasoned Schemer':
+
+(define numeralo
+  (lambda (n)
+    (conde
+      ((== '() n))
+      ((fresh (n^)
+         (== `(1 . ,n^) n)
+         (numeralo n^)))
+      ((fresh (n^)
+         (== `(0 . ,n^) n)
+         (positive-numeralo n^))))))
+
+(define positive-numeralo
+  (lambda (n)
+    (conde
+      ((fresh (n^)
+         (== `(1 . ,n^) n)
+         (numeralo n^)))
+      ((fresh (n^)
+         (== `(0 . ,n^) n)
+         (positive-numeralo n^))))))
+
+(test "numeralo-0"
+  (run* (q) (numeralo '()))
+  '(_.0))
+
+(test "numeralo-1"
+  (run* (q) (numeralo '(1)))
+  '(_.0))
+
+(test "numeralo-2"
+  (run* (q) (numeralo '(0 1)))
+  '(_.0))
+
+
+(test "numeralo-illegal-a"
+  (run* (q) (numeralo '(0)))
+  '())
+
+(test "numeralo-illegal-b"
+  (run* (q) (numeralo '(1 0)))
+  '())
+
+(test "numeralo-illegal-c"
+  (run* (q) (numeralo 'cat))
+  '())
+
+
+;; We can use `numeralo` to ensure all numerals are well-formed, but
+;; at the risk of prematurely grounding `n`, `m`, and `o`, resulting
+;; in generate-and-test behavior:
+
+(test "factor-6-gen-and-test"
+  (run 4 (n m o)
+    (== (build-num 6) o)
+    (numeralo n)
+    (numeralo m)
+    (*o n m o))
+  '(((1) (0 1 1) (0 1 1))
+    ((0 1) (1 1) (0 1 1))
+    ((1 1) (0 1) (0 1 1))
+    ((0 1 1) (1) (0 1 1))))
+
+(test "factor-6-verify"
+  (run 4 (n m o)
+    (== (build-num 6) o)
+    (*o n m o)
+    (numeralo n)
+    (numeralo m))
+  '(((1) (0 1 1) (0 1 1))
+    ((0 1 1) (1) (0 1 1))
+    ((0 1) (1 1) (0 1 1))
+    ((1 1) (0 1) (0 1 1))))
+
+(test "factor-6-underconstraino-typical"
+  (run 4 (n m o)
+    (== (build-num 12) o)
+    (underconstraino (numeralo n))
+    (underconstraino (numeralo m))
+    (*o n m o)
+    (numeralo n)
+    (numeralo m))
+  '(((1) (0 1 1) (0 1 1))
+    ((0 1 1) (1) (0 1 1))
+    ((0 1) (1 1) (0 1 1))
+    ((1 1) (0 1) (0 1 1))))
+
+
+
+(test "*o-illegal-cat-undetected"
+  (run 1 (n m o)
+    (== 'cat m)
+    (*o n m n))
+  '((() cat _.0)))
+
+;; diverges!
+(test-diverges "*o-illegal-cat-generate-and-test"
+  (run 1 (n m o)
+    (== 'cat m)
+    (numeralo n)
+    (numeralo m)
+    (numeralo o)
+    (*o n m o)))
+
+;; diverges, even without the multiplication, due to the `numeralo`
+;; goal itself!
+(test-diverges "no-mult-illegal-cat-generate-and-test"
+  (run 1 (n m o)
+    (== 'cat m)
+    (numeralo n)
+    (numeralo m)))
+
+;; Goals wrapped in an `underconstraino` display `onceo` semantics, to
+;; prevent a conjunction of underconstraints entering a
+;; generate-and-test divergence loop.
+(test "onceo-behavior-of-underconstraino-1"
+  (run 1 (n m o)
+    (== 'cat m)
+    (underconstraino (numeralo n))
+    (underconstraino (numeralo m))
+    (numeralo n)
+    (numeralo m))
+  '())
+
+(test "onceo-behavior-of-underconstraino-2"
+  (run 1 (n m o)
+    (== 'cat m)
+    (underconstraino (numeralo n))
+    (underconstraino (numeralo m))
+    (*o n m o)
+    (numeralo n)
+    (numeralo m))
+  '())
+
+
+;; diverges!
+(test-diverges "*o-illegal-cat-verify"
+  (run 1 (n m o)
+    (== 'cat m)
+    (*o n m o)
+    (numeralo n)
+    (numeralo m)
+    (numeralo o)))
+
+(test "*o-illegal-cat-underconstraino"
+  (run 1 (n m o)
+    (underconstraino (numeralo n))
+    (underconstraino (numeralo m))
+    (underconstraino (numeralo o))
+    (== 'cat m)
+    (*o n m o)
+    (numeralo n)
+    (numeralo m)
+    (numeralo o))
   '())
