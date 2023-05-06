@@ -286,14 +286,35 @@
     ((1 1) (0 1) (0 1 1))))
 
 
+;; Now for the interesting part!
+;;
+;; Failing is a numeral is ill-formed, without diverging.
+
+;; Not only does `*o` not ensure that its numerals are well formed,
+;; `*o` will accept any term as its second argument when the first and
+;; third arguments as () (which represents 0).
 
 (test "*o-illegal-cat-undetected"
+  ;; apparently, 0 * cat = 0
+  ;;
+  ;; The real New Math...
+  (run* (n m o)
+    (== 'cat m)
+    (*o n m o))
+  '((() cat ())))
+
+;; We can verify that the numerals are legal *after* the call to `*o`:
+(test "*o-illegal-cat-verify"
   (run 1 (n m o)
     (== 'cat m)
-    (*o n m n))
-  '((() cat _.0)))
+    (*o n m o)
+    (numeralo n)
+    (numeralo m)
+    (numeralo o))
+  '())
 
-;; diverges!
+;; However, if we try to verify that the numerals are legal before the
+;; call to `*o`, the `run` diverges!
 (test-diverges "*o-illegal-cat-generate-and-test"
   (run 1 (n m o)
     (== 'cat m)
@@ -302,13 +323,21 @@
     (numeralo o)
     (*o n m o)))
 
-;; diverges, even without the multiplication, due to the `numeralo`
-;; goal itself!
+;; In fact, this `run` diverges, even without the multiplication, due
+;; to the `numeralo` goal itself!
 (test-diverges "no-mult-illegal-cat-generate-and-test"
   (run 1 (n m o)
     (== 'cat m)
     (numeralo n)
     (numeralo m)))
+
+;; So, we can't safely check that the arguments to `*o` are legal
+;; before calling `*o`.  But, of couse, it is possible to construct
+;; goals using `*o` that diverge when given the symbol 'cat' as an
+;; argument (TODO: come up with a simple example!), so we really do
+;; want to fail fast if the arguments are ill-formed.  And, of course,
+;; even if a goal doesn't diverge, it might take a long time to
+;; converge.
 
 ;; Goals wrapped in an `underconstraino` display `onceo` semantics, to
 ;; prevent a conjunction of underconstraints entering a
@@ -322,6 +351,8 @@
     (numeralo m))
   '())
 
+;; We can use undercontraints to ensure we have legal numerals:
+
 (test "onceo-behavior-of-underconstraino-2"
   (run 1 (n m o)
     (== 'cat m)
@@ -332,15 +363,8 @@
     (numeralo m))
   '())
 
-
-;; diverges!
-(test-diverges "*o-illegal-cat-verify"
-  (run 1 (n m o)
-    (== 'cat m)
-    (*o n m o)
-    (numeralo n)
-    (numeralo m)
-    (numeralo o)))
+;; The more comprehensive version, in which we ensure `o` is also
+;; well-formed:
 
 (test "*o-illegal-cat-underconstraino"
   (run 1 (n m o)
