@@ -890,11 +890,28 @@
 
 (define-syntax super-trace-one-shot-underconstraino
   (syntax-rules ()
-    [(_ name g)
+    [(_ name ge)
      (error 'super-trace-one-shot-underconstraino 'implement-me)]
-    [(_ name g #f)
-     (error 'super-trace-one-shot-underconstraino 'implement-me)]
-    [(_ name g timeout-ticks)
+    [(_ name ge #f)
+     (let ((g ge))
+       (lambda (st)
+         (begin
+           (printf "~s ge:\n~s\n" name ge)
+           (printf "~s walk*ed ge:\n~s\n" name (walk* ge (state-S st)))
+           (time
+            (suspend
+             (case-inf (g st)
+               (() (begin
+                     (printf "~s failed\n" name)
+                     #f))
+               ((f) (lambda () (f))) ;; thunkify to allow interleaving, since we don't have timeout protection
+               ((c) (begin
+                      (printf "~s succeeded with singleton result\n" name)
+                      st))
+               ((c f^) (begin
+                         (printf "~s succeeded with non-empty stream\n" name)
+                         st))))))))]
+    [(_ name ge timeout-ticks)
      (error 'super-trace-one-shot-underconstraino 'implement-me)]))
 
 ;; full (multi-shot) underconstraints:
