@@ -888,6 +888,15 @@
   (lambda (name g . rest)
     (error 'trace-one-shot-underconstraino 'implement-me)))
 
+(define-syntax super-trace-one-shot-underconstraino
+  (syntax-rules ()
+    [(_ name g)
+     (error 'super-trace-one-shot-underconstraino 'implement-me)]
+    [(_ name g #f)
+     (error 'super-trace-one-shot-underconstraino 'implement-me)]
+    [(_ name g timeout-ticks)
+     (error 'super-trace-one-shot-underconstraino 'implement-me)]))
+
 ;; full (multi-shot) underconstraints:
 (define underconstraino
   (lambda (g . rest)
@@ -896,3 +905,12 @@
 (define trace-underconstraino
   (lambda (name g . rest)
     (error 'trace-underconstraino 'implement-me)))
+
+(define-syntax super-trace-underconstraino
+  (syntax-rules ()
+    [(_ name g)
+     (error 'super-trace-underconstraino 'implement-me)]
+    [(_ name g #f)
+     (error 'super-trace-underconstraino 'implement-me)]
+    [(_ name g timeout-ticks)
+     (error 'super-trace-underconstraino 'implement-me)]))
