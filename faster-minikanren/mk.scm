@@ -890,9 +890,9 @@
 
 (define-syntax super-trace-one-shot-underconstraino
   (syntax-rules ()
-    [(_ name ge)
+    [(_ name ge) ;; use global default timeout parameter
      (error 'super-trace-one-shot-underconstraino 'implement-me)]
-    [(_ name ge #f)
+    [(_ name ge #f) ;; no timeout (overrides global timeout parameter)
      (let ((g ge))
        (lambda (st)
          (begin
@@ -911,7 +911,7 @@
                ((c f^) (begin
                          (printf "~s succeeded with non-empty stream\n" name)
                          st))))))))]
-    [(_ name ge timeout-ticks)
+    [(_ name ge timeout-ticks) ;; use timeout with timeout-ticks (overrides global timeout parameter)
      (error 'super-trace-one-shot-underconstraino 'implement-me)]))
 
 ;; full (multi-shot) underconstraints:
