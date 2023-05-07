@@ -129,24 +129,16 @@
 ;         constraint must be violated to cause failure.
 ;   A - list of absento constraints. Each constraint is a term.
 ;         The list contains no duplicates.
-;   U - list of underconstraints. Each constraint is a goal.
-;         The list may contain duplicates.
 
-(define empty-c '(#f ; T
-                  () ; D
-                  () ; A
-                  () ; U
-                  ))
+(define empty-c '(#f () ()))
 
 (define (c-T c) (car c))
 (define (c-D c) (cadr c))
 (define (c-A c) (caddr c))
-(define (c-U c) (cadddr c))
 
-(define (c-with-T c T) (list     T     (c-D c)  (c-A c)  (c-U c)))
-(define (c-with-D c D) (list  (c-T c)     D     (c-A c)  (c-U c)))
-(define (c-with-A c A) (list  (c-T c)  (c-D c)     A     (c-U c)))
-(define (c-with-U c U) (list  (c-T c)  (c-D c)  (c-A c)     U   ))
+(define (c-with-T c T) (list T (c-D c) (c-A c)))
+(define (c-with-D c D) (list (c-T c) D (c-A c)))
+(define (c-with-A c A) (list (c-T c) (c-D c) A))
 
 ; Constraint store object.
 ; Mapping of representative variable to constraint record. Constraints
@@ -417,18 +409,18 @@
 (define (apply-type-constraint tc)
   (lambda (u)
     (lambda (st)
-      (let ((type-pred (type-constraint-predicate tc))
-            (term (walk u (state-S st))))
-        (cond
-          ((type-pred term) st)
-          ((var? term)
-           (let* ((c (lookup-c st term))
-                  (T (c-T c)))
-             (cond
-               ((eq? T tc) st)
-               ((not T) (set-c st term (c-with-T c tc)))
-               (else #f))))
-          (else #f))))))
+      (let ((type-pred (type-constraint-predicate tc)))
+        (let ((term (walk u (state-S st))))
+          (cond
+            ((type-pred term) st)
+            ((var? term)
+             (let* ((c (lookup-c st term))
+                    (T (c-T c)))
+               (cond
+                 ((eq? T tc) st)
+                 ((not T) (set-c st term (c-with-T c tc)))
+                 (else #f))))
+            (else #f)))))))
 
 (define-syntax declare-type-constraints
   (syntax-rules ()
@@ -528,10 +520,7 @@
             (list ((apply-type-constraint (c-T old-c)) (rhs a)))
             '())
           (map (lambda (atom) (absento atom (rhs a))) (c-A old-c))
-          (map =/=* (c-D old-c))
-          ;; TODO update U constraints:
-          (c-U old-c) ;; what to do with this??
-          ))))))
+          (map =/=* (c-D old-c))))))))
 
 (define (walk* v S)
   (let ((v (walk v S)))
@@ -565,7 +554,6 @@
            (v (walk* x S))
            (R (reify-S v (subst empty-subst-map nonlocal-scope)))
            (relevant-vars (vars v)))
-      ;; do not reify U
       (let*-values (((T D A) (extract-and-normalize st relevant-vars x))
                     ((D A)   (drop-irrelevant D A relevant-vars))
                     ((D A)   (drop-subsumed D A st)))

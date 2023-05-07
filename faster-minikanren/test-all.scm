@@ -1,8 +1,5 @@
 (load "test-check.scm")
 
-(printf "test-underconstraints\n")
-(load "test-underconstraints.scm")
-
 (printf "==-tests\n")
 (load "==-tests.scm")
 

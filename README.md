@@ -13,8 +13,7 @@ Youyou Cong about the `presento` constraint (a dual to the `absento`
 constraint) in miniKanren, from the mkTut tutorial I gave at
 <Programming 2023> in Tokyo.
 
-The `faster-minikanren-with-underconstraints` code is modified from
-Michael Ballantyne's
+The `faster-minikanren` code is from Michael Ballantyne's
 `https://github.com/michaelballantyne/faster-miniKanren`.
 
 An *underconstraint* (short for "underconstrained constraint") is a
