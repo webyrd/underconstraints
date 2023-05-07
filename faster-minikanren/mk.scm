@@ -885,14 +885,14 @@
                  ((c f^) st)))))))))
 
 (define trace-one-shot-underconstraino
-  (lambda args
+  (lambda (name g . rest)
     (error 'trace-one-shot-underconstraino 'implement-me)))
 
 ;; full (multi-shot) underconstraints:
 (define underconstraino
-  (lambda args
+  (lambda (g . rest)
     (error 'underconstraino 'implement-me)))
 
 (define trace-underconstraino
-  (lambda args
+  (lambda (name g . rest)
     (error 'trace-underconstraino 'implement-me)))
