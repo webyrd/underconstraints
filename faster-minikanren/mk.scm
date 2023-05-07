@@ -882,17 +882,7 @@
                  (() #f)
                  ((f) (lambda () (f))) ;; thunkify to allow interleaving, since we don't have timeout protection
                  ((c) st)
-                 ((c f^) st))))))))
-
-  
-  (case-lambda
-    [(g)
-     ]
-    [(g #f)]
-    [(g ticks) (guard )
-     ]
-    [else (error 'one-shot-underconstraino "incorrect arguments")])
-  )
+                 ((c f^) st)))))))))
 
 (define trace-one-shot-underconstraino
   (lambda args
