@@ -277,7 +277,7 @@
 
 ; SearchStream, SuspendedStream -> SearchStream,
 ;
-; f is a thunk to avoid unnecesarry computation in the case that the
+; f is a thunk to avoid unnecessary computation in the case that the
 ; first answer produced by c-inf is enough to satisfy the query.
 (define (mplus stream f)
   (case-inf stream
@@ -824,3 +824,85 @@
 
 (define (lex<=? x y)
   (member (lex-compare x y) '(< =)))
+
+;; WEB 7 May 02023
+;;
+;; Extend `faster-miniKanren` with underconstraints
+
+;; TODO: make these global flags parameters instead.
+
+;; Global default timeout (in number of ticks/gas for engine), or `#f`
+;; if the default is no timeout.  Can be overriden by optional timeout
+;; argument (number ticks or `#f`) to individual underconstraint call.
+;; Upon timeout being reached, the underconstraint *succeeds*
+;; (necessary for soundness).
+(define *global-underconstraint-default-timeout* #f)
+
+;; Global Boolean flag for whether to trace underconstraints,
+;; including the goal expression passed to the underconstraint,
+;; whether the uderconstraint succeeded or failed, and timing/resource
+;; usage information (including whether the underconstraint timed out,
+;; and after how many ticks the timeout occurred).  Underconstraint
+;; calls beginning with `trace-` (`trace-underconstraino`,
+;; `trace-one-shot-underconstraino`) are always traced, regardless of
+;; the value of this flag.
+(define *global-trace-underconstraint* #f)
+
+;; one-shot underconstraints:
+(define one-shot-underconstraino
+  (let ((legal-rest-args?
+         (lambda (rest)
+           (or (null? rest)
+               (and (= (length rest) 1)
+                    (let ((timeout (car rest)))
+                      (eqv? timeout #f)
+                      (and (integer? timeout)
+                           (not (negative? timeout)))))))))
+    (lambda (g . rest)
+      (unless (legal-rest-args? rest)
+        (error
+         'one-shot-underconstraino
+         (format "optional argument must be #f or a non-negative integer representing a number of ticks: given ~s"
+                 rest)))
+      (lambda (st)
+        (let ((timeout (or (and (not (null? rest)) (car rest))
+                           ;; TODO make this global a parameter
+                           *global-underconstraint-default-timeout*)))
+          (if timeout
+              (suspend
+               ;; TODO wrap this entire `case-inf` in an engine with
+               ;; `timeout` ticks; succeeds if the engine times out.
+               (case-inf (g st)
+                 (() #f)
+                 ((f) (f)) ;; force the thunk immediately, since we have a timeout to protect us
+                 ((c) st)
+                 ((c f^) st)))
+              (suspend
+               (case-inf (g st)
+                 (() #f)
+                 ((f) (lambda () (f))) ;; thunkify to allow interleaving, since we don't have timeout protection
+                 ((c) st)
+                 ((c f^) st))))))))
+
+  
+  (case-lambda
+    [(g)
+     ]
+    [(g #f)]
+    [(g ticks) (guard )
+     ]
+    [else (error 'one-shot-underconstraino "incorrect arguments")])
+  )
+
+(define trace-one-shot-underconstraino
+  (lambda args
+    (error 'trace-one-shot-underconstraino 'implement-me)))
+
+;; full (multi-shot) underconstraints:
+(define underconstraino
+  (lambda args
+    (error 'underconstraino 'implement-me)))
+
+(define trace-underconstraino
+  (lambda args
+    (error 'trace-underconstraino 'implement-me)))
