@@ -850,6 +850,7 @@
 ;; the value of this flag.
 (define *global-trace-underconstraint* #f)
 
+
 ;; one-shot underconstraints:
 
 (define one-shot-underconstraino-aux
@@ -892,7 +893,16 @@
                                      (syntax-rules ()
                                        [(_ e) (time e)])
                                      (syntax-rules ()
-                                       [(_ e) e]))))
+                                       [(_ e) e])))
+                     (print-when-trace (if trace?
+                                         (syntax-rules ()
+                                           [(_ e* ... e)
+                                            (begin
+                                              (printf "~s\n" e*)
+                                              ...
+                                              e)])
+                                         (syntax-rules ()
+                                           [(_ e* ... e) e]))))
           (if timeout-ticks
               (suspend
                (let ((eng
@@ -900,73 +910,65 @@
                         (lambda ()
                           (case-inf (g st)
                             (()
-                             (begin
-                               (when trace?
-                                 (printf
-                                  "* one-shot underconstraint ~s failed\n"
-                                  name))
+                             (print-when-trace
+                               (format
+                                "* one-shot underconstraint ~s failed\n"
+                                name)
                                #f))
                             ((f)
                              ;; force `f` immediately, since we have a timeout
                              ;; to protect us
                              (f))
                             ((c)
-                             (begin
-                               (when trace?
-                                 (printf
-                                  "* one-shot underconstraint ~s succeeded with singleton result\n"
-                                  name))
+                             (print-when-trace
+                               (format
+                                "* one-shot underconstraint ~s succeeded with singleton result\n"
+                                name)
                                st))
                             ((c f^)
-                             (begin
-                               (when trace?
-                                 (printf
-                                  "* one-shot underconstraint ~s succeeded with non-singleton stream\n"
-                                  name))
+                             (print-when-trace
+                               (format
+                                "* one-shot underconstraint ~s succeeded with non-singleton stream\n"
+                                name)
                                st)))))))
                  (maybe-time
                   (eng timeout-ticks
                        ;; "complete" procedure
                        (lambda (ticks-left-over value)
-                         (begin
-                           (when trace?
-                             (printf
-                              "* one-shot underconstraint ~s engine completed after ~s of ~s ticks\n"
-                              name
-                              ticks-left-over
-                              timeout-ticks))
+                         (print-when-trace
+                           (format
+                            "* one-shot underconstraint ~s engine completed after ~s of ~s ticks\n"
+                            name
+                            ticks-left-over
+                            timeout-ticks)
                            value))
                        ;; "expire" procedure
                        (lambda (new-engine)
-                         (begin
-                           (when trace?
-                             (printf
-                              "* one-shot underconstraint ~s engine ran out of gas after ~s ticks (treating as success)\n"
-                              name
-                              timeout-ticks))
+                         (print-when-trace
+                           (format
+                            "* one-shot underconstraint ~s engine ran out of gas after ~s ticks (treating as success)\n"
+                            name
+                            timeout-ticks)
                            ;; to maintain soundness we treat a timeout
                            ;; as success, so return the original state
                            st))))))
               (suspend
                (case-inf (g st)
                  (()
-                  (begin
-                    (when trace?
-                      (printf "* one-shot underconstraint ~s failed\n" name))
+                  (print-when-trace
+                    (format "* one-shot underconstraint ~s failed\n" name)
                     #f))
                  ((f)
                   ;; thunkify to allow interleaving, since we don't
                   ;; have timeout protection
                   (lambda () (f)))
                  ((c)
-                  (begin
-                    (when trace?
-                      (printf "* one-shot underconstraint ~s succeeded with singleton result\n" name))
+                  (print-when-trace
+                    (format "* one-shot underconstraint ~s succeeded with singleton result\n" name)
                     st))
                  ((c f^)
-                  (begin
-                    (when trace?
-                      (printf "* one-shot underconstraint ~s succeeded with non-singleton stream\n" name))
+                  (print-when-trace
+                    (printf "* one-shot underconstraint ~s succeeded with non-singleton stream\n" name)
                     st))))))))))
 
 (define-syntax one-shot-underconstraino
