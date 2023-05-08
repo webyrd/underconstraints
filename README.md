@@ -17,8 +17,9 @@ The `faster-minikanren` code is from Michael Ballantyne's
 `https://github.com/michaelballantyne/faster-miniKanren`.
 
 Thank you to Youyou Cong, Michael Ballantyne, and Nada Amin for very
-helpful discussions, questions, and suggestions related to this work.
-Thank you to Michael Ballantyne for his work on `faster-miniKanren`.
+helpful discussions, questions, suggestions, and encouragement related
+to this work.  Thank you to Michael Ballantyne for his work on
+`faster-miniKanren`.
 
 An *underconstraint* (short for "underconstrained constraint") is a
 constraint that is *necessary*, but not *sufficient*.  An
