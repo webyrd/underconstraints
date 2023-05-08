@@ -855,121 +855,130 @@
 
 (define one-shot-underconstraino-aux
   (lambda (name ge g timeout-info trace-version-of-macro?)
-    (lambda (st)
-      (let ((trace? (or trace-version-of-macro?
-                        ;; TODO make this global a parameter:
-                        *global-trace-underconstraint*))
-            (timeout-ticks (pmatch timeout-info
-                             [#f
-                              ;; to timeout paramater passed to macro, so
-                              ;; use the global default value
-                              ;;
-                              ;; TODO make this global a parameter
-                              *global-underconstraint-default-timeout*]
-                             [(timeout #f)
-                              ;; parameter passed to macro that overrides
-                              ;; the global default value---timeout disabled
-                              #f]
-                             [(timeout ,timeout-ticks)
-                              (guard (and (integer? timeout-ticks)
-                                          (positive? timeout-ticks)))
-                              ;; parameter passed to macro that overrides
-                              ;; the global default value---timeout enabled,
-                              ;; with `timeout-ticks` ticks (gas) for the
-                              ;; engine
-                              timeout-ticks]
-                             [else
-                              (error
-                               'one-shot-underconstraino-aux
-                               (format
-                                "optional argument must be #f or a positive integer representing a number of ticks: given ~s"
-                                rest))])))
-        (when trace?
-          (newline)
-          (printf "** one-shot underconstraint ~s received a state object\n" name)
-          (printf "*  one-shot underconstraint ~s ge:\n~s\n" name ge)
-          (printf "*  one-shot underconstraint ~s walk*ed ge:\n~s\n" name (walk* ge (state-S st))))
-        (let-syntax ((maybe-time (if trace?
-                                     (syntax-rules ()
-                                       [(_ e) (time e)])
-                                     (syntax-rules ()
-                                       [(_ e) e])))
-                     (print-when-trace (if trace?
-                                         (syntax-rules ()
-                                           [(_ e* ... e)
-                                            (begin
-                                              (printf "~s\n" e*)
-                                              ...
-                                              e)])
-                                         (syntax-rules ()
-                                           [(_ e* ... e) e]))))
-          (if timeout-ticks
-              (suspend
-               (let ((eng
-                      (make-engine
-                        (lambda ()
-                          (case-inf (g st)
-                            (()
-                             (print-when-trace
-                               (format
-                                "* one-shot underconstraint ~s failed\n"
-                                name)
-                               #f))
-                            ((f)
-                             ;; force `f` immediately, since we have a timeout
-                             ;; to protect us
-                             (f))
-                            ((c)
-                             (print-when-trace
-                               (format
-                                "* one-shot underconstraint ~s succeeded with singleton result\n"
-                                name)
-                               st))
-                            ((c f^)
-                             (print-when-trace
-                               (format
-                                "* one-shot underconstraint ~s succeeded with non-singleton stream\n"
-                                name)
-                               st)))))))
-                 (maybe-time
-                  (eng timeout-ticks
-                       ;; "complete" procedure
-                       (lambda (ticks-left-over value)
-                         (print-when-trace
-                           (format
-                            "* one-shot underconstraint ~s engine completed after ~s of ~s ticks\n"
-                            name
-                            ticks-left-over
-                            timeout-ticks)
-                           value))
-                       ;; "expire" procedure
-                       (lambda (new-engine)
-                         (print-when-trace
-                           (format
-                            "* one-shot underconstraint ~s engine ran out of gas after ~s ticks (treating as success)\n"
-                            name
-                            timeout-ticks)
-                           ;; to maintain soundness we treat a timeout
-                           ;; as success, so return the original state
-                           st))))))
-              (suspend
-               (case-inf (g st)
-                 (()
-                  (print-when-trace
-                    (format "* one-shot underconstraint ~s failed\n" name)
-                    #f))
-                 ((f)
-                  ;; thunkify to allow interleaving, since we don't
-                  ;; have timeout protection
-                  (lambda () (f)))
-                 ((c)
-                  (print-when-trace
-                    (format "* one-shot underconstraint ~s succeeded with singleton result\n" name)
-                    st))
-                 ((c f^)
-                  (print-when-trace
-                    (printf "* one-shot underconstraint ~s succeeded with non-singleton stream\n" name)
-                    st))))))))))
+    (let ((get-trace?
+           (lambda ()
+             (or trace-version-of-macro?
+                 ;; TODO make this global a parameter:
+                 *global-trace-underconstraint*)))
+          (get-timeout-ticks
+           (lambda ()
+             (pmatch timeout-info
+               [#f
+                ;; to timeout paramater passed to macro, so
+                ;; use the global default value
+                ;;
+                ;; TODO make this global a parameter
+                *global-underconstraint-default-timeout*]
+               [(timeout #f)
+                ;; parameter passed to macro that overrides
+                ;; the global default value---timeout disabled
+                #f]
+               [(timeout ,timeout-ticks)
+                (guard (and (integer? timeout-ticks)
+                            (positive? timeout-ticks)))
+                ;; parameter passed to macro that overrides
+                ;; the global default value---timeout enabled,
+                ;; with `timeout-ticks` ticks (gas) for the
+                ;; engine
+                timeout-ticks]
+               [else
+                (error
+                 'one-shot-underconstraino-aux
+                 (format
+                  "ticks argument must be #f or a positive integer: given ~s"
+                  rest))]))))
+      (lambda (st)
+        (let ((trace? (get-trace?))
+              (timeout-ticks (get-timeout-ticks)))
+          (when trace?
+            (newline)
+            (printf "** one-shot underconstraint ~s received a state object\n"
+                    name)
+            (printf "*  one-shot underconstraint ~s ge:\n~s\n"
+                    name ge)
+            (printf "*  one-shot underconstraint ~s walk*ed ge:\n~s\n"
+                    name (walk* ge (state-S st))))
+          (let-syntax ((maybe-time (if trace?
+                                       (syntax-rules ()
+                                         [(_ e) (time e)])
+                                       (syntax-rules ()
+                                         [(_ e) e])))
+                       (print-when-trace (if trace?
+                                             (syntax-rules ()
+                                               [(_ e* ... e)
+                                                (begin
+                                                  (printf "~s\n" e*)
+                                                  ...
+                                                  e)])
+                                             (syntax-rules ()
+                                               [(_ e* ... e) e]))))
+            (if timeout-ticks
+                (suspend
+                 (let ((eng
+                        (make-engine
+                          (lambda ()
+                            (case-inf (g st)
+                              (()
+                               (print-when-trace
+                                 (format
+                                  "* one-shot underconstraint ~s failed\n"
+                                  name)
+                                 #f))
+                              ((f)
+                               ;; force `f` immediately, since we have
+                               ;; a timeout to protect us
+                               (f))
+                              ((c)
+                               (print-when-trace
+                                 (format
+                                  "* one-shot underconstraint ~s succeeded with singleton result\n"
+                                  name)
+                                 st))
+                              ((c f^)
+                               (print-when-trace
+                                 (format
+                                  "* one-shot underconstraint ~s succeeded with non-singleton stream\n"
+                                  name)
+                                 st)))))))
+                   (maybe-time
+                    (eng timeout-ticks
+                         ;; "complete" procedure
+                         (lambda (ticks-left-over value)
+                           (print-when-trace
+                             (format
+                              "* one-shot underconstraint ~s engine completed after ~s of ~s ticks\n"
+                              name
+                              ticks-left-over
+                              timeout-ticks)
+                             value))
+                         ;; "expire" procedure
+                         (lambda (new-engine)
+                           (print-when-trace
+                             (format
+                              "* one-shot underconstraint ~s engine ran out of gas after ~s ticks (treating as success)\n"
+                              name
+                              timeout-ticks)
+                             ;; to maintain soundness we treat a timeout
+                             ;; as success, so return the original state
+                             st))))))
+                (suspend
+                 (case-inf (g st)
+                   (()
+                    (print-when-trace
+                      (format "* one-shot underconstraint ~s failed\n" name)
+                      #f))
+                   ((f)
+                    ;; thunkify to allow interleaving, since we don't
+                    ;; have timeout protection
+                    (lambda () (f)))
+                   ((c)
+                    (print-when-trace
+                      (format "* one-shot underconstraint ~s succeeded with singleton result\n" name)
+                      st))
+                   ((c f^)
+                    (print-when-trace
+                      (printf "* one-shot underconstraint ~s succeeded with non-singleton stream\n" name)
+                      st)))))))))))
 
 (define-syntax one-shot-underconstraino
   (syntax-rules ()
