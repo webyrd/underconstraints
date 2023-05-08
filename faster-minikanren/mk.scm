@@ -892,7 +892,30 @@
              e*)
            ...
            e)]))
-    (lambda (st)
+    (define-syntax case-inf-expr
+      (syntax-rules ()
+        [(_ f-rhs-expr)
+         (case-inf (g st)
+           (()
+            (begin-when-trace
+             (printf
+              "* one-shot underconstraint ~s failed\n"
+              name)
+             #f))
+           ((f) f-rhs-expr)
+           ((c)
+            (begin-when-trace
+             (printf
+              "* one-shot underconstraint ~s succeeded with singleton result\n"
+              name)
+             st))
+           ((c f^)
+            (begin-when-trace
+             (printf
+              "* one-shot underconstraint ~s succeeded with non-singleton stream\n"
+              name)
+             st)))]))
+    (lambda (st)      
       (when (trace?)
         (newline)
         (printf "** one-shot underconstraint ~s received a state object\n"
@@ -901,64 +924,41 @@
                 name ge)
         (printf "*  one-shot underconstraint ~s walk*ed ge:\n~s\n"
                 name (walk* ge (state-S st))))
-      (let-syntax ((case-inf-expr
-                    (syntax-rules ()
-                      [(_ f-rhs-expr)
-                       (case-inf (g st)
-                         (()
-                          (begin-when-trace
-                           (printf
-                            "* one-shot underconstraint ~s failed\n"
-                            name)
-                           #f))
-                         ((f) f-rhs-expr)
-                         ((c)
-                          (begin-when-trace
-                           (printf
-                            "* one-shot underconstraint ~s succeeded with singleton result\n"
-                            name)
-                           st))
-                         ((c f^)
-                          (begin-when-trace
-                           (printf
-                            "* one-shot underconstraint ~s succeeded with non-singleton stream\n"
-                            name)
-                           st)))])))
-        (suspend
-         (let ((timeout-ticks (get-timeout-ticks)))
-           (if (not timeout-ticks)
-               (case-inf-expr
-                ;; thunkify forcing of `f` to allow interleaving,
-                ;; since we don't have timeout protection
-                (lambda () (f)))
-               (let ((eng (make-engine
-                            (lambda ()
-                              (case-inf-expr
-                               ;; force `f` immediately, since we have
-                               ;; a timeout to protect us
-                               (f))))))
-                 (maybe-time
-                  (eng timeout-ticks
-                       ;; engine "completed" procedure
-                       (lambda (ticks-left-over value)
-                         (begin-when-trace
-                          (printf
-                           "* one-shot underconstraint ~s engine completed after ~s of ~s ticks\n"
-                           name
-                           ticks-left-over
-                           timeout-ticks)
-                          value))
-                       ;; engine "expired" procedure
-                       (lambda (new-engine)
-                         (begin-when-trace
-                          (printf
-                           "* one-shot underconstraint ~s engine ran out of gas after ~s ticks (treating as success)\n"
-                           name
-                           timeout-ticks)
-                          ;; to maintain soundness, we must treat
-                          ;; engine timeout timeout as
-                          ;; success---return the original state
-                          st))))))))))))
+      (suspend
+       (let ((timeout-ticks (get-timeout-ticks)))
+         (if (not timeout-ticks)
+             (case-inf-expr
+              ;; thunkify forcing of `f` to allow interleaving,
+              ;; since we don't have timeout protection
+              (lambda () (f)))
+             (let ((eng (make-engine
+                          (lambda ()
+                            (case-inf-expr
+                             ;; force `f` immediately, since we have
+                             ;; a timeout to protect us
+                             (f))))))
+               (maybe-time
+                (eng timeout-ticks
+                     ;; engine "completed" procedure
+                     (lambda (ticks-left-over value)
+                       (begin-when-trace
+                        (printf
+                         "* one-shot underconstraint ~s engine completed after ~s of ~s ticks\n"
+                         name
+                         ticks-left-over
+                         timeout-ticks)
+                        value))
+                     ;; engine "expired" procedure
+                     (lambda (new-engine)
+                       (begin-when-trace
+                        (printf
+                         "* one-shot underconstraint ~s engine ran out of gas after ~s ticks (treating as success)\n"
+                         name
+                         timeout-ticks)
+                        ;; to maintain soundness, we must treat
+                        ;; engine timeout timeout as
+                        ;; success---return the original state
+                        st)))))))))))
 
 (define-syntax one-shot-underconstraino
   (syntax-rules ()
