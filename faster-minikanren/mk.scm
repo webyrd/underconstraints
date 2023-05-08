@@ -878,18 +878,18 @@
         [else
          (error
           'one-shot-underconstraino-aux
-          (format
+          (printf
            "ticks argument must be #f or a positive integer: given ~s"
            rest))]))
     (define-syntax maybe-time
       (syntax-rules ()
         [(_ e) (if (trace?) (time e) e)]))
-    (define-syntax print-when-trace
+    (define-syntax begin-when-trace
       (syntax-rules ()
         [(_ e* ... e)
          (begin
            (when (trace?)
-             (printf "~s\n" e*))
+             e*)
            ...
            e)]))
     (lambda (st)
@@ -906,24 +906,24 @@
                       [(_ f-rhs-expr)
                        (case-inf (g st)
                          (()
-                          (print-when-trace
-                            (format
-                             "* one-shot underconstraint ~s failed\n"
-                             name)
-                            #f))
+                          (begin-when-trace
+                           (printf
+                            "* one-shot underconstraint ~s failed\n"
+                            name)
+                           #f))
                          ((f) f-rhs-expr)
                          ((c)
-                          (print-when-trace
-                            (format
-                             "* one-shot underconstraint ~s succeeded with singleton result\n"
-                             name)
-                            st))
+                          (begin-when-trace
+                           (printf
+                            "* one-shot underconstraint ~s succeeded with singleton result\n"
+                            name)
+                           st))
                          ((c f^)
-                          (print-when-trace
-                            (format
-                             "* one-shot underconstraint ~s succeeded with non-singleton stream\n"
-                             name)
-                            st)))])))
+                          (begin-when-trace
+                           (printf
+                            "* one-shot underconstraint ~s succeeded with non-singleton stream\n"
+                            name)
+                           st)))])))
         (suspend
          (let ((timeout-ticks (get-timeout-ticks)))
            (if (not timeout-ticks)
@@ -941,24 +941,24 @@
                   (eng timeout-ticks
                        ;; engine "completed" procedure
                        (lambda (ticks-left-over value)
-                         (print-when-trace
-                           (format
-                            "* one-shot underconstraint ~s engine completed after ~s of ~s ticks\n"
-                            name
-                            ticks-left-over
-                            timeout-ticks)
-                           value))
+                         (begin-when-trace
+                          (printf
+                           "* one-shot underconstraint ~s engine completed after ~s of ~s ticks\n"
+                           name
+                           ticks-left-over
+                           timeout-ticks)
+                          value))
                        ;; engine "expired" procedure
                        (lambda (new-engine)
-                         (print-when-trace
-                           (format
-                            "* one-shot underconstraint ~s engine ran out of gas after ~s ticks (treating as success)\n"
-                            name
-                            timeout-ticks)
-                           ;; to maintain soundness, we must treat
-                           ;; engine timeout timeout as
-                           ;; success---return the original state
-                           st))))))))))))
+                         (begin-when-trace
+                          (printf
+                           "* one-shot underconstraint ~s engine ran out of gas after ~s ticks (treating as success)\n"
+                           name
+                           timeout-ticks)
+                          ;; to maintain soundness, we must treat
+                          ;; engine timeout timeout as
+                          ;; success---return the original state
+                          st))))))))))))
 
 (define-syntax one-shot-underconstraino
   (syntax-rules ()
