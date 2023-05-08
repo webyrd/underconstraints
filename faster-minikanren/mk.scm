@@ -855,7 +855,7 @@
 
 (define one-shot-underconstraino-aux
   (lambda (name ge g timeout-info trace-version-of-macro?)
-    (let ((get-trace?
+    (let ((trace?
            (lambda ()
              (or trace-version-of-macro?
                  (*trace-underconstraint-param*))))
@@ -885,7 +885,7 @@
                   rest))]))))
       (lambda (st)
         (begin
-          (when (get-trace?)
+          (when (trace?)
             (newline)
             (printf "** one-shot underconstraint ~s received a state object\n"
                     name)
@@ -894,13 +894,13 @@
             (printf "*  one-shot underconstraint ~s walk*ed ge:\n~s\n"
                     name (walk* ge (state-S st))))
           (let-syntax ((maybe-time (syntax-rules ()
-                                     [(_ e) (if (get-trace?)
+                                     [(_ e) (if (trace?)
                                                 (time e)
                                                 e)]))
                        (print-when-trace (syntax-rules ()
                                            [(_ e* ... e)
                                             (begin
-                                              (when (get-trace?)
+                                              (when (trace?)
                                                 (printf "~s\n" e*))
                                               ...
                                               e)])))
