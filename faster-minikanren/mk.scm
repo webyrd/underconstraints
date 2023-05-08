@@ -837,7 +837,7 @@
 ;; underconstraint call.  Upon timeout being reached, the
 ;; underconstraint *succeeds* (necessary for soundness).
 (define *underconstraint-default-timeout-param*
-  (parameterize #f))
+  (make-parameter #f))
 
 ;; Global Boolean parameter for whether to trace underconstraints,
 ;; including: the goal expression passed to the underconstraint,
@@ -848,7 +848,7 @@
 ;; `trace-one-shot-underconstraino`) are always traced, regardless of
 ;; the value of this parameter.
 (define *trace-underconstraint-param*
-  (parameterize #f))
+  (make-parameter #f))
 
 
 ;; one-shot underconstraints:
