@@ -973,11 +973,15 @@
                     (lambda () (f)))
                    ((c)
                     (print-when-trace
-                      (format "* one-shot underconstraint ~s succeeded with singleton result\n" name)
+                      (format
+                       "* one-shot underconstraint ~s succeeded with singleton result\n"
+                       name)
                       st))
                    ((c f^)
                     (print-when-trace
-                      (printf "* one-shot underconstraint ~s succeeded with non-singleton stream\n" name)
+                      (format
+                       "* one-shot underconstraint ~s succeeded with non-singleton stream\n"
+                       name)
                       st)))))))))))
 
 (define-syntax one-shot-underconstraino
