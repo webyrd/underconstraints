@@ -915,7 +915,7 @@
               "* one-shot underconstraint ~s succeeded with non-singleton stream\n"
               name)
              st)))]))
-    (lambda (st)      
+    (lambda (st)
       (when (trace?)
         (newline)
         (printf "** one-shot underconstraint ~s received a state object\n"
