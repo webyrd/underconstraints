@@ -912,8 +912,8 @@
                                                   e)])
                                              (syntax-rules ()
                                                [(_ e* ... e) e]))))
-            (if timeout-ticks
-                (suspend
+            (suspend
+             (if timeout-ticks
                  (let ((eng
                         (make-engine
                           (lambda ()
@@ -960,8 +960,7 @@
                               timeout-ticks)
                              ;; to maintain soundness we treat a timeout
                              ;; as success, so return the original state
-                             st))))))
-                (suspend
+                             st)))))
                  (case-inf (g st)
                    (()
                     (print-when-trace
