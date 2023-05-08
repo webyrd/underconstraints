@@ -949,7 +949,7 @@
                                    (f))))))
                      (maybe-time
                       (eng timeout-ticks
-                           ;; engine "complete" procedure
+                           ;; engine "completed" procedure
                            (lambda (ticks-left-over value)
                              (print-when-trace
                                (format
@@ -958,7 +958,7 @@
                                 ticks-left-over
                                 timeout-ticks)
                                value))
-                           ;; engine "expire" procedure
+                           ;; engine "expired" procedure
                            (lambda (new-engine)
                              (print-when-trace
                                (format
