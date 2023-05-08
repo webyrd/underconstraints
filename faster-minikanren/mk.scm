@@ -861,19 +861,19 @@
     (define (get-timeout-ticks)
       (pmatch timeout-info
         [#f
-         ;; no timeout argument passed to macro, so
-         ;; use the global default parameter
+         ;; no timeout argument passed to macro, so use the global
+         ;; default parameter
          (*underconstraint-default-timeout-param*)]
         [(timeout #f)
-         ;; argument passed to macro that overrides
-         ;; the global default value---timeout disabled
+         ;; argument passed to macro that overrides the global default
+         ;; value---timeout disabled
          #f]
         [(timeout ,timeout-ticks)
          (guard (and (integer? timeout-ticks)
                      (positive? timeout-ticks)))
-         ;; argument passed to macro that overrides the default
-         ;; global parameter---timeout enabled, with
-         ;; `timeout-ticks` ticks (gas) for the engine
+         ;; argument passed to macro that overrides the default global
+         ;; parameter---timeout enabled, with `timeout-ticks` ticks
+         ;; (gas) for the engine
          timeout-ticks]
         [else
          (error
@@ -934,8 +934,8 @@
                (let ((eng (make-engine
                             (lambda ()
                               (case-inf-expr
-                               ;; force `f` immediately, since we
-                               ;; have a timeout to protect us
+                               ;; force `f` immediately, since we have
+                               ;; a timeout to protect us
                                (f))))))
                  (maybe-time
                   (eng timeout-ticks
