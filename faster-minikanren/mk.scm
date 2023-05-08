@@ -1,4 +1,3 @@
-;; TODO add `pmatch.scm` file to this directory
 (load "pmatch.scm")
 
 (define always-wrap-reified? (make-parameter #f))
