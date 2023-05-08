@@ -831,24 +831,24 @@
 ;;
 ;; Extend `faster-miniKanren` with underconstraints
 
-;; TODO make these global flags parameters instead.
+;; Global default timeout parameter: number of ticks/gas for engine,
+;; or `#f` if the default is no timeout.  Can be overriden by optional
+;; timeout argument (number ticks or `#f`) to individual
+;; underconstraint call.  Upon timeout being reached, the
+;; underconstraint *succeeds* (necessary for soundness).
+(define *underconstraint-default-timeout-param*
+  (parameterize #f))
 
-;; Global default timeout (in number of ticks/gas for engine), or `#f`
-;; if the default is no timeout.  Can be overriden by optional timeout
-;; argument (number ticks or `#f`) to individual underconstraint call.
-;; Upon timeout being reached, the underconstraint *succeeds*
-;; (necessary for soundness).
-(define *global-underconstraint-default-timeout* #f)
-
-;; Global Boolean flag for whether to trace underconstraints,
-;; including the goal expression passed to the underconstraint,
+;; Global Boolean parameter for whether to trace underconstraints,
+;; including: the goal expression passed to the underconstraint,
 ;; whether the uderconstraint succeeded or failed, and timing/resource
 ;; usage information (including whether the underconstraint timed out,
 ;; and after how many ticks the timeout occurred).  Underconstraint
 ;; calls beginning with `trace-` (`trace-underconstraino`,
 ;; `trace-one-shot-underconstraino`) are always traced, regardless of
-;; the value of this flag.
-(define *global-trace-underconstraint* #f)
+;; the value of this parameter.
+(define *trace-underconstraint-param*
+  (parameterize #f))
 
 
 ;; one-shot underconstraints:
@@ -858,28 +858,24 @@
     (let ((get-trace?
            (lambda ()
              (or trace-version-of-macro?
-                 ;; TODO make this global a parameter:
-                 *global-trace-underconstraint*)))
+                 (*trace-underconstraint-param*))))
           (get-timeout-ticks
            (lambda ()
              (pmatch timeout-info
                [#f
-                ;; to timeout paramater passed to macro, so
-                ;; use the global default value
-                ;;
-                ;; TODO make this global a parameter
-                *global-underconstraint-default-timeout*]
+                ;; no timeout argument passed to macro, so
+                ;; use the global default parameter
+                (*underconstraint-default-timeout-param*)]
                [(timeout #f)
-                ;; parameter passed to macro that overrides
+                ;; argument passed to macro that overrides
                 ;; the global default value---timeout disabled
                 #f]
                [(timeout ,timeout-ticks)
                 (guard (and (integer? timeout-ticks)
                             (positive? timeout-ticks)))
-                ;; parameter passed to macro that overrides
-                ;; the global default value---timeout enabled,
-                ;; with `timeout-ticks` ticks (gas) for the
-                ;; engine
+                ;; argument passed to macro that overrides the default
+                ;; global parameter---timeout enabled, with
+                ;; `timeout-ticks` ticks (gas) for the engine
                 timeout-ticks]
                [else
                 (error
