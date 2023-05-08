@@ -936,8 +936,8 @@
      (let ((g ge))
        (one-shot-underconstraino-aux name ge g `(timeout #f) #f))]
     [(_ name ge timeout-ticks)
-     ;; use timeout with timeout-ticks (overrides global timeout
-     ;; parameter)
+     ;; use timeout with `timeout-ticks` ticks (gas) (overrides global
+     ;; timeout parameter)
      (let ((g ge))
        (one-shot-underconstraino-aux name ge g `(timeout ,timeout-ticks) #f))]))
 
@@ -954,26 +954,53 @@
      (let ((g ge))
        (one-shot-underconstraino-aux name ge g `(timeout #f) #t))]
     [(_ name ge timeout-ticks)
-     ;; use timeout with timeout-ticks (overrides global timeout
-     ;; parameter)
+     ;; use timeout with `timeout-ticks` ticks (gas) (overrides global
+     ;; timeout parameter)
      (let ((g ge))
        (one-shot-underconstraino-aux name ge g `(timeout ,timeout-ticks) #t))]))
 
 
 ;; full (multi-shot) underconstraints:
-(define underconstraino
-  (lambda (g . rest)
-    (error 'underconstraino 'implement-me)))
 
-(define trace-underconstraino
-  (lambda (name g . rest)
-    (error 'trace-underconstraino 'implement-me)))
+;; TODO rethink the interface for the full underconstraints to use an
+;; attributed-variable-like approach.  Pass an explicit list of
+;; variables/terms to attribute?  Require that `ge` be of the form
+;; `(<rel-name> <t_1> <t_2> ... <t_n>)`?
 
-(define-syntax super-trace-underconstraino
+(define underconstraino-aux
+  (lambda (name ge g timeout-info trace-version-of-macro?)
+    (error 'underconstraino-aux "implement me!")))
+
+(define-syntax underconstraino
   (syntax-rules ()
-    [(_ name g)
-     (error 'super-trace-underconstraino 'implement-me)]
-    [(_ name g #f)
-     (error 'super-trace-underconstraino 'implement-me)]
-    [(_ name g timeout-ticks)
-     (error 'super-trace-underconstraino 'implement-me)]))
+    [(_ name ge)
+     ;; use global default timeout parameter
+     (let ((g ge))
+       (one-shot-underconstraino-aux name ge g #f #f))]
+    [(_ name ge #f)
+     ;; no timeout (overrides global timeout parameter)
+     (let ((g ge))
+       (one-shot-underconstraino-aux name ge g `(timeout #f) #f))]
+    [(_ name ge timeout-ticks)
+     ;; use timeout with `timeout-ticks` ticks (gas) (overrides global
+     ;; timeout parameter)
+     (let ((g ge))
+       (one-shot-underconstraino-aux name ge g `(timeout ,timeout-ticks) #f))]))
+
+(define-syntax trace-underconstraino
+  ;; same as `underconstraino`, but with the trace flag set to `#t`
+  ;; rather than `#f`
+  (syntax-rules ()
+    [(_ name ge)
+     ;; use global default timeout parameter
+     (let ((g ge))
+       (one-shot-underconstraino-aux name ge g #f #t))]
+    [(_ name ge #f)
+     ;; no timeout (overrides global timeout parameter)
+     (let ((g ge))
+       (one-shot-underconstraino-aux name ge g `(timeout #f) #t))]
+    [(_ name ge timeout-ticks)
+     ;; use timeout with `timeout-ticks` ticks (gas) (overrides global
+     ;; timeout parameter)
+     (let ((g ge))
+       (one-shot-underconstraino-aux name ge g `(timeout ,timeout-ticks) #t))]))
