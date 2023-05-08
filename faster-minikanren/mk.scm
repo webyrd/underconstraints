@@ -1033,15 +1033,11 @@
   ;; rather than `#f`
   (syntax-rules ()
     [(_ name ge)
-     ;; use global default timeout parameter
      (let ((g ge))
        (one-shot-underconstraino-aux name ge g #f #t))]
     [(_ name ge #f)
-     ;; no timeout (overrides global timeout parameter)
      (let ((g ge))
        (one-shot-underconstraino-aux name ge g `(timeout #f) #t))]
     [(_ name ge timeout-ticks)
-     ;; use timeout with `timeout-ticks` ticks (gas) (overrides global
-     ;; timeout parameter)
      (let ((g ge))
        (one-shot-underconstraino-aux name ge g `(timeout ,timeout-ticks) #t))]))
