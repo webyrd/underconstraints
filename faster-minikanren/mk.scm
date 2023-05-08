@@ -1,3 +1,6 @@
+;; TODO add `pmatch.scm` file to this directory
+(load "pmatch.scm")
+
 (define always-wrap-reified? (make-parameter #f))
 
 ; Scope object.
@@ -829,7 +832,7 @@
 ;;
 ;; Extend `faster-miniKanren` with underconstraints
 
-;; TODO: make these global flags parameters instead.
+;; TODO make these global flags parameters instead.
 
 ;; Global default timeout (in number of ticks/gas for engine), or `#f`
 ;; if the default is no timeout.  Can be overriden by optional timeout
@@ -849,70 +852,114 @@
 (define *global-trace-underconstraint* #f)
 
 ;; one-shot underconstraints:
-(define one-shot-underconstraino
-  (let ((legal-rest-args?
-         (lambda (rest)
-           (or (null? rest)
-               (and (= (length rest) 1)
-                    (let ((timeout (car rest)))
-                      (eqv? timeout #f)
-                      (and (integer? timeout)
-                           (not (negative? timeout)))))))))
-    (lambda (g . rest)
-      (unless (legal-rest-args? rest)
-        (error
-         'one-shot-underconstraino
-         (format "optional argument must be #f or a non-negative integer representing a number of ticks: given ~s"
-                 rest)))
-      (lambda (st)
-        (let ((timeout (or (and (not (null? rest)) (car rest))
-                           ;; TODO make this global a parameter
-                           *global-underconstraint-default-timeout*)))
-          (if timeout
-              (suspend
-               ;; TODO wrap this entire `case-inf` in an engine with
-               ;; `timeout` ticks; succeeds if the engine times out.
-               (case-inf (g st)
-                 (() #f)
-                 ((f) (f)) ;; force the thunk immediately, since we have a timeout to protect us
-                 ((c) st)
-                 ((c f^) st)))
-              (suspend
-               (case-inf (g st)
-                 (() #f)
-                 ((f) (lambda () (f))) ;; thunkify to allow interleaving, since we don't have timeout protection
-                 ((c) st)
-                 ((c f^) st)))))))))
 
-(define trace-one-shot-underconstraino
-  (lambda (name g . rest)
-    (error 'trace-one-shot-underconstraino 'implement-me)))
+(define one-shot-underconstraino-aux
+  (lambda (name ge g timeout-info trace-version-of-macro?)
+    (lambda (st)
+      (let ((trace? (or trace-version-of-macro?
+                        ;; TODO make this global a parameter:
+                        *global-trace-underconstraint*))
+            (timeout (pmatch timeout-info
+                       [#f
+                        ;; to timeout paramater passed to macro, so
+                        ;; use the global default value
+                        ;;
+                        ;; TODO make this global a parameter
+                        *global-underconstraint-default-timeout*]
+                       [(timeout #f)
+                        ;; parameter passed to macro that overrides
+                        ;; the global default value---timeout disabled
+                        #f]
+                       [(timeout ,timeout-ticks)
+                        (guard (and (integer? timeout-ticks)
+                                    (positive? timeout-ticks)))
+                        ;; parameter passed to macro that overrides
+                        ;; the global default value---timeout enabled,
+                        ;; with `timeout-ticks` ticks (gas) for the
+                        ;; engine
+                        timeout-ticks]
+                       [else
+                        (error
+                         'one-shot-underconstraino-aux
+                         (format
+                          "optional argument must be #f or a positive integer representing a number of ticks: given ~s"
+                          rest))])))
+        (when trace?
+          (newline)
+          (printf "** one-shot underconstraint ~s received a state object\n" name)
+          (printf "*  one-shot underconstraint ~s ge:\n~s\n" name ge)
+          (printf "*  one-shot underconstraint ~s walk*ed ge:\n~s\n" name (walk* ge (state-S st))))
+        (let-syntax ((maybe-time (if trace?
+                                     (syntax-rules ()
+                                       [(_ e) (time e)])
+                                     (syntax-rules ()
+                                       [(_ e) e]))))
+          (maybe-time
+           (if timeout
+               (suspend
+                ;; TODO wrap this entire `case-inf` in an engine with
+                ;; `timeout` ticks; succeeds if the engine times out.
+                (case-inf (g st)
+                  (() #f)
+                  ((f)
+                   ;; force `f` immediately, since we have a timeout
+                   ;; to protect us
+                   (f))
+                  ((c) st)
+                  ((c f^) st)))
+               (suspend
+                (case-inf (g st)
+                  (() (begin
+                        (when trace?
+                          (printf "~s failed\n" name))                        
+                        #f))
+                  ((f)
+                   ;; thunkify to allow interleaving, since we don't
+                   ;; have timeout protection
+                   (lambda () (f)))
+                  ((c) (begin
+                         (when trace?
+                           (printf "~s succeeded with singleton result\n" name))
+                         st))
+                  ((c f^) (begin
+                            (when trace?
+                              (printf "~s succeeded with non-empty stream\n" name))
+                            st)))))))))))
 
-(define-syntax super-trace-one-shot-underconstraino
+(define-syntax one-shot-underconstraino
   (syntax-rules ()
-    [(_ name ge) ;; use global default timeout parameter
-     (error 'super-trace-one-shot-underconstraino 'implement-me)]
-    [(_ name ge #f) ;; no timeout (overrides global timeout parameter)
+    [(_ name ge)
+     ;; use global default timeout parameter
      (let ((g ge))
-       (lambda (st)
-         (begin
-           (printf "~s ge:\n~s\n" name ge)
-           (printf "~s walk*ed ge:\n~s\n" name (walk* ge (state-S st)))
-           (time
-            (suspend
-             (case-inf (g st)
-               (() (begin
-                     (printf "~s failed\n" name)
-                     #f))
-               ((f) (lambda () (f))) ;; thunkify to allow interleaving, since we don't have timeout protection
-               ((c) (begin
-                      (printf "~s succeeded with singleton result\n" name)
-                      st))
-               ((c f^) (begin
-                         (printf "~s succeeded with non-empty stream\n" name)
-                         st))))))))]
-    [(_ name ge timeout-ticks) ;; use timeout with timeout-ticks (overrides global timeout parameter)
-     (error 'super-trace-one-shot-underconstraino 'implement-me)]))
+       (one-shot-underconstraino-aux name ge g #f #f))]
+    [(_ name ge #f)
+     ;; no timeout (overrides global timeout parameter)
+     (let ((g ge))
+       (one-shot-underconstraino-aux name ge g `(timeout #f) #f))]
+    [(_ name ge timeout-ticks)
+     ;; use timeout with timeout-ticks (overrides global timeout
+     ;; parameter)
+     (let ((g ge))
+       (one-shot-underconstraino-aux name ge g `(timeout ,timeout-ticks) #f))]))
+
+(define-syntax trace-one-shot-underconstraino
+  ;; same as `one-shot-underconstraino`, but with the trace flag set
+  ;; to `#t` rather than `#f`
+  (syntax-rules ()
+    [(_ name ge)
+     ;; use global default timeout parameter
+     (let ((g ge))
+       (one-shot-underconstraino-aux name ge g #f #t))]
+    [(_ name ge #f)
+     ;; no timeout (overrides global timeout parameter)
+     (let ((g ge))
+       (one-shot-underconstraino-aux name ge g `(timeout #f) #t))]
+    [(_ name ge timeout-ticks)
+     ;; use timeout with timeout-ticks (overrides global timeout
+     ;; parameter)
+     (let ((g ge))
+       (one-shot-underconstraino-aux name ge g `(timeout ,timeout-ticks) #t))]))
+
 
 ;; full (multi-shot) underconstraints:
 (define underconstraino
