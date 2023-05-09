@@ -921,9 +921,7 @@
         (printf "** one-shot underconstraint ~s received a state object\n"
                 name)
         (printf "*  one-shot underconstraint ~s ge:\n~s\n"
-                name ge)
-        (printf "*  one-shot underconstraint ~s walk*ed ge:\n~s\n"
-                name (walk* ge (state-S st))))
+                name ge))
       (suspend
        (let ((timeout-ticks (get-timeout-ticks)))
          (if (not timeout-ticks)
@@ -965,16 +963,16 @@
     [(_ name ge)
      ;; use global default timeout parameter
      (let ((g ge))
-       (one-shot-underconstraino-aux name ge g #f #f))]
+       (one-shot-underconstraino-aux name 'ge g #f #f))]
     [(_ name ge #f)
      ;; no timeout (overrides global timeout parameter)
      (let ((g ge))
-       (one-shot-underconstraino-aux name ge g `(timeout #f) #f))]
+       (one-shot-underconstraino-aux name 'ge g `(timeout #f) #f))]
     [(_ name ge timeout-ticks)
      ;; use timeout with `timeout-ticks` ticks (gas) (overrides global
      ;; timeout parameter)
      (let ((g ge))
-       (one-shot-underconstraino-aux name ge g `(timeout ,timeout-ticks) #f))]))
+       (one-shot-underconstraino-aux name 'ge g `(timeout ,timeout-ticks) #f))]))
 
 (define-syntax trace-one-shot-underconstraino
   ;; same as `one-shot-underconstraino`, but with the trace flag set
@@ -982,13 +980,13 @@
   (syntax-rules ()
     [(_ name ge)
      (let ((g ge))
-       (one-shot-underconstraino-aux name ge g #f #t))]
+       (one-shot-underconstraino-aux name 'ge g #f #t))]
     [(_ name ge #f)
      (let ((g ge))
-       (one-shot-underconstraino-aux name ge g `(timeout #f) #t))]
+       (one-shot-underconstraino-aux name 'ge g `(timeout #f) #t))]
     [(_ name ge timeout-ticks)
      (let ((g ge))
-       (one-shot-underconstraino-aux name ge g `(timeout ,timeout-ticks) #t))]))
+       (one-shot-underconstraino-aux name 'ge g `(timeout ,timeout-ticks) #t))]))
 
 
 ;; full (multi-shot) underconstraints:
@@ -1007,16 +1005,16 @@
     [(_ name ge)
      ;; use global default timeout parameter
      (let ((g ge))
-       (general-underconstraino-aux name ge g #f #f))]
+       (general-underconstraino-aux name 'ge g #f #f))]
     [(_ name ge #f)
      ;; no timeout (overrides global timeout parameter)
      (let ((g ge))
-       (general-underconstraino-aux name ge g `(timeout #f) #f))]
+       (general-underconstraino-aux name 'ge g `(timeout #f) #f))]
     [(_ name ge timeout-ticks)
      ;; use timeout with `timeout-ticks` ticks (gas) (overrides global
      ;; timeout parameter)
      (let ((g ge))
-       (general-underconstraino-aux name ge g `(timeout ,timeout-ticks) #f))]))
+       (general-underconstraino-aux name 'ge g `(timeout ,timeout-ticks) #f))]))
 
 (define-syntax trace-underconstraino
   ;; same as `underconstraino`, but with the trace flag set to `#t`
@@ -1024,10 +1022,10 @@
   (syntax-rules ()
     [(_ name ge)
      (let ((g ge))
-       (general-underconstraino-aux name ge g #f #t))]
+       (general-underconstraino-aux name 'ge g #f #t))]
     [(_ name ge #f)
      (let ((g ge))
-       (general-underconstraino-aux name ge g `(timeout #f) #t))]
+       (general-underconstraino-aux name 'ge g `(timeout #f) #t))]
     [(_ name ge timeout-ticks)
      (let ((g ge))
-       (general-underconstraino-aux name ge g `(timeout ,timeout-ticks) #t))]))
+       (general-underconstraino-aux name 'ge g `(timeout ,timeout-ticks) #t))]))
