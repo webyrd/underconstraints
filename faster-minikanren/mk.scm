@@ -915,14 +915,14 @@
                (printf
                 "* one-shot underconstraint ~s succeeded with non-singleton stream\n"
                 name)
-               st)))]))      
-      (when (trace?)
-        (newline)
-        (printf
-         "*  one-shot underconstraint ~s trying goal expression:\n~s\n"
-         name ge))
+               st)))]))
       (suspend
        (let ((timeout-ticks (get-timeout-ticks)))
+         (when (trace?)
+           (newline)
+           (printf
+            "*  one-shot underconstraint ~s trying goal expression:\n~s\n   in constraint store:\n~s\n"
+            name ge st))
          (if (not timeout-ticks)
              (case-inf-expr
               ;; thunkify forcing of `f` to allow interleaving,

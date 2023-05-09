@@ -48,7 +48,7 @@
   ;; might be reordered in the future, or if the goals might be
   ;; dynamically reordered at runtime
   (run* (x)
-    (trace-one-shot-underconstraino 'b (== 4 x))
+    (one-shot-underconstraino 'b (== 4 x))
     (== 3 x)
     (== 4 x))
   '())
