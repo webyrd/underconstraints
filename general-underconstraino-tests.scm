@@ -1,10 +1,5 @@
-(load "faster-minikanren-with-underconstraints/mk-vicare.scm")
-(load "faster-minikanren-with-underconstraints/mk.scm")
-(load "faster-minikanren-with-underconstraints/numbers.scm")
-(load "faster-minikanren-with-underconstraints/test-check.scm")
-
 ;; ** These examples do not run yet, since I have not yet implemented
-;; `underconstraino`! **
+;; general `underconstraino`! **
 
 ;; Start with a few very trivial examples showing sound/unsound uses
 ;; of underconstraints and basic goal ordering concerns.
@@ -377,3 +372,4 @@
     (numeralo m)
     (numeralo o))
   '())
+
