@@ -918,10 +918,9 @@
                st)))]))      
       (when (trace?)
         (newline)
-        (printf "** one-shot underconstraint ~s received a state object\n"
-                name)
-        (printf "*  one-shot underconstraint ~s ge:\n~s\n"
-                name ge))
+        (printf
+         "*  one-shot underconstraint ~s trying goal expression:\n~s\n"
+         name ge))
       (suspend
        (let ((timeout-ticks (get-timeout-ticks)))
          (if (not timeout-ticks)
