@@ -930,7 +930,7 @@
                     "* one-shot underconstraint ~s succeeded with non-singleton stream\n"
                     name)
                    st)))))
-             
+            ;; `timeout-ticks` is not #f:
             (let ((eng (make-engine
                          (lambda ()
                            (suspend
