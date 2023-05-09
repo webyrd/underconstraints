@@ -268,6 +268,19 @@
 (test "onceo-behavior-of-one-shot-underconstraino-1"
   (run 1 (n m o)
     (== 'cat m)
+    (trace-one-shot-underconstraino 'a (numeralo n))
+    (trace-one-shot-underconstraino 'b (numeralo m))
+    (numeralo n)
+    (numeralo m))
+  '())
+(printf "finished testing onceo-behavior-of-one-shot-underconstraino-1\n")
+
+
+(printf "testing onceo-behavior-of-one-shot-underconstraino-1...\n")
+(printf "shouldn't even the one-shot version of this query terminate with failure?\n")
+(test "onceo-behavior-of-one-shot-underconstraino-1"
+  (run 1 (n m o)
+    (== 'cat m)
     (one-shot-underconstraino 'a (numeralo n))
     (one-shot-underconstraino 'b (numeralo m))
     (numeralo n)
