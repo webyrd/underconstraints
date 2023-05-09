@@ -119,7 +119,20 @@
   '())
 
 ;; unsound!
-(test "one-shot-underconstraino-number-choiceo-unsound"
+(test "one-shot-underconstraino-number-choiceo-unsound-a"
+  (run* (x)
+    (one-shot-underconstraino 'a (one-or-two-choiceo x)))
+  '(_.0))
+
+;; unsound!
+(test "one-shot-underconstraino-number-choiceo-unsound-b"
+  (run* (x)
+    (one-shot-underconstraino 'b (three-or-four-choiceo x)))
+  '(_.0))
+
+(printf "this test should succeed!")
+;; unsound!
+(test "one-shot-underconstraino-number-choiceo-unsound-c"
   (run* (x)
     (one-shot-underconstraino 'a (one-or-two-choiceo x))
     (one-shot-underconstraino 'b (three-or-four-choiceo x)))
