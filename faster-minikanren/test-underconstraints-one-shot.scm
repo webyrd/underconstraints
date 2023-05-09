@@ -130,7 +130,6 @@
     (one-shot-underconstraino 'b (three-or-four-choiceo x)))
   '(_.0))
 
-(printf "this test should succeed!")
 ;; unsound!
 (test "one-shot-underconstraino-number-choiceo-unsound-c"
   (run* (x)
@@ -231,17 +230,19 @@
     ((1 1) (0 1) (0 1 1))))
 
 (test "factor-6-one-shot-underconstraino-typical"
-  (run 4 (n m o)
+  (run* (n m o)
     (== (build-num 12) o)
     (one-shot-underconstraino 'a (numeralo n))
     (one-shot-underconstraino 'b (numeralo m))
     (*o n m o)
     (numeralo n)
     (numeralo m))
-  '(((1) (0 1 1) (0 1 1))
-    ((0 1 1) (1) (0 1 1))
-    ((0 1) (1 1) (0 1 1))
-    ((1 1) (0 1) (0 1 1))))
+  '(((1) (0 0 1 1) (0 0 1 1))
+    ((0 0 1 1) (1) (0 0 1 1))
+    ((0 1) (0 1 1) (0 0 1 1))
+    ((0 0 1) (1 1) (0 0 1 1))
+    ((1 1) (0 0 1) (0 0 1 1))
+    ((0 1 1) (0 1) (0 0 1 1))))
 
 
 (test "*o-illegal-cat-undetected"
@@ -276,21 +277,6 @@
     (numeralo n)
     (numeralo m)))
 
-(printf "testing onceo-behavior-of-one-shot-underconstraino-1...\n")
-(printf "shouldn't even the one-shot version of this query terminate with failure?\n")
-(test "onceo-behavior-of-one-shot-underconstraino-1"
-  (run 1 (n m o)
-    (== 'cat m)
-    (trace-one-shot-underconstraino 'a (numeralo n))
-    (trace-one-shot-underconstraino 'b (numeralo m))
-    (numeralo n)
-    (numeralo m))
-  '())
-(printf "finished testing onceo-behavior-of-one-shot-underconstraino-1\n")
-
-
-(printf "testing onceo-behavior-of-one-shot-underconstraino-1...\n")
-(printf "shouldn't even the one-shot version of this query terminate with failure?\n")
 (test "onceo-behavior-of-one-shot-underconstraino-1"
   (run 1 (n m o)
     (== 'cat m)
@@ -299,7 +285,15 @@
     (numeralo n)
     (numeralo m))
   '())
-(printf "finished testing onceo-behavior-of-one-shot-underconstraino-1\n")
+
+(test "onceo-behavior-of-one-shot-underconstraino-1"
+  (run 1 (n m o)
+    (== 'cat m)
+    (one-shot-underconstraino 'a (numeralo n))
+    (one-shot-underconstraino 'b (numeralo m))
+    (numeralo n)
+    (numeralo m))
+  '())
 
 (test "onceo-behavior-of-one-shot-underconstraino-2"
   (run 1 (n m o)
