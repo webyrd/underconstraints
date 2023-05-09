@@ -903,7 +903,7 @@
                 "* one-shot underconstraint ~s failed\n"
                 name)
                #f))
-             ((f) f-rhs-expr)
+             ((f) (f-rhs-expr f))
              ((c)
               (begin-when-trace
                (printf
@@ -925,15 +925,18 @@
             name ge))
          (if (not timeout-ticks)
              (case-inf-expr
-              ;; thunkify forcing of `f` to allow interleaving,
-              ;; since we don't have timeout protection
-              (lambda () (f)))
+              (lambda (f)
+                ;; thunkify forcing of `f` to allow interleaving,
+                ;; since we don't have timeout protection                
+                (lambda ()
+                  (f))))
              (let ((eng (make-engine
                           (lambda ()
                             (case-inf-expr
-                             ;; force `f` immediately, since we have
-                             ;; a timeout to protect us
-                             (f))))))
+                             (lambda (f)
+                               ;; force `f` immediately, since we have
+                               ;; a timeout to protect us
+                               (f)))))))
                (maybe-time
                 (eng timeout-ticks
                      ;; engine "completed" procedure
