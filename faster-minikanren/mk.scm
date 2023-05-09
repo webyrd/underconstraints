@@ -896,26 +896,32 @@
       (define-syntax case-inf-expr
         (syntax-rules ()
           [(_ f-rhs-expr)
-           (case-inf (g st)
-             (()
-              (begin-when-trace
-               (printf
-                "* one-shot underconstraint ~s failed\n"
-                name)
-               #f))
-             ((f) (f-rhs-expr f))
-             ((c)
-              (begin-when-trace
-               (printf
-                "* one-shot underconstraint ~s succeeded with singleton result\n"
-                name)
-               st))
-             ((c f^)
-              (begin-when-trace
-               (printf
-                "* one-shot underconstraint ~s succeeded with non-singleton stream\n"
-                name)
-               st)))]))
+           (let ((f-rhs f-rhs-expr))
+             (case-inf (g st)
+               (()
+                (begin-when-trace
+                 (printf
+                  "* one-shot underconstraint ~s failed\n"
+                  name)
+                 #f))
+               ((f)
+                (begin-when-trace
+                 (printf
+                  "* one-shot underconstraint ~s encountered `(f)` case of case-inf\n"
+                  name)
+                 (f-rhs f)))
+               ((c)
+                (begin-when-trace
+                 (printf
+                  "* one-shot underconstraint ~s succeeded with singleton result\n"
+                  name)
+                 st))
+               ((c f^)
+                (begin-when-trace
+                 (printf
+                  "* one-shot underconstraint ~s succeeded with non-singleton stream\n"
+                  name)
+                 st))))]))
       (suspend
        (let ((timeout-ticks (get-timeout-ticks)))
          (when (trace?)
