@@ -970,7 +970,7 @@
                        (printf
                         "* one-shot underconstraint ~s engine completed after ~s of ~s ticks\n"
                         name
-                        ticks-left-over
+                        (- timeout-ticks ticks-left-over)
                         timeout-ticks)
                        value))
                     ;; engine "expired" procedure

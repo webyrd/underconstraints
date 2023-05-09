@@ -1,8 +1,3 @@
-(load "mk-vicare.scm")
-(load "mk.scm")
-(load "numbers.scm")
-(load "test-check.scm")
-
 ;; ** These examples do not run yet, since I have not yet implemented
 ;; general `underconstraino`! **
 

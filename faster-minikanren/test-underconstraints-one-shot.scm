@@ -1,8 +1,3 @@
-(load "mk-vicare.scm")
-(load "mk.scm")
-(load "numbers.scm")
-(load "test-check.scm")
-
 (test "one-shot-underconstraino-trivial-classic"
   ;; classic miniKanren
   (run* (x)
