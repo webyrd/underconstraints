@@ -37,7 +37,7 @@
     (== 4 x)
     (underconstraino (== 3 x))
     (underconstraino (== 4 x)))
-  '(_.0))
+  '())
 
 (test "underconstraino-trivial-sound-but-useless-2"
   ;; also sound but with a useless ordering of goals
@@ -46,7 +46,7 @@
     (== 3 x)
     (== 4 x)
     (underconstraino (== 4 x)))
-  '(_.0))
+  '())
 
 (test "underconstraino-trivial-typical"
   ;; sound, with a typical goal ordering for underconstraints:
@@ -56,7 +56,7 @@
     (underconstraino (== 4 x))
     (== 3 x)
     (== 4 x))
-  '(_.0))
+  '())
 
 (test "underconstraino-trivial-optimized"
   ;; sound, with a typical goal ordering for underconstraints, and
@@ -71,7 +71,7 @@
     (underconstraino (== 4 x))
     (== 3 x)
     (== 4 x))
-  '(_.0))
+  '())
 
 
 ;; Another silly and useless trivial example.  Useless since `symbolo`
