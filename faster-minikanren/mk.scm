@@ -921,8 +921,8 @@
          (when (trace?)
            (newline)
            (printf
-            "*  one-shot underconstraint ~s trying goal expression:\n~s\n   in constraint store:\n~s\n"
-            name ge st))
+            "*  one-shot underconstraint ~s trying goal expression:\n~s\n"
+            name ge))
          (if (not timeout-ticks)
              (case-inf-expr
               ;; thunkify forcing of `f` to allow interleaving,
