@@ -19,8 +19,6 @@
     (one-shot-underconstraino 'b (== 4 x)))
   '())
 
-#!eof
-
 (test "underconstraino-trivial-sound-but-useless-2"
   ;; also sound but with a useless ordering of goals
   (run* (x)
@@ -54,4 +52,3 @@
     (== 3 x)
     (== 4 x))
   '())
-

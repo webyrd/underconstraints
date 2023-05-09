@@ -892,30 +892,30 @@
              e*)
            ...
            e)]))
-    (define-syntax case-inf-expr
-      (syntax-rules ()
-        [(_ f-rhs-expr)
-         (case-inf (g st)
-           (()
-            (begin-when-trace
-             (printf
-              "* one-shot underconstraint ~s failed\n"
-              name)
-             #f))
-           ((f) f-rhs-expr)
-           ((c)
-            (begin-when-trace
-             (printf
-              "* one-shot underconstraint ~s succeeded with singleton result\n"
-              name)
-             st))
-           ((c f^)
-            (begin-when-trace
-             (printf
-              "* one-shot underconstraint ~s succeeded with non-singleton stream\n"
-              name)
-             st)))]))
     (lambda (st)
+      (define-syntax case-inf-expr
+        (syntax-rules ()
+          [(_ f-rhs-expr)
+           (case-inf (g st)
+             (()
+              (begin-when-trace
+               (printf
+                "* one-shot underconstraint ~s failed\n"
+                name)
+               #f))
+             ((f) f-rhs-expr)
+             ((c)
+              (begin-when-trace
+               (printf
+                "* one-shot underconstraint ~s succeeded with singleton result\n"
+                name)
+               st))
+             ((c f^)
+              (begin-when-trace
+               (printf
+                "* one-shot underconstraint ~s succeeded with non-singleton stream\n"
+                name)
+               st)))]))      
       (when (trace?)
         (newline)
         (printf "** one-shot underconstraint ~s received a state object\n"
