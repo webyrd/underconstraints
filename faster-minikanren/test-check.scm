@@ -1,4 +1,4 @@
-(define test-failed #f)
+(define *num-tests-failed* 0)
 
 (define-syntax test
   (syntax-rules ()
@@ -9,6 +9,13 @@
               (produced tested-expression))
          (or (equal? expected produced)
              (begin
-               (set! test-failed #t)
-               (printf "Failed: ~s~%Expected: ~s~%Computed: ~s~%"
-                     'tested-expression expected produced))))))))
+               (set! *num-tests-failed* (add1 *num-tests-failed*))
+               (printf "Failed:\n")
+               (pretty-print 'tested-expression)
+               (newline)
+               (printf "Expected:\n")
+               (pretty-print expected)
+               (newline)
+               (printf "Computed:\n")
+               (pretty-print produced)
+               (newline))))))))
