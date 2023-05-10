@@ -10,25 +10,25 @@
   (run* (x)
     (== 3 x)
     (== 4 x)
-    (one-shot-underconstraino 'a (== 3 x))
-    (one-shot-underconstraino 'b (== 4 x)))
+    (one-shot-underconstraino 'a1 (== 3 x))
+    (one-shot-underconstraino 'b1 (== 4 x)))
   '())
 
 (test "one-shot-underconstraino-trivial-sound-but-useless-2"
   ;; also sound but with a useless ordering of goals
   (run* (x)
-    (one-shot-underconstraino 'a (== 3 x))
+    (one-shot-underconstraino 'a2 (== 3 x))
     (== 3 x)
     (== 4 x)
-    (one-shot-underconstraino 'b (== 4 x)))
+    (one-shot-underconstraino 'b2 (== 4 x)))
   '())
 
 (test "one-shot-underconstraino-trivial-typical"
   ;; sound, with a typical goal ordering for underconstraints:
   ;; underconstraints should normally come first
   (run* (x)
-    (one-shot-underconstraino 'a (== 3 x))
-    (one-shot-underconstraino 'b (== 4 x))
+    (one-shot-underconstraino 'a3 (== 3 x))
+    (one-shot-underconstraino 'b3 (== 4 x))
     (== 3 x)
     (== 4 x))
   '())
@@ -43,7 +43,7 @@
   ;; might be reordered in the future, or if the goals might be
   ;; dynamically reordered at runtime
   (run* (x)
-    (one-shot-underconstraino 'b (== 4 x))
+    (one-shot-underconstraino 'b4 (== 4 x))
     (== 3 x)
     (== 4 x))
   '())
@@ -63,29 +63,29 @@
 (test "one-shot-underconstraino-silly-unsound"
   ;; unsound!
   (run* (x)
-    (one-shot-underconstraino 'a (symbolo x))
-    (one-shot-underconstraino 'b (numbero x)))
+    (one-shot-underconstraino 'a5 (symbolo x))
+    (one-shot-underconstraino 'b5 (numbero x)))
   '(_.0))
 
 (test "one-shot-underconstraino-silly-sound-but-useless"
   (run* (x)
     (symbolo x)
-    (one-shot-underconstraino 'a (symbolo x))
+    (one-shot-underconstraino 'a6 (symbolo x))
     (numbero x)
-    (one-shot-underconstraino 'b (numbero x)))
+    (one-shot-underconstraino 'b6 (numbero x)))
   '())
 
 (test "one-shot-underconstraino-silly-typical"
   (run* (x)
-    (one-shot-underconstraino 'a (symbolo x))
-    (one-shot-underconstraino 'b (numbero x))
+    (one-shot-underconstraino 'a7 (symbolo x))
+    (one-shot-underconstraino 'b7 (numbero x))
     (symbolo x)
     (numbero x))
   '())
 
 (test "one-shot-underconstraino-silly-optimized"
   (run* (x)
-    (one-shot-underconstraino 'a (numbero x))
+    (one-shot-underconstraino 'b8 (numbero x))
     (symbolo x)
     (numbero x))
   '())
@@ -116,34 +116,34 @@
 ;; unsound!
 (test "one-shot-underconstraino-number-choiceo-unsound-a"
   (run* (x)
-    (one-shot-underconstraino 'a (one-or-two-choiceo x)))
+    (one-shot-underconstraino 'a9 (one-or-two-choiceo x)))
   '(_.0))
 
 ;; unsound!
 (test "one-shot-underconstraino-number-choiceo-unsound-b"
   (run* (x)
-    (one-shot-underconstraino 'b (three-or-four-choiceo x)))
+    (one-shot-underconstraino 'b10 (three-or-four-choiceo x)))
   '(_.0))
 
 ;; unsound!
 (test "one-shot-underconstraino-number-choiceo-unsound-c"
   (run* (x)
-    (one-shot-underconstraino 'a (one-or-two-choiceo x))
-    (one-shot-underconstraino 'b (three-or-four-choiceo x)))
+    (one-shot-underconstraino 'a11 (one-or-two-choiceo x))
+    (one-shot-underconstraino 'b11 (three-or-four-choiceo x)))
   '(_.0))
 
 (test "one-shot-underconstraino-number-choiceo-sound-but-useless"
   (run* (x)
     (one-or-two-choiceo x)
     (three-or-four-choiceo x)
-    (one-shot-underconstraino 'a (one-or-two-choiceo x))
-    (one-shot-underconstraino 'b (three-or-four-choiceo x)))
+    (one-shot-underconstraino 'a12 (one-or-two-choiceo x))
+    (one-shot-underconstraino 'b12 (three-or-four-choiceo x)))
   '())
 
 (test "one-shot-underconstraino-number-choiceo-typical"
   (run* (x)
-    (one-shot-underconstraino 'a (one-or-two-choiceo x))
-    (one-shot-underconstraino 'b (three-or-four-choiceo x))
+    (one-shot-underconstraino 'a13 (one-or-two-choiceo x))
+    (one-shot-underconstraino 'b13 (three-or-four-choiceo x))
     (one-or-two-choiceo x)
     (three-or-four-choiceo x))
   '())
@@ -151,7 +151,7 @@
 
 (test "one-shot-underconstraino-number-choiceo-optimized"
   (run* (x)
-    (one-shot-underconstraino 'b (three-or-four-choiceo x))
+    (one-shot-underconstraino 'b14 (three-or-four-choiceo x))
     (one-or-two-choiceo x)
     (three-or-four-choiceo x))
   '())
@@ -227,8 +227,8 @@
 (test "factor-6-one-shot-underconstraino-typical"
   (run* (n m o)
     (== (build-num 12) o)
-    (one-shot-underconstraino 'a (numeralo n))
-    (one-shot-underconstraino 'b (numeralo m))
+    (one-shot-underconstraino 'a15 (numeralo n))
+    (one-shot-underconstraino 'b15 (numeralo m))
     (*o n m o)
     (numeralo n)
     (numeralo m))
@@ -258,6 +258,8 @@
     (numeralo o))
   '())
 
+;; TODO implement `test-diverges` in `test-check.scm`
+
 #;(test-diverges "*o-illegal-cat-generate-and-test"
   (run 1 (n m o)
     (== 'cat m)
@@ -275,8 +277,8 @@
 (test "onceo-behavior-of-one-shot-underconstraino-1"
   (run 1 (n m o)
     (== 'cat m)
-    (one-shot-underconstraino 'a (numeralo n))
-    (one-shot-underconstraino 'b (numeralo m))
+    (one-shot-underconstraino 'a16 (numeralo n))
+    (one-shot-underconstraino 'b16 (numeralo m))
     (numeralo n)
     (numeralo m))
   '())
@@ -284,8 +286,8 @@
 (test "onceo-behavior-of-one-shot-underconstraino-1"
   (run 1 (n m o)
     (== 'cat m)
-    (one-shot-underconstraino 'a (numeralo n))
-    (one-shot-underconstraino 'b (numeralo m))
+    (one-shot-underconstraino 'a17 (numeralo n))
+    (one-shot-underconstraino 'b17 (numeralo m))
     (numeralo n)
     (numeralo m))
   '())
@@ -293,8 +295,8 @@
 (test "onceo-behavior-of-one-shot-underconstraino-2"
   (run 1 (n m o)
     (== 'cat m)
-    (one-shot-underconstraino 'a (numeralo n))
-    (one-shot-underconstraino 'b (numeralo m))
+    (one-shot-underconstraino 'a18 (numeralo n))
+    (one-shot-underconstraino 'b18 (numeralo m))
     (*o n m o)
     (numeralo n)
     (numeralo m))
@@ -302,9 +304,9 @@
 
 (test "*o-illegal-cat-one-shot-underconstraino"
   (run 1 (n m o)
-    (one-shot-underconstraino 'a (numeralo n))
-    (one-shot-underconstraino 'b (numeralo m))
-    (one-shot-underconstraino 'c (numeralo o))
+    (one-shot-underconstraino 'a19 (numeralo n))
+    (one-shot-underconstraino 'b19 (numeralo m))
+    (one-shot-underconstraino 'c19 (numeralo o))
     (== 'cat m)
     (*o n m o)
     (numeralo n)
