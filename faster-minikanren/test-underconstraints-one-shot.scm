@@ -258,9 +258,7 @@
     (numeralo o))
   '())
 
-;; TODO implement `test-diverges` in `test-check.scm`
-
-#;(test-diverges "*o-illegal-cat-generate-and-test"
+(test-divergence "*o-illegal-cat-generate-and-test"
   (run 1 (n m o)
     (== 'cat m)
     (numeralo n)
@@ -268,7 +266,7 @@
     (numeralo o)
     (*o n m o)))
 
-#;(test-diverges "no-mult-illegal-cat-generate-and-test"
+(test-divergence "no-mult-illegal-cat-generate-and-test"
   (run 1 (n m o)
     (== 'cat m)
     (numeralo n)
