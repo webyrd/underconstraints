@@ -7,3 +7,4 @@ Underconstraints TODO
 * closely read through the existing `faster-miniKanren` implementation
 * add general underconstraints to the `faster-miniKanren` implementation
 * add tests for when the engine times out for an underconstraint (which should lead to success)
+* update README in faster-miniKanren.scm to reflect the underconstraint changes
