@@ -1,4 +1,9 @@
 Underconstraints TODO
 
+* think throught whether general underconstraints must be top-level
+* think through how nested underconstraints should work (for both one-shot and general underconstraints)
+* think through the interface for general underconstraints
+* think through how general underconstraints should be represented in the constraint store
 * closely read through the existing `faster-miniKanren` implementation
 * add general underconstraints to the `faster-miniKanren` implementation
+* add tests for when the engine times out for an underconstraint (which should lead to success)
