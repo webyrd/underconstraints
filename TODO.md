@@ -19,3 +19,13 @@ say that the constraint is added to only one variable
 * make sure I completely understand the mk.scm code:
 ** how and why is `remove-c` used?
 ** how does the new intmap work?
+** how exactly does this reification code in `run` work?
+
+```
+(lambda (st)
+  (let ((st (state-with-scope st nonlocal-scope)))
+    (let ((z ((reify q) st)))
+      (cons z (lambda () (lambda () #f))))))
+```
+
+What is the purpose of `(cons z (lambda () (lambda () #f)))`?
