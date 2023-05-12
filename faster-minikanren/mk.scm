@@ -334,7 +334,7 @@
            (let ((x (var scope)) ...)
              (bind* (g0 st) g ...))))))))
 
-; (conde [g:Goal ...] ...+) -> Goal
+; (conde [g:Goal ...+] ...+) -> Goal
 (define-syntax conde
   (syntax-rules ()
     ((_ (g0 g ...) (g1 g^ ...) ...)
@@ -350,11 +350,12 @@
     ((_ n (q) g0 g ...)
      (take n
            (suspend
-             ((fresh (q) g0 g ...
-                     (lambda (st)
-                       (let ((st (state-with-scope st nonlocal-scope)))
-                         (let ((z ((reify q) st)))
-                           (cons z (lambda () (lambda () #f)))))))
+             ((fresh (q)
+                g0 g ...
+                (lambda (st)
+                  (let ((st (state-with-scope st nonlocal-scope)))
+                    (let ((z ((reify q) st)))
+                      (cons z (lambda () (lambda () #f)))))))
               empty-state))))
     ((_ n (q0 q1 q ...) g0 g ...)
      (run n (x)
