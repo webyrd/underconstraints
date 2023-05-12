@@ -19,6 +19,29 @@ say that the constraint is added to only one variable
 * make sure I completely understand the mk.scm code:
 ** how and why is `remove-c` used?
 ** how does the new intmap work?
+** why does `mplus*` use suspend, but not `bind*`?
+
+```
+; (bind* e:SearchStream g:Goal ...) -> SearchStream
+(define-syntax bind*
+  (syntax-rules ()
+    ((_ e) e)
+    ((_ e g0 g ...) (bind* (bind e g0) g ...))))
+
+; (suspend e:SearchStream) -> SuspendedStream
+; Used to clearly mark the locations where search is suspended in order to
+; interleave with other branches.
+(define-syntax suspend (syntax-rules () ((_ body) (lambda () body))))
+
+; (mplus* e:SearchStream ...+) -> SearchStream
+(define-syntax mplus*
+  (syntax-rules ()
+    ((_ e) e)
+    ((_ e0 e ...)
+     (mplus e0 (suspend (mplus* e ...))))))
+```
+
+** What are the rules/intuition for using `suspend`?
 ** how exactly does this reification code in `run` work?
 
 ```
