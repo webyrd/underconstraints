@@ -25,7 +25,7 @@ Add timeout and tracing versions as well.
 
 --
 
-If I strip out all the underconstrainys from the constraint store passed to the goal of the underconstriant, nested underconstraints may just work.
+If I strip out all the underconstraints from the constraint store passed to the goal of the underconstriant, nested underconstraints may just work.
 
 Basically a type of stratification
 
@@ -38,6 +38,42 @@ Could also check the constraints on those variables, I suppose.
 Might be able to be ultra lazy while checking term equality.  Not sure.
 
 ---------------------------
+
+Thoughts on these emails:
+
+```
+(underconstraino <term expression> <goal expression>)
+```
+
+seems like a reasonable interface.  Can always combine whatever terms
+or variables into a single term through `cons` or `list` or
+`quasiquote` and `unquote`.
+
+Simplifying the term during each solving step, reconstructing a list
+of remaining fresh variables (for example), might make sense.
+
+--
+
+Michael Ballantyne joined me, and had several suggestions and
+questions.  Michael thinks it could be more efficient to put the
+underconstraints on attributed variables.  Sounds like this would
+work, since even though a disequality constraint is only placed on one
+of the variable/term pairs (or on a single variable/variable pair),
+the disequlity constraint can't be violated unless all of the relevant
+variable/term or variable/variable pairs become equal.  So it is
+possible to use the current attributed variable scheme to trigger an
+under constraint when (and only when) the relevant attributed
+variables are updated in a way that might cause the underconstraint to
+now fail.
+
+Michael says that the staged miniKanren code has to pay attention to
+constrained variables that have changed, and that I can probably use
+or adapt this code for the underconstraints.
+
+---------------------------
+
+
+
 
 * think throught whether general underconstraints must be top-level
 * think through how nested underconstraints should work (for both one-shot and general underconstraints)
