@@ -96,6 +96,16 @@ or adapt this code for the underconstraints (from `mk.scm` in the
       res)))
 ```
 
+An example use of `lookup-c` and `set-c`, when adding
+a disequality constraint:
+
+```
+(define (add-to-D st v d)
+  (let* ((c (lookup-c st v))
+         (c^ (c-with-D c (cons d (c-D c)))))
+    (set-c st v c^)))
+```
+
 ---------------------------
 
 * think throught whether general underconstraints must be top-level
