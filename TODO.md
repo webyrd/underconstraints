@@ -68,7 +68,34 @@ now fail.
 
 Michael says that the staged miniKanren code has to pay attention to
 constrained variables that have changed, and that I can probably use
-or adapt this code for the underconstraints.
+or adapt this code for the underconstraints:
+
+
+`~/github/staged-mk/faster-miniKanren/mk.scm` (`staged-file-cleanup` branch)
+
+; Constraint store object.
+; Mapping of representative variable to constraint record. Constraints
+; are always on the representative element and must be moved / merged
+; when that element changes.
+
+;; For staged-mk, we track the variables whose constraint store
+;; entries have been changed since the last entering a `later-scope`.
+(define C-vars car)
+(define C-map cdr)
+(define empty-C (cons '() empty-intmap))
+
+(define (set-c st x c)
+  (state-with-C
+    st
+    (cons (cons x (C-vars (state-C st)))
+          (intmap-set (C-map (state-C st)) (var-idx x) c))))
+
+(define (lookup-c st x)
+  (let ((res (intmap-ref (C-map (state-C st)) (var-idx x))))
+    (if (unbound? res)
+      empty-c
+      res)))
+
 
 ---------------------------
 
