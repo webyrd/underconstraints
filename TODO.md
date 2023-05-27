@@ -68,11 +68,10 @@ now fail.
 
 Michael says that the staged miniKanren code has to pay attention to
 constrained variables that have changed, and that I can probably use
-or adapt this code for the underconstraints:
+or adapt this code for the underconstraints (from `mk.scm` in the
+`staged-file-cleanup` branch of `faster-miniKanren`):
 
-
-`~/github/staged-mk/faster-miniKanren/mk.scm` (`staged-file-cleanup` branch)
-
+```
 ; Constraint store object.
 ; Mapping of representative variable to constraint record. Constraints
 ; are always on the representative element and must be moved / merged
@@ -95,12 +94,9 @@ or adapt this code for the underconstraints:
     (if (unbound? res)
       empty-c
       res)))
-
+```
 
 ---------------------------
-
-
-
 
 * think throught whether general underconstraints must be top-level
 * think through how nested underconstraints should work (for both one-shot and general underconstraints)
