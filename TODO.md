@@ -108,6 +108,25 @@ More `C-map` related functions:
   (cons '() (C-map C)))
 ```
 
+Constraint update:
+
+```
+; Not fully optimized. Could do absento update with fewer
+; hash-refs / hash-sets.
+(define (update-constraints a st)
+  (let ((old-c (lookup-c st (lhs a))))
+    (if (eq? old-c empty-c)
+      st
+      (let ((st (remove-c (lhs a) st)))
+       (and-foldl (lambda (op st) (op st)) st
+        (append
+          (if (c-T old-c)
+            (list ((apply-type-constraint (c-T old-c)) (rhs a)))
+            '())
+          (map (lambda (atom) (absento atom (rhs a))) (c-A old-c))
+          (map =/=* (c-D old-c))))))))
+```
+
 An example use of `lookup-c` and `set-c`, when adding
 a disequality constraint:
 
