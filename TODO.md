@@ -96,6 +96,18 @@ or adapt this code for the underconstraints (from `mk.scm` in the
       res)))
 ```
 
+More `C-map` related functions:
+
+```
+; t:unbind in mk-vicare.scm either is buggy or doesn't do what I would expect, so
+; I implement remove by setting the value to the empty constraint record.
+(define (remove-c x st)
+  (state-with-C st (cons (C-vars (state-C st)) (intmap-set (C-map (state-C st)) (var-idx x) empty-c))))
+
+(define (C-new-later-scope C)
+  (cons '() (C-map C)))
+```
+
 An example use of `lookup-c` and `set-c`, when adding
 a disequality constraint:
 
