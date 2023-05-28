@@ -183,6 +183,11 @@ variable will never appear in the `added` list, or in the list of
 variables that have been constrained by constraints other than
 unifiation?
 
+Think through the complete case analysis for pushing down an
+underconstraint, removing an underconstraint (if necessary), etc.
+Think through the cases for `added` pairs.  Think about `walk`,
+representative elements, etc.
+
 Seems like there are some assumptions/invariants I need to
 maintain/ensure/document.
 
