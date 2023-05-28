@@ -157,7 +157,12 @@ successful unification be handled the same, or differently, than the
 variables added from non-unification constraint solving?
 Unification/the `added` list seems like the only way an
 underconstraint can be removed.  And perhaps the only way an
-underconstraint can be pushed to another variable.
+underconstraint can be pushed to another variable.  So, I should
+probably hndled `added` pairs differently than the list of
+newly-constrained vars that are not from unification.  I might need to
+do something like remove the set of `added` vars from the set of
+newly-constrained vars to see which underconstraints should actually
+be run.
 
 Do I need to remove dups from the list of updated variables in C?
 
@@ -170,6 +175,16 @@ variables, etc).
 I should ensure an underconstraint is never run more than once after
 constraints are solved, even if multiple variables associated with a
 given underconstraint have become further constrained.
+
+If a variable associated with an underconstraint becomes ground,
+should still run the underconstraint.  Do I need to remove the
+underconstraint from that var?  Or is it not an issue, since that
+variable will never appear in the `added` list, or in the list of
+variables that have been constrained by constraints other than
+unifiation?
+
+Seems like there are some assumptions/invariants I need to
+maintain/ensure/document.
 
 ---------------------------
 
