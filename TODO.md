@@ -114,6 +114,15 @@ Is the list of variables actually reset?  Or does it just keep growing?  Is this
 
 I suppose for the purposes of underconstraints, I could reset the list each time unification and/or constraint solving is performed, then use the list immediately after the normal constraint solving.
 
+```
+(define (== u v)
+  (lambda (st)
+    (let-values (((S^ added) (unify u v (state-S st))))
+      (if S^
+        (and-foldl update-constraints (state-with-S st S^) added)
+        #f))))
+```
+
 Constraint update:
 
 ```
