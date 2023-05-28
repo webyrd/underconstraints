@@ -110,6 +110,8 @@ More `C-map` related functions:
 
 Hmmm---`C-new-later-scope` doesn't appear to be used!
 
+Is the list of variables actually reset?  Or does it just keep growing?  Is this an oversight in the code, or am I missing something?  I would expect `C-new-later-scope` to be used in `fresh` and/or `conde`, or perhaps reset after each batch of constraint solving.  I don't understand this...
+
 Constraint update:
 
 ```
