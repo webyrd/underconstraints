@@ -108,6 +108,8 @@ More `C-map` related functions:
   (cons '() (C-map C)))
 ```
 
+Hmmm---`C-new-later-scope` doesn't appear to be used!
+
 Constraint update:
 
 ```
