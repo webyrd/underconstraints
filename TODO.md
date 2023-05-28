@@ -152,6 +152,25 @@ a disequality constraint:
     (set-c st v c^)))
 ```
 
+Should the variables associated with `added` returned from a
+successful unification be handled the same, or differently, than the
+variables added from non-unification constraint solving?
+Unification/the `added` list seems like the only way an
+underconstraint can be removed.  And perhaps the only way an
+underconstraint can be pushed to another variable.
+
+Do I need to remove dups from the list of updated variables in C?
+
+I need to both associate underconstraints with fresh variables,
+and (presumably) update/remove/add/move these underconstraint/variable
+associations when variables become ground/partially ground (remove
+underconstraint after running, or push down underconstraint on two
+variables, etc).
+
+I should ensure an underconstraint is never run more than once after
+constraints are solved, even if multiple variables associated with a
+given underconstraint have become further constrained.
+
 ---------------------------
 
 * think throught whether general underconstraints must be top-level
