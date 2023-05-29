@@ -219,6 +219,10 @@ underconstraints, while the underconstraints run in parallel.  This
 would add complexity, and Chez with threads runs single-threaded code
 slower than does vanilla Chez.  Not sure this would be a win.
 
+`update-constraints` is only called from within `==`.  Do I also want
+to run underconstraints after a `=/=`, `absento`, `symbolo`,
+`numbero`, or `stringo` call?  Or only after a successful `==` call?
+
 ---------------------------
 
 * think throught whether general underconstraints must be top-level
