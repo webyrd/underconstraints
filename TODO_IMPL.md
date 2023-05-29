@@ -4,6 +4,8 @@ based on thoughts in `TODO.md`.
 !) Get general underconstraints working and tested *before* trying to
  optimize.  Make sure optimizations are guided by benchmarks.
 
+!) Run all the tests after making each change to the `mk.scm` code.
+
 
 *) Update the constraint record object to include a list of
  underconstraint goals (without duplicates) associated with each logic
