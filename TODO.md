@@ -5,15 +5,15 @@ Underconstraints TODO
 
 Implement a flat (no nesting allowed), top-level underconstraint that takes a single term and a goal as arguments.
 
-The constraint store keeps track of the current under constraints, and the previous walk*ed value of the term.
+The constraint store keeps track of the current under constraints, and the previous `walk*`ed value of the term.
 
-After all the normal constraints succeed, if the constraint store/substitution has been extended, the for each underconstraint, walk* the term, and compare it to the old walk*ed term.  If the new walk*ed term differs, then run the underconstraint. If not, ignore.
+After all the normal constraints succeed, if the constraint store/substitution has been extended, the for each underconstraint, `walk*` the term, and compare it to the old `walk*`ed term.  If the new `walk*`ed term differs, then run the underconstraint. If not, ignore.
 
 If the term ever becomes ground, can throw away the underconstraint after running it.
 
-If the term becomes partially ground, may be able to simplify the term to just be a list of fresh variables, to keep down the costs of walk*.
+If the term becomes partially ground, may be able to simplify the term to just be a list of fresh variables, to keep down the costs of `walk*`.
 
-May be able to further optimize by lazily walking rather than doing a full walk*.
+May be able to further optimize by lazily `walk`ing rather than doing a full `walk*`.
 
 Make sure to run the constraints in a new constraint store with a global scope.
 
@@ -31,7 +31,7 @@ Basically a type of stratification
 
 --
 
-Can collect a list or set of fresh variables when doing the walk to check if anything has changed.  Use that list as the new term to check.
+Can collect a list or set of fresh variables when doing the `walk` to check if anything has changed.  Use that list as the new term to check.
 
 Could also check the constraints on those variables, I suppose.
 
