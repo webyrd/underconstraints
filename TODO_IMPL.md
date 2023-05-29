@@ -15,6 +15,16 @@ based on thoughts in `TODO.md`.
  `faster-miniKanren` to keep track of which variables have been
  updated due to non-unification constraint solving.
 
+??? What is the right way to handle nested general underconstraints?
+Use a depth counter?  Strip away underconstraints on the variables in
+the state being passed into the underconstraint's goal?  Some other
+approach?  Need to be careful here.
+
+*) Implement general `underconstraino` constraint that takes a term
+and a goal, runs the underconstraint (with `onceo` semantics) in the
+current state, and upon success returns the original state + the new
+underconstraint pushed down onto any fresh variables.
+
 *) Update `==` definition to run the underconstraints on variables
  that have been extended due to unification (in `added`) or are in the
  list of variables that have had constraints updated (through `add-c`
