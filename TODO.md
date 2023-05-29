@@ -237,6 +237,15 @@ function `update-underconstraints`, in constrast to the existing
 
 Should I `and-foldl` over underconstraints?
 
+I guess it would be safe to accumulate the variables with updated
+constraints until reaching a choice-point (`conde`), and *then*
+running the underconstraints.  Waiting as late as possible to
+accumulate substitution extensions and constraint extensions before
+running the underconstraints could significantly reduce the overhead.
+On the other hand, the attributed variable approach may have low
+enough overhead that this isn't needed.  Ideally I would benchmark
+both approaches.
+
 ---------------------------
 
 * think throught whether general underconstraints must be top-level
