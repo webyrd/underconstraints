@@ -191,6 +191,22 @@ representative elements, etc.
 Seems like there are some assumptions/invariants I need to
 maintain/ensure/document.
 
+Delay running underconstraints until both unification and normal
+constraint solving both succeeds.
+
+Could delay updating which underconstraints are on which variables
+until after all underconstraints succeed, to hopefully avoid this
+work (if an underconstraint fails).  It may have better amortized
+efficiency to update the constraints on variables while solving the
+underconstraints.  Need to look at this closely.
+
+Could solve all the underconstraints in parallel, using multiple
+threads, since the underconstraints are independent.  Could have the
+main thread updating the variable associations for the
+underconstraints, while the underconstraints run in parallel.  This
+would add complexity, and Chez with threads runs single-threaded code
+slower than does vanilla Chez.  Not sure this would be a win.
+
 ---------------------------
 
 * think throught whether general underconstraints must be top-level
