@@ -19,5 +19,5 @@ based on thoughts in `TODO.md`.
  are run, and underconstraints are attributed to new fresh variables
  ("pushed down") as necessary.
 
-*) Once everything is working and teste, revisit to ensure the
+*) Once everything is working and tested, revisit to ensure the
  implementation performs as little `walk`ing of variables as possible.
