@@ -220,9 +220,22 @@ would add complexity, and Chez with threads runs single-threaded code
 slower than does vanilla Chez.  Not sure this would be a win.
 
 `update-constraints` is only called from within `==`.  Do I also want
-to run underconstraints after a successful `=/=`, `absento`,
+to run underconstraints after a new successful `=/=`, `absento`,
 `symbolo`, `numbero`, or `stringo` call?  Or only after a successful
-`==` call?
+`==` call?  (Only new calls to `=/=`, `absento`, `symbolo`, etc.,
+result in constraint solving---otherwise, constraints are solved only
+after a successful unification that extends the substitution, inside
+of `==`.)
+
+Prolly a good idea to have a function that performs underconstraint
+solving that I can use in `==`, `absento`, `=/=`, and type
+constraints.  Since the constraint goals use `set-c`, it *should* be
+as straightforward to call this underconstraint solving function from
+`absento`, `=/=`, etc., as to call it from `==`.  Could call the
+function `update-underconstraints`, in constrast to the existing
+`update-constraints`.
+
+Should I `and-foldl` over underconstraints?
 
 ---------------------------
 
