@@ -5,8 +5,8 @@ based on thoughts in `TODO.md`.
  optimize.  Make sure optimizations are guided by benchmarks.
 
 
-*) Extend the state representation to include underconstraints, along
- with the substition and normal constraints.
+*) Update the constraint record object to include a list of
+ underconstraints, without duplicates.
 
 ...
 
