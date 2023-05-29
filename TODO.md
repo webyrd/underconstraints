@@ -246,6 +246,9 @@ On the other hand, the attributed variable approach may have low
 enough overhead that this isn't needed.  Ideally I would benchmark
 both approaches.
 
+Should first implement general underconstraints without engines, for
+simplicity.
+
 ---------------------------
 
 * think throught whether general underconstraints must be top-level
