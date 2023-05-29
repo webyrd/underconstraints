@@ -6,7 +6,8 @@ based on thoughts in `TODO.md`.
 
 
 *) Update the constraint record object to include a list of
- underconstraints, without duplicates.
+ underconstraints, without duplicates associated with each logic
+ variable.
 
 ...
 
