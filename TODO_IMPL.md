@@ -1,6 +1,10 @@
 What needs to be done, exactly, to implement general underconstraints,
 based on thoughts in `TODO.md`.
 
+!) Get general underconstraints working and tested *before* trying to
+ optimize.  Make sure optimizations are guided by benchmarks.
+
+
 *) Extend the state representation to include underconstraints, along
  with the substition and normal constraints.
 
