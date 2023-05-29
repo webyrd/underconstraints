@@ -189,7 +189,12 @@ Think through the cases for `added` pairs.  Think about `walk`,
 representative elements, etc.
 
 Seems like there are some assumptions/invariants I need to
-maintain/ensure/document.
+maintain/ensure/document.  For example, for the `added` list, is this
+a legal miniKanren substitution, with the normal mk substitution
+invariants?  Are left-hand-side terms all logic variables?  Are logic
+variables on the right-hand-side fresh (but not necessarilty logic
+variables occurring in a pair in the rhs)?  What are the properties
+related to `walk`ing/`walk*`ing the lhs and rhs terms?
 
 Delay running underconstraints until both unification and normal
 constraint solving both succeeds.
