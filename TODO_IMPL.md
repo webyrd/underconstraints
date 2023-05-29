@@ -9,7 +9,7 @@ based on thoughts in `TODO.md`.
 
 *) Update the constraint record object to include a list of
  underconstraint goals (without duplicates) associated with each logic
- variable.
+ variable. [done and tested]
 
 ...
 
