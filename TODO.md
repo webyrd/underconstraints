@@ -244,7 +244,8 @@ accumulate substitution extensions and constraint extensions before
 running the underconstraints could significantly reduce the overhead.
 On the other hand, the attributed variable approach may have low
 enough overhead that this isn't needed.  Ideally I would benchmark
-both approaches.
+both approaches.  Would waiting until the choice-point to run the
+underconstraints be similar to how dKanren works?  Or Andorra?
 
 Should first implement general underconstraints without engines, for
 simplicity.
