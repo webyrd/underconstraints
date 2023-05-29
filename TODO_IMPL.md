@@ -14,6 +14,27 @@ based on thoughts in `TODO.md`.
  to associate an underconstraint nesting level with each
  underconstraint.  Careful here!
 
+Could add an underconstraint depth counter (a natural number) to the
+state object. The original state object created in `run` would have an
+underconstraint depth counter of 0.  Whenever the goal of an
+underconstraint is passed a state, the counter in the state passed to
+that goal is increased by one.  The counter value increases lexically,
+not monadically.  The general underconstraints associated with a logic
+variable in the variable's constraint record object contains a counter
+and a list of underconstraints:
+
+((7 . <general underconstraint list>)
+ (4 . <general underconstraint list>)
+ (2 . <general underconstraint list>))
+
+Notice that the numbers increase monotonically, but are not
+necessarily consecutively, and do not necessarily start at 0.  The
+highest number comes first in the list.  Use the current counter to
+select the relevant underconstraints, and ignore all others.  Can also
+have a max counter value---beyond a certain counter value,
+underconstraints are not checked, and underconstraints are not added
+to variable constraint records.
+
 
 *) Update the constraint record object to include a list of
  underconstraint goals (without duplicates) associated with each logic
