@@ -196,7 +196,12 @@ variables on the right-hand-side fresh (but not necessarilty logic
 variables occurring in a pair in the rhs)?  What are the properties
 related to `walk`ing/`walk*`ing the lhs and rhs terms?  Do I ever need
 to `walk` variables in the lhs of the `added` list?  What about
-variables in the rhs?
+variables in the rhs?  Avoiding unneccesary walks are important to
+performance.
+
+Would it make sense to do a `project` or the equivalent before running
+underconstraints, to avoid unnecessary `walk`ing?  How can I avoid all
+unnecessary `walk`s?
 
 Delay running underconstraints until both unification and normal
 constraint solving both succeeds.
