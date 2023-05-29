@@ -6,6 +6,14 @@ based on thoughts in `TODO.md`.
 
 !) Run all the tests after making each change to the `mk.scm` code.
 
+!) Need to be able to support nested underconstraints correctly.  One
+ way to do this would be to strip all underconstraints off all
+ variables with constraints on them in the constraint store in the
+ state passed to the underconstraint's goal.  Might be more efficient
+ ways to pass in a counter with an underconstraint nesting level, and
+ to associate an underconstraint nesting level with each
+ underconstraint.  Careful here!
+
 
 *) Update the constraint record object to include a list of
  underconstraint goals (without duplicates) associated with each logic
@@ -16,9 +24,13 @@ based on thoughts in `TODO.md`.
  updated due to non-unification constraint solving.
 
 ??? What is the right way to handle nested general underconstraints?
-Use a depth counter?  Strip away underconstraints on the variables in
-the state being passed into the underconstraint's goal?  Some other
-approach?  Need to be careful here.
+Use a depth counter?  Strip away all underconstraints on all the
+variables in the state being passed into the underconstraint's goal?
+Some other approach?  Need to be careful here.  I could write a
+function that strips away all underconstraints on all variables in the
+state being passed into the underconstraint's goal, alhough that might
+be expensive.  Perhaps a counter or scope-style sentinel value would
+be more efficient.
 
 *) Implement general `underconstraino` constraint that takes a term
 and a goal, runs the underconstraint (with `onceo` semantics) in the
