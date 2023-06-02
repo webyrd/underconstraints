@@ -30,9 +30,29 @@ running the goal associated with the underconstraint.  Lexical scope
 does the rest!  :)
 
 
-*) Update the constraint record object to include a list of
- underconstraint goals (without duplicates) associated with each logic
- variable.
+*) Update the state object to include a list of underconstraint goals
+ (without duplicates) associated with each logic variable. [done]
+
+*) Add an `underconstraino` goal constructor function that takes a
+ term and a goal:
+
+ `(underconstraino <term> <goal>)`
+
+  Alternatively, could make `underconstraino` a macro that takes a
+  term-expression and a goal-expression:
+
+  `(underconstraino <term-expr> <goal-expr>)`
+
+  Should also have a variant that takes a timeout for an engine, and a
+  tracing variant, similar to one-shot underconstraints.
+
+  When `underconstraino` is called, the associated goal should be
+  immediately run, in the current state *updated with an empty
+  underconstraint store*.  Upon failure, fail as usual.  Upon success,
+  return a *singleton stream* (for `onceo` semantics) containing the
+  *original* state passed to the underconstraint, but with the new
+  underconstraint's goal added to the underconstraint store by pushing
+  it down on any fresh variables inside of the term.
 
 *) Add the `add-c` code from the staged miniKanren branches of
  `faster-miniKanren` to keep track of which variables have been
