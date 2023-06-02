@@ -131,19 +131,16 @@
 ;         constraint must be violated to cause failure.
 ;   A - list of absento constraints. Each constraint is a term.
 ;         The list contains no duplicates.
-;   U - list of general underconstraint goals, without duplicates.
 
-(define empty-c '(#f () () ()))
+(define empty-c '(#f () ()))
 
 (define (c-T c) (car c))
 (define (c-D c) (cadr c))
 (define (c-A c) (caddr c))
-(define (c-U c) (cadddr c))
 
-(define (c-with-T c T) (list T (c-D c) (c-A c) (c-U c)))
-(define (c-with-D c D) (list (c-T c) D (c-A c) (c-U c)))
-(define (c-with-A c A) (list (c-T c) (c-D c) A (c-U c)))
-(define (c-with-U c U) (list (c-T c) (c-D c) (c-A c) U))
+(define (c-with-T c T) (list T (c-D c) (c-A c)))
+(define (c-with-D c D) (list (c-T c) D (c-A c)))
+(define (c-with-A c A) (list (c-T c) (c-D c) A))
 
 ; Constraint store object.
 ; Mapping of representative variable to constraint record. Constraints
