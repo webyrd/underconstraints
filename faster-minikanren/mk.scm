@@ -166,6 +166,31 @@
   (state-with-C st (intmap-set (state-C st) (var-idx x) empty-c)))
 
 
+; Underconstraint object.
+;
+; Describes the underconstraints attached to a single variable.
+;
+; An underconstraint object is a list of (<name> . <goal>) pairs,
+; where <name> is a unique object comparable using `eq?`.
+;
+; When an underconstraint is first created, it is given a unique name
+; so that duplicate underconstraints on a variable can be avoided, to
+; aid with tracing, and to help keep track of which underconstraints
+; have already been run when running all the underconstraints
+; associated with a set of variables.
+
+(define empty-u '())
+
+(define (u-name u name)
+  (cond
+    ((assq name u) => cdr)
+    (else #f)))
+
+(define (u-with-name/goal u name goal)
+  (if (u-name u name)
+      u
+      (cons (cons name goal) u)))
+
 ; Underconstraint store object.
 ; Mapping of representative variable to list (without duplicates) of
 ; underconstraint goals. The list of underconstraint goals is always

@@ -11,6 +11,16 @@ based on thoughts in `TODO.md`.
  variables with constraints on them in the constraint store in the
  state passed to the underconstraint's goal.  
 
+!) To avoid duplicate work, when I am running underconstraints
+ associated with multiple variables, keep track of which
+ underconstraints have already been run.  (Is `eq?` on procedures
+ going to be an issue?  Do I need a gensym/counter/name on each
+ underconstrained procedure, for easier debugging and reliable
+ comparison?  Probably!)  Ensure that no underconstrained goal is run
+ more than once per set of variables that are triggering the
+ underconstraints, since running the same underconstraint more than
+ once cannot result in failure (since all substitution and constraint
+ extensions are discarded upon underconstraint success).
 
 From a conversation with Michael Ballantyne on June 1, 2023, Michael
 convinced me that I don't need anything fancy in order to reset the
@@ -52,39 +62,21 @@ does the rest!  :)
   return a *singleton stream* (for `onceo` semantics) containing the
   *original* state passed to the underconstraint, but with the new
   underconstraint's goal added to the underconstraint store by pushing
-  it down on any fresh variables inside of the term.
+  it down on any fresh variables inside of the term.  The
+  underconstriaint should be given a unique name, either user-provided
+  (plus a gensym, perhaps), or auto-generated, that will be associated
+  with the underconstrained goal to ensure that the list of
+  underconstraints associated with a variable does not contain
+  duplicates, to aid with tracing, and to help keep track of which
+  underconstraints have already been run when running all the
+  underconstraints associated with a set of variables.
+  
 
 *) Add the `add-c` code from the staged miniKanren branches of
  `faster-miniKanren` to keep track of which variables have been
  updated due to non-unification constraint solving.
 
-??? What is the right way to handle nested general underconstraints?
-Use a depth counter?  Strip away all underconstraints on all the
-variables in the state being passed into the underconstraint's goal?
-Some other approach?  Need to be careful here.  I could write a
-function that strips away all underconstraints on all variables in the
-state being passed into the underconstraint's goal, alhough that might
-be expensive.  Perhaps a counter or scope-style sentinel value would
-be more efficient.
-
-*) Implement general `underconstraino` constraint that takes a term
-and a goal, runs the underconstraint (with `onceo` semantics) in the
-current state, and upon success returns the original state + the new
-underconstraint pushed down onto any fresh variables.
-
-*) Update `==` definition to run the underconstraints on variables
- that have been extended due to unification (in `added`) or are in the
- list of variables that have had constraints updated (through `add-c`
- being called).  The code also needs to push down the underconstraints
- onto fresh variables in a similar manner to how `absento` constraints
- are pushed down.  All of this code should only run after the normal
- constraint solving has succeeded.
-
-*) Abstract the underconstraint solving and update code used in `==`,
- and add the equivalent code to `=/=`, `absento`, `symbolo`,
- `numbero`, and `stringo` goal constructor definitions.
-
-...
+*) 
 
 *) Test general underconstraints, including nested underconstraints.
 
