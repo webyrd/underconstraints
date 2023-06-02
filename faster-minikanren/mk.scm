@@ -166,25 +166,55 @@
   (state-with-C st (intmap-set (state-C st) (var-idx x) empty-c)))
 
 
+; Underconstraint store object.
+; Mapping of representative variable to list (without duplicates) of
+; underconstraint goals. The list of underconstraint goals is always
+; on the representative element and must be moved / merged when that
+; element changes.
+
+(define empty-U empty-intmap)
+
+(define (set-u st x u)
+  (state-with-U
+    st
+    (intmap-set (state-U st) (var-idx x) u)))
+
+(define (lookup-u st x)
+  (let ((res (intmap-ref (state-U st) (var-idx x))))
+    (if (unbound? res)
+      empty-u
+      res)))
+
+; t:unbind in mk-vicare.scm either is buggy or doesn't do what I would expect, so
+; I implement remove by setting the value to the empty constraint record.
+(define (remove-u x st)
+  (state-with-U st (intmap-set (state-U st) (var-idx x) empty-u)))
+
+
 ; State object.
 ; The state is the value that is monadically passed through the search
 ; Contains:
 ;   S - the substitution
 ;   C - the constraint store
+;   U - the underconstraint store
 
-(define (state S C) (cons S C))
+(define (state S C U) (list S C U))
 
 (define (state-S st) (car st))
-(define (state-C st) (cdr st))
+(define (state-C st) (cadr st))
+(define (state-U st) (caddr st))
 
-(define empty-state (state empty-subst empty-C))
+(define empty-state (state empty-subst empty-C empty-U))
 
 (define (state-with-C st C^)
-  (state (state-S st) C^))
+  (state (state-S st) C^ (state-U st)))
+
+(define (state-with-U st U^)
+  (state (state-S st) (state-C st) U^))
 
 (define state-with-scope
   (lambda (st new-scope)
-    (state (subst-with-scope (state-S st) new-scope) (state-C st))))
+    (state (subst-with-scope (state-S st) new-scope) (state-C st) (state-U st))))
 
 ; Unification
 
@@ -507,7 +537,7 @@
   (lambda (st)
     (let-values (((S^ added) (unify u v (state-S st))))
       (if S^
-        (and-foldl update-constraints (state S^ (state-C st)) added)
+        (and-foldl update-constraints (state S^ (state-C st) (state-U st)) added)
         #f))))
 
 ; Not fully optimized. Could do absento update with fewer
