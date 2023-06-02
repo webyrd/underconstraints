@@ -9,39 +9,30 @@ based on thoughts in `TODO.md`.
 !) Need to be able to support nested underconstraints correctly.  One
  way to do this would be to strip all underconstraints off all
  variables with constraints on them in the constraint store in the
- state passed to the underconstraint's goal.  Might be more efficient
- ways to pass in a counter with an underconstraint nesting level, and
- to associate an underconstraint nesting level with each
- underconstraint.  Careful here!
+ state passed to the underconstraint's goal.  
 
-Try this.  Add an underconstraint depth counter (a natural number) to
-the state object. The original state object created in `run` would
-have an underconstraint depth counter of 0.  Whenever the goal of an
-underconstraint is run, increment the underconstraint depth counter in
-the state passed to that goal by one.  The underconstraint depth
-counter value increases lexically, not monadically.  The general
-underconstraints associated with a logic variable in the variable's
-constraint record object contains a counter and a list of
-underconstraints:
 
-((7 . <general underconstraint list>)
- (4 . <general underconstraint list>)
- (2 . <general underconstraint list>))
+From a conversation with Michael Ballantyne on June 1, 2023, Michael
+convinced me that I don't need anything fancy in order to reset the
+underconstraints passing in the state to an underconstraint's goal.
+Instead, just have a hash table of variable->underconstraints as part
+of the state.  Don't mess with the variable constraint state at all.
+Whenever I pass in a state to an underconstraint's goal, reconstruct
+the state object to contain the *empty* hash table of
+variable->underconstraints.
 
-Notice that the underconstraint depth counter values in this list
-increase monotonically, but are not necessarily consecutive, and do
-not necessarily start at 0, since underconstraints may not have been
-added to the variable at each nesting level.  The highest number comes
-first in the list.  Use the current counter to select the relevant
-underconstraints, and ignore all others.  Can also have a max counter
-value---beyond a certain counter value, underconstraints are not
-checked, and underconstraints are not added to variable constraint
-records.
+Michael also pointed out that there might be two meanings to the
+notion of "nested underconstraints": `(conj* u1 u2 g3 u4 u5)`, and
+also my original notion of nesting that comes up, for example, when an
+underconstraint's goal is a recursive relation.  In both cases we want
+to reset the underconstraint store to the empty hash table when
+running the goal associated with the underconstraint.  Lexical scope
+does the rest!  :)
 
 
 *) Update the constraint record object to include a list of
  underconstraint goals (without duplicates) associated with each logic
- variable. [done and tested]
+ variable.
 
 *) Add the `add-c` code from the staged miniKanren branches of
  `faster-miniKanren` to keep track of which variables have been
