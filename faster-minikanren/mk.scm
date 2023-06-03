@@ -883,7 +883,7 @@
 (define (lex<=? x y)
   (member (lex-compare x y) '(< =)))
 
-;; WEB 7 May 02023
+;; WEB 7 May 02023 -- 3 June 02023
 ;;
 ;; Extend `faster-miniKanren` with underconstraints
 
@@ -907,7 +907,7 @@
   (make-parameter #f))
 
 
-;; one-shot underconstraints:
+;; One-shot underconstraints:
 
 (define one-shot-underconstraino-aux
   (lambda (name ge g timeout-info trace-version-of-macro?)
@@ -1072,16 +1072,35 @@
        (one-shot-underconstraino-aux name 'ge g `(timeout ,timeout-ticks) #t))]))
 
 
-;; full (multi-shot) underconstraints:
+;; Full (multi-shot) underconstraints:
 
-;; TODO rethink the interface for the full underconstraints to use an
-;; attributed-variable-like approach.  Pass an explicit list of
-;; variables/terms to attribute?  Require that `ge` be of the form
-;; `(<rel-name> <t_1> <t_2> ... <t_n>)`?
-
-(define general-underconstraino-aux
+(define add-general-underconstraino
   (lambda (name te t ge g timeout-info trace-version-of-macro?)
-    (error 'general-underconstraino-aux "implement me!")))
+    (lambda (st)
+      ;; TODO Run the underconstraint's goal `g` immediately, in the
+      ;; current state `st`, but with the underconstraint mapping U
+      ;; replaced with the empty U.
+      
+      ;; TODO Upon success:
+      ;;
+      ;; * "forget"/discard the new stream of states returned from
+      ;; running `g`, since we are only running underconstraints for
+      ;; fail-fast behavior.  (Also, we need to eventually return a
+      ;; single stream, to get the desired `onceo` semantics.)
+      ;;
+      ;; * generate a globally unique name (which can also include the
+      ;; user-specified name as a component) for the new underconstraint;
+      ;; 
+      ;; * `walk` the term `t` in the substitution from the original
+      ;; state `st`, finding the set of fresh variables at the leaves,
+      ;; and add those variables, associated with the unique name and
+      ;; underconstrained goal `g`, to the underconstraint mapping U.
+      ;; Return a singleton stream with the original state `st`,
+      ;; updated with the new U.
+
+      'TODO
+      
+      )))
 
 (define-syntax underconstraino
   (syntax-rules ()
@@ -1089,18 +1108,18 @@
      ;; use global default timeout parameter
      (let ((t te)
            (g ge))
-       (general-underconstraino-aux name 'te t 'ge g #f #f))]
+       (add-general-underconstraino name 'te t 'ge g #f #f))]
     [(_ name te ge #f)
      ;; no timeout (overrides global timeout parameter)
      (let ((t te)
            (g ge))
-       (general-underconstraino-aux name 'te t 'ge g `(timeout #f) #f))]
+       (add-general-underconstraino name 'te t 'ge g `(timeout #f) #f))]
     [(_ name te ge timeout-ticks)
      ;; use timeout with `timeout-ticks` ticks (gas) (overrides global
      ;; timeout parameter)
      (let ((t te)
            (g ge))
-       (general-underconstraino-aux name 'te t 'ge g `(timeout ,timeout-ticks) #f))]))
+       (add-underconstraino name 'te t 'ge g `(timeout ,timeout-ticks) #f))]))
 
 (define-syntax trace-underconstraino
   ;; same as `underconstraino`, but with the trace flag set to `#t`
@@ -1109,12 +1128,12 @@
     [(_ name te ge)
      (let ((t te)
            (g ge))
-       (general-underconstraino-aux name 'te t 'ge g #f #t))]
+       (add-underconstraino name 'te t 'ge g #f #t))]
     [(_ name te ge #f)
      (let ((t te)
            (g ge))
-       (general-underconstraino-aux name 'te t 'ge g `(timeout #f) #t))]
+       (add-underconstraino name 'te t 'ge g `(timeout #f) #t))]
     [(_ name te ge timeout-ticks)
      (let ((t te)
            (g ge))
-       (general-underconstraino-aux name 'te t 'ge g `(timeout ,timeout-ticks) #t))]))
+       (add-underconstraino name 'te t 'ge g `(timeout ,timeout-ticks) #t))]))
