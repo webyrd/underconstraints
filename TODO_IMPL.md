@@ -1,5 +1,35 @@
+From conversation with Michael Ballantyne 3 June 02023.
+
+Move all underconstraint extensions to a separate file to minimize the
+diff between vanilla faster-miniKanren and the extended version.
+Should work from a restored `mk.scm` to ensure minimum diffing.
+
+The underconstraint info added to the store should be a sigle U/V pair
+of an underconstraint store and a list of "touched" variables.  This
+minimizes the number of changes to faster-miniKanren.
+
+Create a `solve-underconstraints` function that can be called either
+at the end of `==`, individual constraint calls, and/or immediately
+within `conde`, so I can experiment with performance tradeoffs of
+running the underconstraints more or less often.  MB points out that
+we might want to call underconstraints less often, if they turn out to
+be expensive: might want a counter in the state, so we can solve
+underconstraints only after at least N operations have occurred (every
+10 times operations that add touched variables, or N basic
+block/`conde` entries, etc.).
+
+
 What needs to be done, exactly, to implement general underconstraints,
 based on thoughts in `TODO.md`.
+
+?) Is it ever necessary or desirable to remove an underconstraint?
+For example, in the case in which the term an underconstraint is
+associated with becomes ground.  Or, will the faster-miniKanren
+implementation of unification and constraint solving avoid extending
+the substitution or constraint store with ground variables, avoiding
+this problem?  Certaintly it isn't *necessary*, since running an
+underconstraint a finite number of extra times is inefficient but
+sound.
 
 !) Get general underconstraints working and tested *before* trying to
  optimize.  Make sure optimizations are guided by benchmarks.
