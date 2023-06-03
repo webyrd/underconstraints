@@ -165,35 +165,91 @@
 (define (remove-c x st)
   (state-with-C st (intmap-set (state-C st) (var-idx x) empty-c)))
 
-
-; Underconstraint object.
+; Underconstraint record object.
 ;
-; Describes the underconstraints attached to a single variable.
-;
-; An underconstraint object is a list of (<name> . <goal>) pairs,
-; where <name> is a unique object comparable using `eq?`.
+; An underconstraint record object is a proper list.
 ;
 ; When an underconstraint is first created, it is given a unique name
 ; so that duplicate underconstraints on a variable can be avoided, to
 ; aid with tracing, and to help keep track of which underconstraints
 ; have already been run when running all the underconstraints
 ; associated with a set of variables.
+;
+; Contains:
+;
+;   user-name    - user-specified name for the underconstraint. Used for
+;                    tracing.
+;   unique-name  - generated globally-unique name for the
+;                    underconstraint.  Used for `eq?`-based lookup of the
+;                    underconstraint, to ensure no variable includes
+;                    duplicate underconstraints, and to ensure no
+;                    underconstraint is run more than once when running
+;                    underconstraints on multiple variables.
+;   te           - the original term expression specified by the user.
+;                    Used for tracing.
+;   t            - term with which that the underconstraint is currently
+;                    associated.  The same underconstraint might currently
+;                    be associated with other terms as well, since
+;                    underconstraints are "pushed down" when a fresh
+;                    variable is associated with a pair containing fresh
+;                    variables.  `t` might not be a fresh variable; if `t`
+;                    is a pair that contains fresh variables when the
+;                    underconstaint is run, the underconstraint will need
+;                    to be "pushed down" onto those fresh variables if the
+;                    underconstraint succeeds.
+;   ge           - the original goal expression specified by the user.
+;                    Used for tracing.
+;   g            - the underconstraint goal specified by the user.
+;   timeout-info - the engine timeout value specified by the user.
+;   trace?       - whether the user used a tracing version of the
+;                    `underconstraino` macro.
+
+(define (underconstraint user-name unique-name te t ge g timeout-info trace?)
+  (list unique-name g t timeout-info trace? user-name te ge))
+
+(define (underconstraint-unique-name u)
+  (list-ref u 0))
+
+(define (underconstraint-g u)
+  (list-ref u 1))
+
+(define (underconstraint-t u)
+  (list-ref u 2))
+
+(define (underconstraint-timeout-info u)
+  (list-ref u 3))
+
+(define (underconstraint-trace? u)
+  (list-ref u 4))
+
+(define (underconstraint-user-name u)
+  (list-ref u 5))
+
+(define (underconstraint-te u)
+  (list-ref u 6))
+
+(define (underconstraint-ge u)
+  (list-ref u 7))
+
+;; `u` is a list (without duplicates) of underconstraints associated
+;; with a variable.
 
 (define empty-u '())
 
-(define (u-name u name)
+(define (u-unique-name u unique-name)
   (cond
-    ((assq name u) => cdr)
+    ((assq unique-name u) => cdr)
     (else #f)))
 
-(define (u-with-name/goal u name goal)
-  (if (u-name u name)
+(define (u-with-underconstraint u underconstraint)
+  (if (u-unique-name u (underconstraint-unique-name u))
       u
-      (cons (cons name goal) u)))
+      (cons underconstraint u)))
 
 ; Underconstraint store object.
-; Mapping of representative variable to list (without duplicates) of
-; underconstraint goals. The list of underconstraint goals is always
+
+; Mapping of a representative variable to a list (without duplicates) of
+; underconstraint records. The list of underconstraint records is always
 ; on the representative element and must be moved / merged when that
 ; element changes.
 
@@ -909,137 +965,136 @@
 
 ;; One-shot underconstraints:
 
-(define one-shot-underconstraino-aux
-  (lambda (name ge g timeout-info trace-version-of-macro?)
-    (define (trace?)
-      (or trace-version-of-macro?
-          (*trace-underconstraint-param*)))
-    (define (get-timeout-ticks)
-      (pmatch timeout-info
-        [#f
-         ;; no timeout argument passed to macro, so use the global
-         ;; default parameter
-         (*underconstraint-default-timeout-param*)]
-        [(timeout #f)
-         ;; argument passed to macro that overrides the global default
-         ;; value---timeout disabled
-         #f]
-        [(timeout ,timeout-ticks)
-         (guard (and (integer? timeout-ticks)
-                     (positive? timeout-ticks)))
-         ;; argument passed to macro that overrides the default global
-         ;; parameter---timeout enabled, with `timeout-ticks` ticks
-         ;; (gas) for the engine
-         timeout-ticks]
-        [else
-         (error
-          'one-shot-underconstraino-aux
-          (printf
-           "ticks argument must be #f or a positive integer: given ~s"
-           rest))]))
-    (define-syntax maybe-time
-      (syntax-rules ()
-        [(_ e) (if (trace?) (time e) e)]))
-    (define-syntax begin-when-trace
-      (syntax-rules ()
-        [(_ e* ... e)
-         (begin
-           (when (trace?)
-             e*)
-           ...
-           e)]))
-    (lambda (st)
-      (let ((timeout-ticks (get-timeout-ticks)))
-        (when (trace?)
-          (newline)
-          (printf
-           "*  one-shot underconstraint ~s trying goal expression:\n~s\n"
-           name ge))
-        (if (not timeout-ticks)
-            (suspend
-             (let loop (($ (g st)))
-               (case-inf $
-                 (()
-                  (begin-when-trace
-                   (printf
-                    "* one-shot underconstraint ~s failed\n"
-                    name)
-                   #f))
-                 ((f)
-                  (begin-when-trace
-                   (printf
-                    "* one-shot underconstraint ~s encountered `(f)` case of case-inf\n"
-                    name)
-                   (lambda ()
-                     ;; thunkify forcing of `f` to allow interleaving,
-                     ;; since we don't have timeout protection
-                     (loop (f)))))
-                 ((c)
-                  (begin-when-trace
-                   (printf
-                    "* one-shot underconstraint ~s succeeded with singleton result\n"
-                    name)
-                   st))
-                 ((c f^)
-                  (begin-when-trace
-                   (printf
-                    "* one-shot underconstraint ~s succeeded with non-singleton stream\n"
-                    name)
-                   st)))))
-            ;; `timeout-ticks` is not #f:
-            (let ((eng (make-engine
-                         (lambda ()
-                           (suspend
-                            (let loop (($ (g st)))
-                              (case-inf $
-                                (()
-                                 (begin-when-trace
-                                  (printf
-                                   "* one-shot underconstraint ~s failed\n"
-                                   name)
-                                  #f))
-                                ((f)
-                                 (begin-when-trace
-                                  (printf
-                                   "* one-shot underconstraint ~s encountered `(f)` case of case-inf\n"
-                                   name)
-                                  ;; force `f` immediately, since we have
-                                  ;; a timeout to protect us
-                                  (loop (f))))
-                                ((c)
-                                 (begin-when-trace
-                                  (printf
-                                   "* one-shot underconstraint ~s succeeded with singleton result\n"
-                                   name)
-                                  st))
-                                ((c f^)
-                                 (begin-when-trace
-                                  (printf
-                                   "* one-shot underconstraint ~s succeeded with non-singleton stream\n"
-                                   name)
-                                  st)))))))))
-              (maybe-time
-               (eng timeout-ticks
-                    ;; engine "completed" procedure
-                    (lambda (ticks-left-over value)
-                      (begin-when-trace
-                       (printf
-                        "* one-shot underconstraint ~s engine completed after ~s of ~s ticks\n"
-                        name
-                        (- timeout-ticks ticks-left-over)
-                        timeout-ticks)
-                       value))
-                    ;; engine "expired" procedure
-                    (lambda (new-engine)
-                      (begin-when-trace
-                       (printf
-                        "* one-shot underconstraint ~s engine ran out of gas after ~s ticks (treating as success)\n"
-                        name
-                        timeout-ticks)
-                       ;; to maintain soundness, we must treat
-                       ;; engine timeout timeout as
-                       ;; success---return the original state
-                       st))))))))))
+(define (one-shot-underconstraino-aux name ge g timeout-info trace-version-of-macro?)
+  (define (trace?)
+    (or trace-version-of-macro?
+        (*trace-underconstraint-param*)))
+  (define (get-timeout-ticks)
+    (pmatch timeout-info
+      [#f
+       ;; no timeout argument passed to macro, so use the global
+       ;; default parameter
+       (*underconstraint-default-timeout-param*)]
+      [(timeout #f)
+       ;; argument passed to macro that overrides the global default
+       ;; value---timeout disabled
+       #f]
+      [(timeout ,timeout-ticks)
+       (guard (and (integer? timeout-ticks)
+                   (positive? timeout-ticks)))
+       ;; argument passed to macro that overrides the default global
+       ;; parameter---timeout enabled, with `timeout-ticks` ticks
+       ;; (gas) for the engine
+       timeout-ticks]
+      [else
+       (error
+        'one-shot-underconstraino-aux
+        (printf
+         "ticks argument must be #f or a positive integer: given ~s"
+         rest))]))
+  (define-syntax maybe-time
+    (syntax-rules ()
+      [(_ e) (if (trace?) (time e) e)]))
+  (define-syntax begin-when-trace
+    (syntax-rules ()
+      [(_ e* ... e)
+       (begin
+         (when (trace?)
+           e*)
+         ...
+         e)]))
+  (lambda (st)
+    (let ((timeout-ticks (get-timeout-ticks)))
+      (when (trace?)
+        (newline)
+        (printf
+         "*  one-shot underconstraint ~s trying goal expression:\n~s\n"
+         name ge))
+      (if (not timeout-ticks)
+          (suspend
+           (let loop (($ (g st)))
+             (case-inf $
+               (()
+                (begin-when-trace
+                 (printf
+                  "* one-shot underconstraint ~s failed\n"
+                  name)
+                 #f))
+               ((f)
+                (begin-when-trace
+                 (printf
+                  "* one-shot underconstraint ~s encountered `(f)` case of case-inf\n"
+                  name)
+                 (lambda ()
+                   ;; thunkify forcing of `f` to allow interleaving,
+                   ;; since we don't have timeout protection
+                   (loop (f)))))
+               ((c)
+                (begin-when-trace
+                 (printf
+                  "* one-shot underconstraint ~s succeeded with singleton result\n"
+                  name)
+                 st))
+               ((c f^)
+                (begin-when-trace
+                 (printf
+                  "* one-shot underconstraint ~s succeeded with non-singleton stream\n"
+                  name)
+                 st)))))
+          ;; `timeout-ticks` is not #f:
+          (let ((eng (make-engine
+                       (lambda ()
+                         (suspend
+                          (let loop (($ (g st)))
+                            (case-inf $
+                              (()
+                               (begin-when-trace
+                                (printf
+                                 "* one-shot underconstraint ~s failed\n"
+                                 name)
+                                #f))
+                              ((f)
+                               (begin-when-trace
+                                (printf
+                                 "* one-shot underconstraint ~s encountered `(f)` case of case-inf\n"
+                                 name)
+                                ;; force `f` immediately, since we have
+                                ;; a timeout to protect us
+                                (loop (f))))
+                              ((c)
+                               (begin-when-trace
+                                (printf
+                                 "* one-shot underconstraint ~s succeeded with singleton result\n"
+                                 name)
+                                st))
+                              ((c f^)
+                               (begin-when-trace
+                                (printf
+                                 "* one-shot underconstraint ~s succeeded with non-singleton stream\n"
+                                 name)
+                                st)))))))))
+            (maybe-time
+             (eng timeout-ticks
+                  ;; engine "completed" procedure
+                  (lambda (ticks-left-over value)
+                    (begin-when-trace
+                     (printf
+                      "* one-shot underconstraint ~s engine completed after ~s of ~s ticks\n"
+                      name
+                      (- timeout-ticks ticks-left-over)
+                      timeout-ticks)
+                     value))
+                  ;; engine "expired" procedure
+                  (lambda (new-engine)
+                    (begin-when-trace
+                     (printf
+                      "* one-shot underconstraint ~s engine ran out of gas after ~s ticks (treating as success)\n"
+                      name
+                      timeout-ticks)
+                     ;; to maintain soundness, we must treat
+                     ;; engine timeout timeout as
+                     ;; success---return the original state
+                     st)))))))))
 
 (define-syntax one-shot-underconstraino
   (syntax-rules ()
@@ -1074,33 +1129,38 @@
 
 ;; Full (multi-shot) underconstraints:
 
-(define add-general-underconstraino
-  (lambda (name te t ge g timeout-info trace-version-of-macro?)
-    (lambda (st)
-      ;; TODO Run the underconstraint's goal `g` immediately, in the
-      ;; current state `st`, but with the underconstraint mapping U
-      ;; replaced with the empty U.
-      
-      ;; TODO Upon success:
-      ;;
-      ;; * "forget"/discard the new stream of states returned from
-      ;; running `g`, since we are only running underconstraints for
-      ;; fail-fast behavior.  (Also, we need to eventually return a
-      ;; single stream, to get the desired `onceo` semantics.)
-      ;;
-      ;; * generate a globally unique name (which can also include the
-      ;; user-specified name as a component) for the new underconstraint;
-      ;; 
-      ;; * `walk` the term `t` in the substitution from the original
-      ;; state `st`, finding the set of fresh variables at the leaves,
-      ;; and add those variables, associated with the unique name and
-      ;; underconstrained goal `g`, to the underconstraint mapping U.
-      ;; Return a singleton stream with the original state `st`,
-      ;; updated with the new U.
+(define (run-general-underconstraint underconstraint st)
+  ;; TODO Run the underconstraint's goal `g` immediately, in the
+  ;; current state `st`, but with the underconstraint mapping U
+  ;; replaced with the empty U.
 
-      'TODO
-      
-      )))
+  ;; MB points out can prolly call the one-shot code here!
+  
+  ;; TODO Upon success:
+  ;;
+  ;; * "forget"/discard the new stream of states returned from
+  ;; running `g`, since we are only running underconstraints for
+  ;; fail-fast behavior.  (Also, we need to eventually return a
+  ;; single stream, to get the desired `onceo` semantics.)
+  ;;
+  ;; * generate a globally unique name (which can also include the
+  ;; user-specified name as a component) for the new underconstraint;
+  ;; 
+  ;; * `walk` the term `t` in the substitution from the original
+  ;; state `st`, finding the set of fresh variables at the leaves,
+  ;; and add those variables, associated with the unique name and
+  ;; underconstrained goal `g`, to the underconstraint mapping U.
+  ;; Return a singleton stream with the original state `st`,
+  ;; updated with the new U.
+
+  'TODO
+  
+  )
+
+(define (add-general-underconstraino user-name te t ge g timeout-info trace-version-of-macro?)
+  (lambda (st)
+    (let ((under (underconstraint user-name (gensym user-name) te t ge g timeout-info trace-version-of-macro?)))
+      (run-general-underconstraint under st))))
 
 (define-syntax underconstraino
   (syntax-rules ()
