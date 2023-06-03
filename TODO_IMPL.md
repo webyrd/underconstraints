@@ -18,6 +18,9 @@ underconstraints only after at least N operations have occurred (every
 10 times operations that add touched variables, or N basic
 block/`conde` entries, etc.).
 
+MB also suggested that I use the one-shot underconstraint code for
+solving the general constraint code.
+
 
 What needs to be done, exactly, to implement general underconstraints,
 based on thoughts in `TODO.md`.
