@@ -1080,35 +1080,41 @@
 ;; `(<rel-name> <t_1> <t_2> ... <t_n>)`?
 
 (define general-underconstraino-aux
-  (lambda (name ge g timeout-info trace-version-of-macro?)
+  (lambda (name te t ge g timeout-info trace-version-of-macro?)
     (error 'general-underconstraino-aux "implement me!")))
 
 (define-syntax underconstraino
   (syntax-rules ()
-    [(_ name ge)
+    [(_ name te ge)
      ;; use global default timeout parameter
-     (let ((g ge))
-       (general-underconstraino-aux name 'ge g #f #f))]
-    [(_ name ge #f)
+     (let ((t te)
+           (g ge))
+       (general-underconstraino-aux name 'te t 'ge g #f #f))]
+    [(_ name te ge #f)
      ;; no timeout (overrides global timeout parameter)
-     (let ((g ge))
-       (general-underconstraino-aux name 'ge g `(timeout #f) #f))]
-    [(_ name ge timeout-ticks)
+     (let ((t te)
+           (g ge))
+       (general-underconstraino-aux name 'te t 'ge g `(timeout #f) #f))]
+    [(_ name te ge timeout-ticks)
      ;; use timeout with `timeout-ticks` ticks (gas) (overrides global
      ;; timeout parameter)
-     (let ((g ge))
-       (general-underconstraino-aux name 'ge g `(timeout ,timeout-ticks) #f))]))
+     (let ((t te)
+           (g ge))
+       (general-underconstraino-aux name 'te t 'ge g `(timeout ,timeout-ticks) #f))]))
 
 (define-syntax trace-underconstraino
   ;; same as `underconstraino`, but with the trace flag set to `#t`
   ;; rather than `#f`
   (syntax-rules ()
-    [(_ name ge)
-     (let ((g ge))
-       (general-underconstraino-aux name 'ge g #f #t))]
-    [(_ name ge #f)
-     (let ((g ge))
-       (general-underconstraino-aux name 'ge g `(timeout #f) #t))]
-    [(_ name ge timeout-ticks)
-     (let ((g ge))
-       (general-underconstraino-aux name 'ge g `(timeout ,timeout-ticks) #t))]))
+    [(_ name te ge)
+     (let ((t te)
+           (g ge))
+       (general-underconstraino-aux name 'te t 'ge g #f #t))]
+    [(_ name te ge #f)
+     (let ((t te)
+           (g ge))
+       (general-underconstraino-aux name 'te t 'ge g `(timeout #f) #t))]
+    [(_ name te ge timeout-ticks)
+     (let ((t te)
+           (g ge))
+       (general-underconstraino-aux name 'te t 'ge g `(timeout ,timeout-ticks) #t))]))
