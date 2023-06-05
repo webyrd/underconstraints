@@ -1,4 +1,4 @@
-;; WEB 7 May 02023 -- 4 June 02023
+;; WEB 7 May 02023 -- 5 June 02023
 ;;
 ;; Extend faster-miniKanren's `mk.scm` with underconstraints.
 
@@ -66,19 +66,19 @@
 ;                    `underconstraino` macro.
 
 (define (underconstraint user-name unique-name te t ge g timeout-info trace?)
-  (list unique-name g t timeout-info trace? user-name te ge))
+  `(,unique-name ,g ,t ,timeout-info ,trace? ,user-name ,te ,ge))
 
 (define (underconstraint-unique-name u)
-  (list-ref u 0))
+  (car u))
 
 (define (underconstraint-g u)
-  (list-ref u 1))
+  (cadr u))
 
 (define (underconstraint-t u)
-  (list-ref u 2))
+  (caddr u))
 
 (define (underconstraint-timeout-info u)
-  (list-ref u 3))
+  (cadddr u))
 
 (define (underconstraint-trace? u)
   (list-ref u 4))
@@ -92,8 +92,11 @@
 (define (underconstraint-ge u)
   (list-ref u 7))
 
-;; `u` is a list (without duplicates) of underconstraints associated
-;; with a variable.
+; `u` is an association list (without duplicates) of
+;
+;   (<unique-name> . <underconstraint record object>)
+;
+; pairs associated with a variable.
 
 (define empty-u '())
 
@@ -103,16 +106,21 @@
     (else #f)))
 
 (define (u-with-underconstraint u underconstraint)
-  (if (u-unique-name u (underconstraint-unique-name u))
-      u
-      (cons underconstraint u)))
+  (let ((unique-name (underconstraint-unique-name u)))
+    (if (u-unique-name u unique-name)
+        u
+        `((,unique-name . ,underconstraint) . ,u))))
 
 ; Underconstraint store object.
 
-; Mapping of a representative variable to a list (without duplicates) of
-; underconstraint records. The list of underconstraint records is always
-; on the representative element and must be moved / merged when that
-; element changes.
+; Mapping of a representative variable to a association list (without
+; duplicates) of
+;
+;   (<unique-name> . <underconstraint record object>)
+;
+; pairs. The list of underconstraint records is always on the
+; representative element and must be moved / merged when that element
+; changes.
 
 (define empty-U empty-intmap)
 
@@ -132,13 +140,13 @@
 (define (remove-u x st)
   (state-with-U st (intmap-set (state-U st) (var-idx x) empty-u)))
 
-;; "touched" variables store
-;;
-;; The store is a list of variables that have been updated, either
-;; through unification or through "normal" constraint solving,
-;; since the last time that underconstraints were run.
-;;
-;; The list of variables does not contain duplicates.
+; "touched" variables store
+;
+; The store is a list of variables that have been updated, either
+; through unification or through "normal" constraint solving, since
+; the last time that underconstraints were run.
+;
+; The list of "touched" variables does not contain duplicates.
 
 (define empty-V '())
 
@@ -150,7 +158,7 @@
           st
           (cons U (cons v V))))))
 
-;; underconstraint/"touched" variable store
+; underconstraint/"touched" variable store
 
 (define empty-U/V (cons empty-U empty-V))
 
