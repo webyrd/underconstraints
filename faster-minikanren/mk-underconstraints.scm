@@ -390,14 +390,11 @@
   ;;
   ;; * (as an optimization, if the new stream of states returned from
   ;; running `g` is a singleton stream, it is safe to commit the
-  ;; resulting state extensions.  Might want to restart solving the
+  ;; returned singleton state.  Should probably restart solving the
   ;; remaining underconstraints in that case, using the newly updated
   ;; state extension (along with the new list of unique "touched"
   ;; variables).)
   ;;
-  ;; * generate a globally unique name (which can also include the
-  ;; user-specified name as a component) for the new underconstraint;
-  ;; 
   ;; * `walk` the term `t` in the substitution from the original
   ;; state `st`, finding the set of fresh variables at the leaves,
   ;; and add those variables, associated with the unique name and
