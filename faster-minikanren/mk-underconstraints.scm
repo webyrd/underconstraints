@@ -210,9 +210,9 @@
 
 ;; One-shot underconstraints:
 
-(define (one-shot-underconstraino-aux name ge g timeout-info trace-version-of-macro?)
+(define (one-shot-underconstraino-aux name ge g timeout-info trace?)
   (define (trace?)
-    (or trace-version-of-macro?
+    (or trace?
         (*trace-underconstraint-param*)))
   (define (get-timeout-ticks)
     (pmatch timeout-info
@@ -402,9 +402,9 @@
   
   )
 
-(define (add-general-underconstraino user-name te t ge g timeout-info trace-version-of-macro?)
+(define (add-general-underconstraino user-name te t ge g timeout-info trace?)
   (lambda (st)
-    (let ((under (underconstraint user-name (gensym user-name) te t ge g timeout-info trace-version-of-macro?)))
+    (let ((under (underconstraint user-name (gensym user-name) te t ge g timeout-info trace?)))
       (run-general-underconstraint under st))))
 
 (define-syntax underconstraino
