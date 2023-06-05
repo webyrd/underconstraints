@@ -208,9 +208,7 @@
 (define fail (== #f #t))
 
 
-;; One-shot underconstraints:
-
-(define (one-shot-underconstraino-aux name ge g timeout-info trace?)
+(define (run-underconstraint-onceo name ge g timeout-info trace? general?)
   (define (trace?)
     (or trace?
         (*trace-underconstraint-param*)))
@@ -233,7 +231,7 @@
        timeout-ticks]
       [else
        (error
-        'one-shot-underconstraino-aux
+        'run-underconstraint-onceo
         (printf
          "ticks argument must be #f or a positive integer: given ~s"
          rest))]))
@@ -253,7 +251,7 @@
       (when (trace?)
         (newline)
         (printf
-         "*  one-shot underconstraint ~s trying goal expression:\n~s\n"
+         "* underconstraint ~s trying goal expression:\n~s\n"
          name ge))
       (if (not timeout-ticks)
           (suspend
@@ -262,13 +260,13 @@
                (()
                 (begin-when-trace
                  (printf
-                  "* one-shot underconstraint ~s failed\n"
+                  "* underconstraint ~s failed\n"
                   name)
                  #f))
                ((f)
                 (begin-when-trace
                  (printf
-                  "* one-shot underconstraint ~s encountered `(f)` case of case-inf\n"
+                  "* underconstraint ~s encountered `(f)` case of case-inf\n"
                   name)
                  (lambda ()
                    ;; thunkify forcing of `f` to allow interleaving,
@@ -277,13 +275,17 @@
                ((c)
                 (begin-when-trace
                  (printf
-                  "* one-shot underconstraint ~s succeeded with singleton result\n"
+                  "* underconstraint ~s succeeded with singleton result\n"
                   name)
+                 ;; TODO should consider returning `c` here; since the
+                 ;; singleton state is being returned, it is safe to
+                 ;; commit to the new state returned (updated with
+                 ;; underconstraints, perhaps).
                  st))
                ((c f^)
                 (begin-when-trace
                  (printf
-                  "* one-shot underconstraint ~s succeeded with non-singleton stream\n"
+                  "* underconstraint ~s succeeded with non-singleton stream\n"
                   name)
                  st)))))
           ;; `timeout-ticks` is not #f:
@@ -295,13 +297,13 @@
                               (()
                                (begin-when-trace
                                 (printf
-                                 "* one-shot underconstraint ~s failed\n"
+                                 "* underconstraint ~s failed\n"
                                  name)
                                 #f))
                               ((f)
                                (begin-when-trace
                                 (printf
-                                 "* one-shot underconstraint ~s encountered `(f)` case of case-inf\n"
+                                 "* underconstraint ~s encountered `(f)` case of case-inf\n"
                                  name)
                                 ;; force `f` immediately, since we have
                                 ;; a timeout to protect us
@@ -309,13 +311,17 @@
                               ((c)
                                (begin-when-trace
                                 (printf
-                                 "* one-shot underconstraint ~s succeeded with singleton result\n"
+                                 "* underconstraint ~s succeeded with singleton result\n"
                                  name)
+                                ;; TODO should consider returning `c` here; since the
+                                ;; singleton state is being returned, it is safe to
+                                ;; commit to the new state returned (updated with
+                                ;; underconstraints, perhaps).
                                 st))
                               ((c f^)
                                (begin-when-trace
                                 (printf
-                                 "* one-shot underconstraint ~s succeeded with non-singleton stream\n"
+                                 "* underconstraint ~s succeeded with non-singleton stream\n"
                                  name)
                                 st)))))))))
             (maybe-time
@@ -324,7 +330,7 @@
                   (lambda (ticks-left-over value)
                     (begin-when-trace
                      (printf
-                      "* one-shot underconstraint ~s engine completed after ~s of ~s ticks\n"
+                      "* underconstraint ~s engine completed after ~s of ~s ticks\n"
                       name
                       (- timeout-ticks ticks-left-over)
                       timeout-ticks)
@@ -333,13 +339,18 @@
                   (lambda (new-engine)
                     (begin-when-trace
                      (printf
-                      "* one-shot underconstraint ~s engine ran out of gas after ~s ticks (treating as success)\n"
+                      "* underconstraint ~s engine ran out of gas after ~s ticks (treating as success)\n"
                       name
                       timeout-ticks)
                      ;; to maintain soundness, we must treat
                      ;; engine timeout timeout as
                      ;; success---return the original state
                      st)))))))))
+
+;; One-shot underconstraints:
+
+(define (one-shot-underconstraino-aux name ge g timeout-info trace?)
+  (run-underconstraint-onceo name ge g timeout-info trace? #f))
 
 (define-syntax one-shot-underconstraino
   (syntax-rules ()
@@ -375,36 +386,46 @@
 ;; Full (multi-shot) underconstraints:
 
 (define (run-general-underconstraint underconstraint st)
-  ;; TODO Run the underconstraint's goal `g` immediately, in the
-  ;; current state `st`, but with the underconstraint mapping U
-  ;; replaced with the empty U.
-
-  ;; MB points out can prolly call the one-shot code here!
   
-  ;; TODO Upon success:
-  ;;
-  ;; * "forget"/discard the new stream of states returned from
-  ;; running `g`, since we are only running underconstraints for
-  ;; fail-fast behavior.  (Also, we need to eventually return a
-  ;; single stream, to get the desired `onceo` semantics.)
-  ;;
-  ;; * (as an optimization, if the new stream of states returned from
-  ;; running `g` is a singleton stream, it is safe to commit the
-  ;; returned singleton state.  Should probably restart solving the
-  ;; remaining underconstraints in that case, using the newly updated
-  ;; state extension (along with the new list of unique "touched"
-  ;; variables).)
-  ;;
-  ;; * `walk` the term `t` in the substitution from the original
-  ;; state `st`, finding the set of fresh variables at the leaves,
-  ;; and add those variables, associated with the unique name and
-  ;; underconstrained goal `g`, to the underconstraint mapping U.
-  ;; Return a singleton stream with the original state `st`,
-  ;; updated with the new U.
+  ;; Run the underconstraint's goal `g` immediately, in the current
+  ;; state `st`, but with the underconstraint mapping `U` and the list
+  ;; of newly "touched" variables `V` replaced with the empty `U/V`.
 
-  'TODO
+  (let ((user-name (underconstraint-user-name underconstraint))
+        (unique-name (underconstraint-unique-name underconstraint))
+        (te (underconstraint-te underconstraint))
+        (t (underconstraint-t underconstraint))
+        (ge (underconstraint-ge underconstraint))
+        (g (underconstraint-g underconstraint))
+        (timeout-info (underconstraint-timeout-info underconstraint))
+        (trace? (underconstraint-trace? underconstraint)))
+    (let (($ ((run-underconstraint-onceo `(,user-name . ,unique-name) ge g timeout-info trace? #t)
+              (state-with-U/V st empty-U/V))))
   
-  )
+      ;; TODO Upon failure, fail.  Upon success:
+      ;;
+      ;; * "forget"/discard the new stream of states returned from
+      ;; running `g`, since we are only running underconstraints for
+      ;; fail-fast behavior.  (Also, we need to eventually return a
+      ;; single stream, to get the desired `onceo` semantics.)
+      ;;
+      ;; * (as an optimization, if the new stream of states returned from
+      ;; running `g` is a singleton stream, it is safe to commit the
+      ;; returned singleton state.  Should probably restart solving the
+      ;; remaining underconstraints in that case, using the newly updated
+      ;; state extension (along with the new list of unique "touched"
+      ;; variables).)
+      ;;
+      ;; * `walk` the term `t` in the substitution from the original
+      ;; state `st`, finding the set of fresh variables at the leaves,
+      ;; and add those variables, associated with the unique name and
+      ;; underconstrained goal `g`, to the underconstraint mapping U.
+      ;; Return a singleton stream with the original state `st`,
+      ;; updated with the new U.
+
+      'TODO
+      
+      )))
 
 (define (add-general-underconstraino user-name te t ge g timeout-info trace?)
   (lambda (st)
@@ -428,7 +449,7 @@
      ;; timeout parameter)
      (let ((t te)
            (g ge))
-       (add-underconstraino name 'te t 'ge g `(timeout ,timeout-ticks) #f))]))
+       (add-general-underconstraino name 'te t 'ge g `(timeout ,timeout-ticks) #f))]))
 
 (define-syntax trace-underconstraino
   ;; same as `underconstraino`, but with the trace flag set to `#t`
