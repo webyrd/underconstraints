@@ -113,14 +113,14 @@
 
 ; Underconstraint store object.
 
-; Mapping of a representative variable to a association list (without
-; duplicates) of
+; Mapping of a representative variable `x` to an association list `u`
+; (without duplicates) of
 ;
 ;   (<unique-name> . <underconstraint record object>)
 ;
-; pairs. The list of underconstraint records is always on the
-; representative element and must be moved / merged when that element
-; changes.
+; pairs. The association list of underconstraint record objects is
+; always on the representative element and must be moved / merged when
+; that element changes.
 
 (define empty-U empty-intmap)
 
