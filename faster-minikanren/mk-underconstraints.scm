@@ -252,8 +252,8 @@
       (when (trace?)
         (newline)
         (printf
-         "* underconstraint ~s trying goal expression:\n~s\n"
-         name ge))
+         "* underconstraint ~s with timeout ~s trying goal expression:\n~s\n"
+         name timeout-ticks ge))
       (if (not timeout-ticks)
           (suspend
            (let loop (($ (g st)))
