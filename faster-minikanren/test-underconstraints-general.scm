@@ -310,7 +310,7 @@
 
 ;; However, if we try to verify that the numerals are legal before the
 ;; call to `*o`, the `run` diverges!
-(test-diverges "*o-illegal-cat-generate-and-test"
+(test-divergence "*o-illegal-cat-generate-and-test"
   (run 1 (n m o)
     (== 'cat m)
     (numeralo n)
@@ -320,7 +320,7 @@
 
 ;; In fact, this `run` diverges, even without the multiplication, due
 ;; to the `numeralo` goal itself!
-(test-diverges "no-mult-illegal-cat-generate-and-test"
+(test-divergence "no-mult-illegal-cat-generate-and-test"
   (run 1 (n m o)
     (== 'cat m)
     (numeralo n)
