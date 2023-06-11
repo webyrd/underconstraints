@@ -224,7 +224,7 @@
     ((0 1) (1 1) (0 1 1))
     ((1 1) (0 1) (0 1 1))))
 
-(test "factor-6-one-shot-underconstraino-typical"
+(test "factor-12-one-shot-underconstraino-typical"
   (run* (n m o)
     (== (build-num 12) o)
     (one-shot-underconstraino 'a15 (numeralo n))

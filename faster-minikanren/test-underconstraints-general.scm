@@ -267,18 +267,20 @@
     ((0 1) (1 1) (0 1 1))
     ((1 1) (0 1) (0 1 1))))
 
-(test "factor-6-underconstraino-typical"
-  (run 4 (n m o)
+(test "factor-12-underconstraino-typical"
+  (run* (n m o)
     (== (build-num 12) o)
     (underconstraino 'a15 n (numeralo n))
     (underconstraino 'b15 m (numeralo m))
     (*o n m o)
     (numeralo n)
     (numeralo m))
-  '(((1) (0 1 1) (0 1 1))
-    ((0 1 1) (1) (0 1 1))
-    ((0 1) (1 1) (0 1 1))
-    ((1 1) (0 1) (0 1 1))))
+  '(((1) (0 0 1 1) (0 0 1 1))
+    ((0 0 1 1) (1) (0 0 1 1))
+    ((0 1) (0 1 1) (0 0 1 1))
+    ((0 0 1) (1 1) (0 0 1 1))
+    ((1 1) (0 0 1) (0 0 1 1))
+    ((0 1 1) (0 1) (0 0 1 1))))
 
 
 ;; Now for the interesting part!
