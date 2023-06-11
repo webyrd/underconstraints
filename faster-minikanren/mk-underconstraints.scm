@@ -151,12 +151,10 @@
 (define empty-V '())
 
 (define (set-v st v)
-  (let ((U/V (state-U/V st)))
-    (let ((U (car U/V))
-          (V (cdr U/V)))
-      (if (memq v V)
-          st
-          (state-with-U/V st (cons U (cons v V)))))))
+  (let ((V (state-V st)))
+    (if (memq v V)
+        st
+        (state-with-V st (cons v V)))))
 
 ; underconstraint/"touched" variable store
 
@@ -207,6 +205,18 @@
 (define succeed (== #f #f))
 (define fail (== #f #t))
 
+(define (trigger-underconstraintso)
+  (lambda (st)
+    (let ((V (state-V st))
+          (st (state-with-V st empty-V)))
+      (let ((unders
+             (remove-duplicates (apply append (map (lambda (x) (lookup-u st x)) V)))))
+        (let loop ((unders unders)
+                   (st st))
+          (cond
+            ((null? unders) st)
+            (else (bind (run-and-add-underconstraint (car unders) st)
+                        (lambda (st) (loop (cdr unders) st))))))))))
 
 (define (run-underconstraint-onceo name ge g timeout-info trace? general?)
   (define (trace?)
@@ -425,8 +435,11 @@
   (lambda (st)
     (let* ((unique-name (parameterize ([gensym-prefix user-name]) (gensym)))
            (under (underconstraint user-name unique-name te t ge g timeout-info trace?)))
-      (bind (run-general-underconstraint under st)
-            (add-underconstraint-to-store under)))))
+      (run-and-add-underconstraint under st))))
+
+(define (run-and-add-underconstraint under st)
+  (bind (run-general-underconstraint under st)
+        (add-underconstraint-to-store under)))
 
 (define-syntax underconstraino
   (syntax-rules ()

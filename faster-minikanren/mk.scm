@@ -321,11 +321,14 @@
   (syntax-rules ()
     ((_ (g0 g ...) (g1 g^ ...) ...)
      (lambda (st)
-       (suspend
-         (let ((st (state-with-scope st (new-scope))))
-           (mplus*
-             (bind* (g0 st) g ...)
-             (bind* (g1 st) g^ ...) ...)))))))
+       (bind
+        ((trigger-underconstraintso) st)
+        (lambda (st)
+          (suspend
+           (let ((st (state-with-scope st (new-scope))))
+             (mplus*
+              (bind* (g0 st) g ...)
+              (bind* (g1 st) g^ ...) ...)))))))))
 
 (define-syntax run
   (syntax-rules ()
