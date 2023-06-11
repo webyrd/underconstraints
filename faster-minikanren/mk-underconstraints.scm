@@ -66,15 +66,18 @@
 ;                    `underconstraino` macro.
 
 (define (underconstraint user-name unique-name te t ge g timeout-info trace?)
-  `(,unique-name ,g ,t ,timeout-info ,trace? ,user-name ,te ,ge))
-
-(define (underconstraint-unique-name u)
-  (car u))
-
-(define (underconstraint-g u)
-  (cadr u))
+  `(,t ,unique-name ,g ,timeout-info ,trace? ,user-name ,te ,ge))
 
 (define (underconstraint-t u)
+  (car u))
+
+(define (underconstraint-with-t u t)
+  (cons t (cdr u)))
+
+(define (underconstraint-unique-name u)
+  (cadr u))
+
+(define (underconstraint-g u)
   (caddr u))
 
 (define (underconstraint-timeout-info u)
@@ -91,6 +94,7 @@
 
 (define (underconstraint-ge u)
   (list-ref u 7))
+
 
 ; `u` is an association list (without duplicates) of
 ;
@@ -205,22 +209,32 @@
 (define succeed (== #f #f))
 (define fail (== #f #t))
 
+(define (remove-eq-duplicates l)
+  (cond ((null? l)
+         '())
+        ((memq (car l) (cdr l))
+         (remove-eq-duplicates (cdr l)))
+        (else
+         (cons (car l) (remove-eq-duplicates (cdr l))))))
+
 (define (trigger-underconstraintso)
   (lambda (st)
-    (let ((V (state-V st))
-          (st (state-with-V st empty-V)))
-      (let ((unders
-             (remove-duplicates (apply append (map (lambda (x) (lookup-u st x)) V)))))
-        (let loop ((unders unders)
-                   (st st))
-          (cond
-            ((null? unders) st)
-            (else (bind (run-and-add-underconstraint (car unders) st)
-                        (lambda (st) (loop (cdr unders) st))))))))))
+    (let ((V (state-V st)))
+      (if (null? V)
+          st
+          (let ((st (state-with-V st empty-V)))
+            (let ((unders (apply append (map (lambda (x) (lookup-u st x)) V))))
+              (let ((unders (remove-eq-duplicates unders)))
+                (let loop ((unders unders)
+                           (st st))
+                  (cond
+                    ((null? unders) st)
+                    (else (bind (run-and-add-underconstraint (car unders) st)
+                                (lambda (st) (loop (cdr unders) st)))))))))))))
 
-(define (run-underconstraint-onceo name ge g timeout-info trace? general?)
+(define (run-underconstraint-onceo name ge g timeout-info trace-arg? general?)  
   (define (trace?)
-    (or trace?
+    (or trace-arg?
         (*trace-underconstraint-param*)))
   (define (get-timeout-ticks)
     (pmatch timeout-info
@@ -300,7 +314,7 @@
                  st))))
           ;; `timeout-ticks` is not #f:
           (let ((eng (make-engine
-                       (lambda ()
+                       (lambda ()                                                  
                          (let loop (($ (g st)))
                             (case-inf $
                               (()
@@ -417,19 +431,13 @@
 
 (define (add-underconstraint-to-store underconstraint)
   (lambda (st)
-    (let ((user-name (underconstraint-user-name underconstraint))
-          (unique-name (underconstraint-unique-name underconstraint))
-          (te (underconstraint-te underconstraint))
-          (t (underconstraint-t underconstraint))
-          (ge (underconstraint-ge underconstraint))
-          (g (underconstraint-g underconstraint))
-          (timeout-info (underconstraint-timeout-info underconstraint))
-          (trace? (underconstraint-trace? underconstraint)))
+    (let ((t (underconstraint-t underconstraint)))
       (let ((vars-to-attribute (vars (walk* t (state-S st)))))
-        (fold-left
-         (lambda (st v)
-           (set-u/nonduplicate st v underconstraint))
-         st vars-to-attribute)))))
+        (let ((underconstraint^ (underconstraint-with-t underconstraint vars-to-attribute)))
+          (fold-left
+           (lambda (st v)
+             (set-u/nonduplicate st v underconstraint))
+           st vars-to-attribute))))))
 
 (define (underconstraino-aux user-name te t ge g timeout-info trace?)
   (lambda (st)
@@ -438,7 +446,8 @@
       (run-and-add-underconstraint under st))))
 
 (define (run-and-add-underconstraint under st)
-  (bind (run-general-underconstraint under st)
+  ((add-underconstraint-to-store under) st)
+  #;(bind (run-general-underconstraint under st)
         (add-underconstraint-to-store under)))
 
 (define-syntax underconstraino
