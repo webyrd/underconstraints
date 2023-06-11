@@ -429,7 +429,8 @@
 
 (define (add-general-underconstraino user-name te t ge g timeout-info trace?)
   (lambda (st)
-    (let ((under (underconstraint user-name (gensym user-name) te t ge g timeout-info trace?)))
+    (let* ((unique-name (parameterize ([gensym-prefix user-name]) (gensym)))
+           (under (underconstraint user-name unique-name te t ge g timeout-info trace?)))
       (run-general-underconstraint under st))))
 
 (define-syntax underconstraino
