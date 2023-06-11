@@ -156,7 +156,7 @@
           (V (cdr U/V)))
       (if (memq v V)
           st
-          (cons U (cons v V))))))
+          (state-with-U/V st (cons U (cons v V)))))))
 
 ; underconstraint/"touched" variable store
 

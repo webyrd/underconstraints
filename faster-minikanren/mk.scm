@@ -149,7 +149,7 @@
 
 (define (set-c st x c)
   (state-with-C
-    st
+    (set-v st x)
     (intmap-set (state-C st) (var-idx x) c)))
 
 (define (lookup-c st x)
@@ -490,17 +490,18 @@
 ; Not fully optimized. Could do absento update with fewer
 ; hash-refs / hash-sets.
 (define (update-constraints a st)
-  (let ((old-c (lookup-c st (lhs a))))
-    (if (eq? old-c empty-c)
-      st
-      (let ((st (remove-c (lhs a) st)))
-       (and-foldl (lambda (op st) (op st)) st
-        (append
-          (if (c-T old-c)
-            (list ((apply-type-constraint (c-T old-c)) (rhs a)))
-            '())
-          (map (lambda (atom) (absento atom (rhs a))) (c-A old-c))
-          (map =/=* (c-D old-c))))))))
+  (let ((st (set-v st (lhs a))))
+    (let ((old-c (lookup-c st (lhs a))))
+      (if (eq? old-c empty-c)
+          st
+          (let ((st (remove-c (lhs a) st)))
+            (and-foldl (lambda (op st) (op st)) st
+                       (append
+                        (if (c-T old-c)
+                            (list ((apply-type-constraint (c-T old-c)) (rhs a)))
+                            '())
+                        (map (lambda (atom) (absento atom (rhs a))) (c-A old-c))
+                        (map =/=* (c-D old-c)))))))))
 
 (define (walk* v S)
   (let ((v (walk v S)))
