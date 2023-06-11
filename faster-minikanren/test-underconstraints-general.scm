@@ -21,8 +21,8 @@
 (test "underconstraino-trivial-unsound"
   ;; unsound!
   (run* (x)
-    (underconstraino (== 3 x))
-    (underconstraino (== 4 x)))
+    (underconstraino 'a0 x (== 3 x))
+    (underconstraino 'b0 x (== 4 x)))
   '(_.0))
 
 (test "underconstraino-trivial-sound-but-useless"
@@ -30,25 +30,25 @@
   (run* (x)
     (== 3 x)
     (== 4 x)
-    (underconstraino (== 3 x))
-    (underconstraino (== 4 x)))
+    (underconstraino 'a1 x (== 3 x))
+    (underconstraino 'b1 x (== 4 x)))
   '())
 
 (test "underconstraino-trivial-sound-but-useless-2"
   ;; also sound but with a useless ordering of goals
   (run* (x)
-    (underconstraino (== 3 x))
+    (underconstraino 'a2 x (== 3 x))
     (== 3 x)
     (== 4 x)
-    (underconstraino (== 4 x)))
+    (underconstraino 'b2 x (== 4 x)))
   '())
 
 (test "underconstraino-trivial-typical"
   ;; sound, with a typical goal ordering for underconstraints:
   ;; underconstraints should normally come first
   (run* (x)
-    (underconstraino (== 3 x))
-    (underconstraino (== 4 x))
+    (underconstraino 'a3 x (== 3 x))
+    (underconstraino 'b3 x (== 4 x))
     (== 3 x)
     (== 4 x))
   '())
@@ -63,7 +63,7 @@
   ;; might be reordered in the future, or if the goals might be
   ;; dynamically reordered at runtime
   (run* (x)
-    (underconstraino (== 4 x))
+    (underconstraino 'b4 x (== 4 x))
     (== 3 x)
     (== 4 x))
   '())
@@ -83,25 +83,25 @@
 (test "underconstraino-silly-unsound"
   ;; unsound!
   (run* (x)
-    (underconstraino (symbolo x))
-    (underconstraino (numbero x)))
+    (underconstraino 'a5 x (symbolo x))
+    (underconstraino 'b5 x (numbero x)))
   '(_.0))
 
 (test "underconstraino-silly-sound-but-useless"
   ;; sound but with a useless ordering of goals
   (run* (x)
     (symbolo x)
-    (underconstraino (symbolo x))
+    (underconstraino 'a6 x (symbolo x))
     (numbero x)
-    (underconstraino (numbero x)))
+    (underconstraino 'b6 x (numbero x)))
   '())
 
 (test "underconstraino-silly-typical"
   ;; sound, with a typical goal ordering for underconstraints:
   ;; underconstraints should normally come first
   (run* (x)
-    (underconstraino (symbolo x))
-    (underconstraino (numbero x))
+    (underconstraino 'a7 x (symbolo x))
+    (underconstraino 'b7 x (numbero x))
     (symbolo x)
     (numbero x))
   '())
@@ -116,7 +116,7 @@
   ;; might be reordered in the future, or if the goals might be
   ;; dynamically reordered at runtime
   (run* (x)
-    (underconstraino (numbero x))
+    (underconstraino 'b8 x (numbero x))
     (symbolo x)
     (numbero x))
   '())
@@ -147,8 +147,8 @@
 ;; unsound!
 (test "underconstraino-number-choiceo-unsound"
   (run* (x)
-    (underconstraino (one-or-two-choiceo x))
-    (underconstraino (three-or-four-choiceo x)))
+    (underconstraino 'a11 x (one-or-two-choiceo x))
+    (underconstraino 'b11 x (three-or-four-choiceo x)))
   '(_.0))
 
 ;; sound but with a useless ordering of goals
@@ -156,16 +156,16 @@
   (run* (x)
     (one-or-two-choiceo x)
     (three-or-four-choiceo x)
-    (underconstraino (one-or-two-choiceo x))
-    (underconstraino (three-or-four-choiceo x)))
+    (underconstraino 'a12 x (one-or-two-choiceo x))
+    (underconstraino 'b12 x (three-or-four-choiceo x)))
   '())
 
 ;; sound, with a typical goal ordering for underconstraints:
 ;; underconstraints should normally come first
 (test "underconstraino-number-choiceo-typical"
   (run* (x)
-    (underconstraino (one-or-two-choiceo x))
-    (underconstraino (three-or-four-choiceo x))
+    (underconstraino 'a13 x (one-or-two-choiceo x))
+    (underconstraino 'b13 x (three-or-four-choiceo x))
     (one-or-two-choiceo x)
     (three-or-four-choiceo x))
   '())
@@ -180,7 +180,7 @@
 ;; dynamically reordered at runtime
 (test "underconstraino-number-choiceo-optimized"
   (run* (x)
-    (underconstraino (three-or-four-choiceo x))
+    (underconstraino 'b14 x (three-or-four-choiceo x))
     (one-or-two-choiceo x)
     (three-or-four-choiceo x))
   '())
@@ -270,8 +270,8 @@
 (test "factor-6-underconstraino-typical"
   (run 4 (n m o)
     (== (build-num 12) o)
-    (underconstraino (numeralo n))
-    (underconstraino (numeralo m))
+    (underconstraino 'a15 n (numeralo n))
+    (underconstraino 'b15 m (numeralo m))
     (*o n m o)
     (numeralo n)
     (numeralo m))
@@ -340,8 +340,8 @@
 (test "onceo-behavior-of-underconstraino-1"
   (run 1 (n m o)
     (== 'cat m)
-    (underconstraino (numeralo n))
-    (underconstraino (numeralo m))
+    (underconstraino 'a16 n (numeralo n))
+    (underconstraino 'b16 m (numeralo m))
     (numeralo n)
     (numeralo m))
   '())
@@ -351,8 +351,8 @@
 (test "onceo-behavior-of-underconstraino-2"
   (run 1 (n m o)
     (== 'cat m)
-    (underconstraino (numeralo n))
-    (underconstraino (numeralo m))
+    (underconstraino 'a18 n (numeralo n))
+    (underconstraino 'b18 m (numeralo m))
     (*o n m o)
     (numeralo n)
     (numeralo m))
@@ -363,9 +363,9 @@
 
 (test "*o-illegal-cat-underconstraino"
   (run 1 (n m o)
-    (underconstraino (numeralo n))
-    (underconstraino (numeralo m))
-    (underconstraino (numeralo o))
+    (underconstraino 'a19 n (numeralo n))
+    (underconstraino 'b19 m (numeralo m))
+    (underconstraino 'c19 o (numeralo o))
     (== 'cat m)
     (*o n m o)
     (numeralo n)
