@@ -66,16 +66,16 @@
 ;                    `underconstraino` macro.
 
 (define (underconstraint user-name unique-name te t ge g timeout-info trace?)
-  `(,t ,unique-name ,g ,timeout-info ,trace? ,user-name ,te ,ge))
-
-(define (underconstraint-t u)
-  (car u))
-
-(define (underconstraint-with-t u t)
-  (cons t (cdr u)))
+  `(,unique-name ,t ,g ,timeout-info ,trace? ,user-name ,te ,ge))
 
 (define (underconstraint-unique-name u)
+  (car u))
+
+(define (underconstraint-t u)
   (cadr u))
+
+(define (underconstraint-with-t u t)
+  (cons (car u) (cons t (cddr u))))
 
 (define (underconstraint-g u)
   (caddr u))
@@ -209,13 +209,13 @@
 (define succeed (== #f #f))
 (define fail (== #f #t))
 
-(define (remove-eq-duplicates l)
-  (cond ((null? l)
-         '())
-        ((memq (car l) (cdr l))
-         (remove-eq-duplicates (cdr l)))
-        (else
-         (cons (car l) (remove-eq-duplicates (cdr l))))))
+(define (remove-duplicate-underconstraints u*)
+  (cond
+    ((null? u*) '())
+    ((assq (underconstraint-unique-name (car u*)) (cdr u*))
+     (remove-duplicate-underconstraints (cdr u*)))
+    (else
+     (cons (car u*) (remove-duplicate-underconstraints (cdr u*))))))
 
 (define (trigger-underconstraintso)
   (lambda (st)
@@ -224,7 +224,7 @@
           st
           (let ((st (state-with-V st empty-V)))
             (let ((unders (apply append (map (lambda (x) (lookup-u st x)) V))))
-              (let ((unders (remove-eq-duplicates unders)))
+              (let ((unders (remove-duplicate-underconstraints unders)))
                 (let loop ((unders unders)
                            (st st))
                   (cond
@@ -436,7 +436,7 @@
         (let ((underconstraint^ (underconstraint-with-t underconstraint vars-to-attribute)))
           (fold-left
            (lambda (st v)
-             (set-u/nonduplicate st v underconstraint))
+             (set-u/nonduplicate st v underconstraint^))
            st vars-to-attribute))))))
 
 (define (underconstraino-aux user-name te t ge g timeout-info trace?)
