@@ -311,3 +311,15 @@
     (numeralo m)
     (numeralo o))
   '())
+
+;; `nevero` will never terminate; we need the engine to cut off
+;; underconstraint execution.
+(define nevero
+  (lambda ()
+    (conde
+      (fail)
+      ((nevero)))))
+(test "nevero-engine"
+  (run 1 (q)
+    (one-shot-underconstraino 'a20 (nevero) 1000))
+  '(_.0))

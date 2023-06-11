@@ -255,8 +255,7 @@
          "* underconstraint ~s with timeout ~s trying goal expression:\n~s\n"
          name timeout-ticks ge))
       (if (not timeout-ticks)
-          (suspend
-           (let loop (($ (g st)))
+          (let loop (($ (g st)))
              (case-inf $
                (()
                 (begin-when-trace
@@ -288,12 +287,11 @@
                  (printf
                   "* underconstraint ~s succeeded with non-singleton stream\n"
                   name)
-                 st)))))
+                 st))))
           ;; `timeout-ticks` is not #f:
           (let ((eng (make-engine
                        (lambda ()
-                         (suspend
-                          (let loop (($ (g st)))
+                         (let loop (($ (g st)))
                             (case-inf $
                               (()
                                (begin-when-trace
@@ -324,7 +322,7 @@
                                 (printf
                                  "* underconstraint ~s succeeded with non-singleton stream\n"
                                  name)
-                                st)))))))))
+                                st))))))))
             (maybe-time
              (eng timeout-ticks
                   ;; engine "completed" procedure
