@@ -247,7 +247,8 @@
          ...
          e)]))
   (lambda (st)
-    (let ((timeout-ticks (get-timeout-ticks)))
+    (let ((st (state-with-scope st (new-scope)))
+          (timeout-ticks (get-timeout-ticks)))
       (when (trace?)
         (newline)
         (printf
