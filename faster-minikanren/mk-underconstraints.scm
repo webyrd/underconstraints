@@ -384,53 +384,49 @@
 
 ;; Full (multi-shot) underconstraints:
 
+;; Run the underconstraint's goal `g` immediately, in the current
+;; state `st`, but with the underconstraint mapping `U` and the list
+;; of newly "touched" variables `V` replaced with the empty `U/V`.
 (define (run-general-underconstraint underconstraint st)
-  
-  ;; Run the underconstraint's goal `g` immediately, in the current
-  ;; state `st`, but with the underconstraint mapping `U` and the list
-  ;; of newly "touched" variables `V` replaced with the empty `U/V`.
-
   (let ((user-name (underconstraint-user-name underconstraint))
         (unique-name (underconstraint-unique-name underconstraint))
-        (te (underconstraint-te underconstraint))
-        (t (underconstraint-t underconstraint))
         (ge (underconstraint-ge underconstraint))
         (g (underconstraint-g underconstraint))
         (timeout-info (underconstraint-timeout-info underconstraint))
         (trace? (underconstraint-trace? underconstraint)))
-    (let (($ ((run-underconstraint-onceo `(,user-name . ,unique-name) ge g timeout-info trace? #t)
-              (state-with-U/V st empty-U/V))))
-  
-      ;; TODO Upon failure, fail.  Upon success:
-      ;;
-      ;; * "forget"/discard the new stream of states returned from
-      ;; running `g`, since we are only running underconstraints for
-      ;; fail-fast behavior.  (Also, we need to eventually return a
-      ;; single stream, to get the desired `onceo` semantics.)
-      ;;
-      ;; * (as an optimization, if the new stream of states returned from
-      ;; running `g` is a singleton stream, it is safe to commit the
-      ;; returned singleton state.  Should probably restart solving the
-      ;; remaining underconstraints in that case, using the newly updated
-      ;; state extension (along with the new list of unique "touched"
-      ;; variables).)
-      ;;
-      ;; * `walk` the term `t` in the substitution from the original
-      ;; state `st`, finding the set of fresh variables at the leaves,
-      ;; and add those variables, associated with the unique name and
-      ;; underconstrained goal `g`, to the underconstraint mapping U.
-      ;; Return a singleton stream with the original state `st`,
-      ;; updated with the new U.
+    ((run-underconstraint-onceo `(,user-name . ,unique-name) ge g timeout-info trace? #t)
+     (state-with-U/V st empty-U/V))))
 
-      'TODO
-      
-      )))
+;; if under is not already in the list of underconstraint records for the
+;; variable `v`, add it and return the updated state.
+(define (set-u/nonduplicate st v under)
+  (let ((current-u (lookup-u st v)))
+    (if (memq under current-u)
+        st
+        (set-u st v (cons under current-u)))))
 
-(define (add-general-underconstraino user-name te t ge g timeout-info trace?)
+(define (add-underconstraint-to-store underconstraint)
+  (lambda (st)
+    (let ((user-name (underconstraint-user-name underconstraint))
+          (unique-name (underconstraint-unique-name underconstraint))
+          (te (underconstraint-te underconstraint))
+          (t (underconstraint-t underconstraint))
+          (ge (underconstraint-ge underconstraint))
+          (g (underconstraint-g underconstraint))
+          (timeout-info (underconstraint-timeout-info underconstraint))
+          (trace? (underconstraint-trace? underconstraint)))
+      (let ((vars-to-attribute (vars (walk* t (state-S st)))))
+        (fold-left
+         (lambda (st v)
+           (set-u/nonduplicate st v underconstraint))
+         st vars-to-attribute)))))
+
+(define (underconstraino-aux user-name te t ge g timeout-info trace?)
   (lambda (st)
     (let* ((unique-name (parameterize ([gensym-prefix user-name]) (gensym)))
            (under (underconstraint user-name unique-name te t ge g timeout-info trace?)))
-      (run-general-underconstraint under st))))
+      (bind (run-general-underconstraint under st)
+            (add-underconstraint-to-store under)))))
 
 (define-syntax underconstraino
   (syntax-rules ()
@@ -438,18 +434,18 @@
      ;; use global default timeout parameter
      (let ((t te)
            (g ge))
-       (add-general-underconstraino name 'te t 'ge g #f #f))]
+       (underconstraino-aux name 'te t 'ge g #f #f))]
     [(_ name te ge #f)
      ;; no timeout (overrides global timeout parameter)
      (let ((t te)
            (g ge))
-       (add-general-underconstraino name 'te t 'ge g `(timeout #f) #f))]
+       (underconstraino-aux name 'te t 'ge g `(timeout #f) #f))]
     [(_ name te ge timeout-ticks)
      ;; use timeout with `timeout-ticks` ticks (gas) (overrides global
      ;; timeout parameter)
      (let ((t te)
            (g ge))
-       (add-general-underconstraino name 'te t 'ge g `(timeout ,timeout-ticks) #f))]))
+       (underconstraino-aux name 'te t 'ge g `(timeout ,timeout-ticks) #f))]))
 
 (define-syntax trace-underconstraino
   ;; same as `underconstraino`, but with the trace flag set to `#t`
