@@ -557,3 +557,45 @@
      (let ((t te)
            (g ge))
        (add-underconstraino name 'te t 'ge g `(timeout ,timeout-ticks) #t))]))
+
+(define-syntax (condg stx)
+  (syntax-case stx ()
+   ((_ ((x ...) (g0 g ...) (b0 b ...)) ...)
+    #`(letrec ([condg-g (condg-runtime
+                          (list
+                            (lambda (st)
+                              (let ([scope (subst-scope (state-S st))])
+                                (let ([x (var scope)] ...)
+                                  (cons
+                                    (bind* (g0 st) g ...)
+                                    (lambda (st) (bind* (b0 st) b ...))))))
+                            ...)
+                            (lambda () condg-g))])
+         condg-g))))
+
+(define (condg-runtime clauses g)
+  (lambda (st)
+    (define (nondeterministic) st #;(cons 'progress st g))
+    (let ((st (state-with-scope st (new-scope)))) ;; for set-var-val at choice point entry
+      (let loop ([clauses clauses] [previously-found-clause #f])
+        (if (null? clauses)
+            (and previously-found-clause
+                 (let ([guard-result (car previously-found-clause)]
+                       [body (cdr previously-found-clause)])
+                   (body guard-result)))
+            (let* ([clause-evaluated ((car clauses) st)]
+                   [guard-stream (car clause-evaluated)])
+              (let ([guard-result (evaluate-guard guard-stream)])
+                (cond
+                  [(eq? 'nondet guard-result) (nondeterministic)]
+                  [(not guard-result) (loop (cdr clauses) previously-found-clause)]
+                  [else (if previously-found-clause
+                            (nondeterministic)
+                            (loop (cdr clauses) (cons guard-result (cdr clause-evaluated))))]))))))))
+
+(define (evaluate-guard stream)
+  (let ([result (take 2 (lambda () stream))])
+    (cond
+      [(null? result) #f]
+      [(null? (cdr result)) (car result)]
+      [else 'nondet])))
