@@ -558,17 +558,18 @@
            (g ge))
        (add-underconstraino name 'te t 'ge g `(timeout ,timeout-ticks) #t))]))
 
+
 (define-syntax (condg stx)
   (syntax-case stx ()
-   ((_ ((x ...) (g0 g ...) (b0 b ...)) ...)
+   ((_ ((x ...) (g ...) (b ...)) ...)
     #`(letrec ([condg-g (condg-runtime
                           (list
                             (lambda (st)
                               (let ([scope (subst-scope (state-S st))])
                                 (let ([x (var scope)] ...)
                                   (cons
-                                    (bind* (g0 st) g ...)
-                                    (lambda (st) (bind* (b0 st) b ...))))))
+                                    (bind* st g ...)
+                                    (lambda (st) (bind* st b ...))))))
                             ...)
                             (lambda () condg-g))])
          condg-g))))
