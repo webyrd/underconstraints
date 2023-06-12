@@ -79,6 +79,23 @@
             ([] [(== y 2)] [(== b 2)])))))
       '((_.0 . 1)))
 
+(test "condg nondet first, det second; commits second; return to first"
+      (run* (q)
+        (fresh (x y a b)
+          (underconstraino
+           'u1
+           (list x y a b)
+           (freshg ()
+                   (== q (cons a b))
+                   (== y 1)
+                   (condg
+                    ([] [(== x 1)] [(== a 1)])
+                    ([] [(== x 2)] [(== a 2)]))
+                   (condg
+                    ([] [(== y 1)] [(== b 1)])
+                    ([] [(== y 2)] [(== b 2)]))))
+          (== x 1)))
+      '((1 . 1)))
 
 (test "condg interp should eval ground program 1"
       (run 1 (q)
@@ -97,6 +114,48 @@
          '()
          (evalo/g '(cons 1 '()) q)))
       '((1)))
+
+(test "condg interp partial 1 resume"
+      (run 1 (q)
+        (fresh (p)
+          (underconstraino
+           'u1
+           (list p)
+           (evalo/g `(cons 1 ,p) q))
+          (== p ''())))
+      '((1)))
+
+(test "condg interp partial 2"
+      (run 1 (q)
+        (fresh (p)
+          (underconstraino
+           'u1
+           (list p)
+           (evalo/g `(cons 1 (cons ,p '())) q))))
+      '((1 _.0)))
+
+(test "condg interp partial 2 resume"
+      (run 1 (q)
+        (fresh (p)
+          (underconstraino
+           'u1
+           (list p)
+           (evalo/g `(cons 1 (cons ,p '())) q))
+          (== p 2)))
+      '((1 2)))
+
+
+(test "condg interp partial 3 resume"
+      (run 1 (q)
+        (fresh (p)
+          (underconstraino
+           'u1
+           (list p)
+           (evalo/g `(letrec ((double (lambda (l) : ((list) -> list)
+                                        ,p)))
+                       (double (cons 1 (cons 2 (cons 3 '()))))) q))
+          (== p 'l)))
+      '((1 2 3)))
 
 
 (test "condg interp should eval ground program identity"
@@ -121,6 +180,59 @@
                                              l))))
                      (cons-if-= 1 1 (cons 1 (cons 2 (cons 3 '()))))) q)))
       '((1 1 2 3)))
+
+(test "condg interp resume cons-if-eq 1"
+      (run 1 (q)
+        (fresh (p1 p2 p3)
+          (underconstraino
+           'u1
+           (list p1)
+           (evalo/g `(letrec ((cons-if-= (lambda (v1 v2 l) : ((number number list) -> list)
+                                           ,p1)))
+                       (cons-if-= 1 1 (cons 1 (cons 2 (cons 3 '()))))) q))
+          (== p1 `(if ,p2
+                      ,p3
+                      l))
+          (conde [succeed])
+          (== p3 '(cons v1 l))
+          (conde [succeed])
+          (== p2 '(= v1 v2))
+
+          (evalo `(letrec ((cons-if-= (lambda (v1 v2 l) : ((number number list) -> list)
+                                           ,p1)))
+                       (cons-if-= 1 1 (cons 1 (cons 2 (cons 3 '()))))) q)))
+      '((1 1 2 3)))
+
+(test "condg interp resume rember 1"
+      (run 1 (q)
+        (fresh (p)
+          (underconstraino
+           'u1
+           (list p)
+           (evalo/g `(letrec ((rember (lambda (e l) : ((number list) -> list)
+                                        ,p)))
+                       (rember 5 (cons 3 (cons 4 (cons 6 (cons 7 '()))))))
+                    q))
+          (== p '(match l
+                   ('() l)
+                   ((cons _.0 _.1) (if (= _.0 e) _.1 (cons _.0 (rember e _.1))))))))
+      '((3 4 6 7)))
+
+(test "condg interp resume rember 1 timeout"
+      (run 1 (q)
+        (fresh (p)
+          (underconstraino
+           'u1
+           (list p)
+           (evalo/g `(letrec ((rember (lambda (e l) : ((number list) -> list)
+                                        ,p)))
+                       (rember 5 (cons 3 (cons 4 (cons 6 (cons 7 '()))))))
+                    q)
+           1000000)
+          (== p '(match l
+                   ('() l)
+                   ((cons _.0 _.1) (if (= _.0 e) _.1 (cons _.0 (rember e _.1))))))))
+      '((3 4 6 7)))
 
 
 (test "condg interp should eval ground program rember 1"
@@ -234,9 +346,9 @@
 
 
 (*trace-underconstraint-param* #f)
-(define max-ticks 10000000)
+(define max-ticks 300000)
 
-(time (test "synthesize rember with 3 top-level general underconstraint"
+#;(time (test "synthesize rember with 4 top-level general underconstraint"
             (run 1 (q)
               (absento 3 q)
               (absento 4 q)
@@ -248,7 +360,7 @@
                'u1
                q
                (evalo/g `(letrec ((rember (lambda (e l) : ((number list) -> list)
-                                         ,q)))
+                                            ,q)))
                         (rember 5 '())) '())
                max-ticks)
     
@@ -276,7 +388,7 @@
                            (rember 5 (cons 3 (cons 4 (cons 6 (cons 7 '())))))) '(3 4 6 7))
                max-ticks)       
 
-       
+
               (evalo `(letrec ((rember (lambda (e l) : ((number list) -> list)
                                          ,q)))
                         (rember 5 '())) '())
@@ -291,7 +403,86 @@
 
               (evalo `(letrec ((rember (lambda (e l) : ((number list) -> list)
                                          ,q)))
-                        (rember 5 (cons 3 (cons 4 (cons 6 (cons 7 '())))))) '(3 4 6 7)))
+                        (rember 5 (cons 3 (cons 4 (cons 6 (cons 7 '())))))) '(3 4 6 7))
+              
+              )
+            '(((match l
+                 ('() l)
+                 ((cons _.0 _.1) (if (= _.0 e) _.1 (cons _.0 (rember e _.1)))))
+               (=/=
+                ((_.0 _.1))
+                ((_.0 cons))
+                ((_.0 e))
+                ((_.0 if))
+                ((_.0 rember))
+                ((_.1 cons))
+       ((_.1 e))
+       ((_.1 if))
+       ((_.1 rember)))
+     (sym _.0 _.1)))))
+
+;; TODO: why is this succeeding with just `l`? Shouldn't match all the underconstraints.
+(time (test "synthesize rember with 4 top-level general underconstraint, just 1 evalo"
+            (run 1 (q)
+              (absento 3 q)
+              (absento 4 q)
+              (absento 5 q)
+              (absento 6 q)
+              (absento 7 q)
+       
+              (underconstraino
+               'u1
+               q
+               (evalo/g `(letrec ((rember (lambda (e l) : ((number list) -> list)
+                                            ,q)))
+                        (rember 5 '())) '())
+               max-ticks)
+    
+              (underconstraino
+               'u2
+               q
+               (evalo/g `(letrec ((rember (lambda (e l) : ((number list) -> list)
+                                            ,q)))
+                           (rember 6 (cons 6 '()))) '())
+               max-ticks)
+
+              (underconstraino
+               'u3
+               q
+               (evalo/g `(letrec ((rember (lambda (e l) : ((number list) -> list)
+                                            ,q)))
+                           (rember 7 (cons 3 (cons 4 (cons 7 (cons 6 '())))))) '(3 4 6))
+               max-ticks)
+              
+              (underconstraino
+               'u4
+               q
+               (evalo/g `(letrec ((rember (lambda (e l) : ((number list) -> list)
+                                            ,q)))
+                           (rember 5 (cons 3 (cons 4 (cons 6 (cons 7 '())))))) '(3 4 6 7))
+               max-ticks)
+
+
+              (evalo `(letrec ((rember (lambda (e l) : ((number list) -> list)
+                                         ,q)))
+                        (rember 5 '())) '())
+              
+              #;(
+              
+
+              (evalo `(letrec ((rember (lambda (e l) : ((number list) -> list)
+                                         ,q)))
+                        (rember 6 (cons 6 '()))) '())
+
+              (evalo `(letrec ((rember (lambda (e l) : ((number list) -> list)
+                                         ,q)))
+                        (rember 7 (cons 3 (cons 4 (cons 7 (cons 6 '())))))) '(3 4 6))
+
+              (evalo `(letrec ((rember (lambda (e l) : ((number list) -> list)
+                                         ,q)))
+                        (rember 5 (cons 3 (cons 4 (cons 6 (cons 7 '())))))) '(3 4 6 7))
+              )
+              )
             '(((match l
                  ('() l)
                  ((cons _.0 _.1) (if (= _.0 e) _.1 (cons _.0 (rember e _.1)))))

@@ -4,6 +4,22 @@
 
 (load "pmatch.scm")
 
+#;(define-syntax check-type
+  (syntax-rules ()
+    [(_ v pred)
+     (check-type-runtime v pred 'pred)]))
+
+(define-syntax check-type
+  (syntax-rules ()
+    [(_ v pred)
+     v]))
+
+(define (check-type-runtime v pred pred-e)
+  (if (pred v)
+      v
+      (error 'check-type (format "expected ~s, got ~s" pred-e v)))) 
+
+
 ;; Global default timeout parameter: number of ticks/gas for engine,
 ;; or `#f` if the default is no timeout.  Can be overriden by optional
 ;; timeout argument (number ticks or `#f`) to individual
@@ -63,10 +79,11 @@
               (take n
                     (suspend
                      ((fresh (q) g0 g ...
-                             (lambda (st)
-                               (let ((st (state-with-scope st nonlocal-scope)))
-                                 (let ((z ((reify q) st)))
-                                   (cons z (lambda () (lambda () #f)))))))
+                        (trigger-underconstraintso)
+                        (lambda (st)
+                          (let ((st (state-with-scope st nonlocal-scope)))
+                            (let ((z ((reify q) st)))
+                              (cons z (lambda () (lambda () #f)))))))
                       empty-state)))))
          (print-counters!)
          result)))
@@ -119,6 +136,9 @@
 ;   timeout-info - the engine timeout value specified by the user.
 ;   trace?       - whether the user used a tracing version of the
 ;                    `underconstraino` macro.
+
+(define (underconstraint? v)
+  (and (list? v) (= (length v) 8)))
 
 (define (underconstraint user-name unique-name te t ge g timeout-info trace?)
   `(,unique-name ,t ,g ,timeout-info ,trace? ,user-name ,te ,ge))
@@ -228,6 +248,9 @@
 ;   S - the substitution
 ;   C - the constraint store
 ;   U/V - the underconstraint store/list of "touched" variables (without duplicates)
+
+(define (state? v)
+  (and (list? v) (= (length v) 3)))
 
 (define (state S C U/V) (list S C U/V))
 
@@ -563,6 +586,10 @@
            (g ge))
        (add-underconstraino name 'te t 'ge g `(timeout ,timeout-ticks) #t))]))
 
+(define (infg? v)
+  (or (not v)
+      (and (pair? v) (state? (car v)) (procedure? (cdr v)))
+      (state? v)))
 
 (define-syntax case-infg
   (syntax-rules ()
@@ -593,7 +620,7 @@
 
 (define (condg-runtime clauses g-thunk)
   (lambda (st)
-    (define (nondeterministic) (cons st (g-thunk)))
+    (define (nondeterministic) (check-type (cons st (g-thunk)) infg?))
     (let ((st (state-with-scope st (new-scope)))) ;; for set-var-val at choice point entry
       (let loop ([clauses clauses] [previously-found-clause #f])
         (if (null? clauses)
@@ -613,24 +640,29 @@
                             (loop (cdr clauses) guard-result))]))))))))
 
 (define (evaluate-guard stream body-g)
-  (case-infg stream
-    (() #f)
-    ((c) (cons c body-g))
-    ((c f) (cons c (lambda (st) (bindg f body-g))))))
-
+  (check-type
+   (case-infg stream
+              (() #f)
+              ((c) (cons c body-g))
+              ((c f) (cons c (lambda (st) (bindg (f st) body-g)))))
+   infg?))
+  
 
 
 (define (bindg stream g)
-  (case-infg stream
-    (() #f)
-    ((c) (g c))   ;; committed and finished, so just g left to do
-    ((c1 f1)      ;; committed but suspened...
-     (let ([s2 (g c1)])
-       (case-infg s2
-         (() #f)              ;; g fails, so whole thing fails
-         ((c2) (cons c2 f1))  ;; committed and finished, so just f1 to return to
-         ;; when we return we need to do both f1 and f2
-         ((c2 f2) (cons c2 (lambda (st) (bindg (f1 st) f2)))))))))
+  (check-type stream infg?)
+  (check-type
+   (case-infg stream
+              (() #f)
+              ((c) (g c))   ;; committed and finished, so just g left to do
+              ((c1 f1)      ;; committed but suspened...
+               (let ([s2 (g c1)])
+                 (case-infg s2
+                            (() #f)              ;; g fails, so whole thing fails
+                            ((c2) (cons c2 f1))  ;; committed and finished, so just f1 to return to
+                            ;; when we return we need to do both f1 and f2
+                            ((c2 f2) (cons c2 (lambda (st) (bindg (f1 st) f2))))))))
+   infg?))
 
 (define-syntax bindg*
   (syntax-rules ()
@@ -755,6 +787,7 @@
 (define (run-and-add-committing-underconstraint under st)
   (let ((user-name (underconstraint-user-name under))
         (unique-name (underconstraint-unique-name under))
+        (t (underconstraint-t under))
         (ge (underconstraint-ge under))
         (g (underconstraint-g under))
         (timeout-info (underconstraint-timeout-info under))
@@ -762,21 +795,20 @@
   
     (let ([$ ((run-committing-underconstraint-onceo `(,user-name . ,unique-name) ge g timeout-info trace? #t)
               (state-with-U/V st empty-U/V))])
-
+      (check-type $ infg?)
       (case-infg $
-       (() #f)
-       ((c^) c^) ;; could remove underconstraint, here
-       ((c^ f^)
+        (() #f)
+        ((c^) c^) ;; could remove underconstraint, here
+        ((c^ f^)
 
-        (let ((t (underconstraint-t under)))
-          (let ((vars-to-attribute (vars (walk* t (state-S c^)))))
-            (let* ((under^ (underconstraint-with-t under vars-to-attribute))
-                   (under^ (underconstraint-with-g under^ f^)))
-              (fold-left
-               (lambda (st v)
-                 (set-u/nonduplicate st v under^))
-               c^ vars-to-attribute))))
+         (let ((vars-to-attribute (vars (walk* t (state-S c^)))))
+           (let* ((under^ (underconstraint-with-t under vars-to-attribute))
+                  (under^ (underconstraint-with-g under^ f^)))
+             (fold-left
+              (lambda (st v)
+                (set-u/nonduplicate st v under^))
+              c^ vars-to-attribute)))
 
-        ))
+         ))
       
       )))
