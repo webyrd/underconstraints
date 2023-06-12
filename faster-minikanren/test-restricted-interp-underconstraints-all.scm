@@ -112,7 +112,7 @@
 #!eof
 
 max-ticks 300000:
-Testing "synthesize rember with one top-level general underconstraint"
+Testing "synthesize rember with 3 top-level general underconstraints"
 *engine-completed-counter*: 35_638
 *engine-timedout-counter*: 32_231
 *immature-stream-counter*: 36_219_862
