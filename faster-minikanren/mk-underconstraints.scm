@@ -425,7 +425,7 @@
 ;; variable `v`, add it and return the updated state.
 (define (set-u/nonduplicate st v under)
   (let ((current-u (lookup-u st v)))
-    (if (memq under current-u)
+    (if (assq (underconstraint-unique-name under) current-u)
         st
         (set-u st v (cons under current-u)))))
 
