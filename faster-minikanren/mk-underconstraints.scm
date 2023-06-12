@@ -23,7 +23,62 @@
 (define *trace-underconstraint-param*
   (make-parameter #f))
 
+(define *engine-completed-counter* 0)
+(define *engine-timedout-counter* 0)
 
+(define *immature-stream-counter* 0)
+(define *fail-counter* 0)
+(define *singleton-succeed-counter* 0)
+(define *non-singleton-succeed-counter* 0)
+
+(define-syntax increment-counter!
+  (syntax-rules ()
+    [(_ c) (set! c (add1 c))]))
+
+(define (reset-counters!)
+  (set! *engine-completed-counter* 0)
+  (set! *engine-timedout-counter* 0)
+  ;;
+  (set! *immature-stream-counter* 0)
+  (set! *fail-counter* 0)
+  (set! *singleton-succeed-counter* 0)
+  (set! *non-singleton-succeed-counter* 0))
+
+(define (print-counters!)
+  (printf "*engine-completed-counter*: ~s\n" *engine-completed-counter*)
+  (printf "*engine-timedout-counter*: ~s\n" *engine-timedout-counter*)
+  ;;
+  (printf "*immature-stream-counter*: ~s\n" *immature-stream-counter*)
+  (printf "*fail-counter*: ~s\n" *fail-counter*)
+  (printf "*singleton-succeed-counter*: ~s\n" *singleton-succeed-counter*)
+  (printf "*non-singleton-succeed-counter*: ~s\n" *non-singleton-succeed-counter*))
+
+
+(define-syntax run
+  (syntax-rules ()
+    ((_ n (q) g0 g ...)
+     (begin
+       (reset-counters!)
+       (let ((result
+              (take n
+                    (suspend
+                     ((fresh (q) g0 g ...
+                             (lambda (st)
+                               (let ((st (state-with-scope st nonlocal-scope)))
+                                 (let ((z ((reify q) st)))
+                                   (cons z (lambda () (lambda () #f)))))))
+                      empty-state)))))
+         (print-counters!)
+         result)))
+    ((_ n (q0 q1 q ...) g0 g ...)
+     (run n (x)
+       (fresh (q0 q1 q ...)
+         g0 g ...
+         (== (list q0 q1 q ...) x))))))
+
+(define-syntax run*
+  (syntax-rules ()
+    ((_ (q0 q ...) g0 g ...) (run #f (q0 q ...) g0 g ...))))
 
 
 ; Underconstraint record object.
@@ -286,32 +341,40 @@
                  (printf
                   "* underconstraint ~s failed\n"
                   name)
-                 #f))
+                 (begin
+                   (increment-counter! *fail-counter*)
+                   #f)))
                ((f)
                 (begin-when-trace
                  (printf
                   "* underconstraint ~s encountered `(f)` case of case-inf\n"
                   name)
-                 (lambda ()
-                   ;; thunkify forcing of `f` to allow interleaving,
-                   ;; since we don't have timeout protection
-                   (loop (f)))))
+                 (begin
+                   (increment-counter! *immature-stream-counter*)
+                   (lambda ()
+                     ;; thunkify forcing of `f` to allow interleaving,
+                     ;; since we don't have timeout protection
+                     (loop (f))))))
                ((c)
                 (begin-when-trace
                  (printf
                   "* underconstraint ~s succeeded with singleton result\n"
                   name)
-                 ;; TODO should consider returning `c` here; since the
-                 ;; singleton state is being returned, it is safe to
-                 ;; commit to the new state returned (updated with
-                 ;; underconstraints, perhaps).
-                 st))
+                 (begin
+                   (increment-counter! *singleton-succeed-counter*)
+                   ;; TODO should consider returning `c` here; since the
+                   ;; singleton state is being returned, it is safe to
+                   ;; commit to the new state returned (updated with
+                   ;; underconstraints, perhaps).
+                   st)))
                ((c f^)
                 (begin-when-trace
                  (printf
                   "* underconstraint ~s succeeded with non-singleton stream\n"
                   name)
-                 st))))
+                 (begin
+                   (increment-counter! *non-singleton-succeed-counter*)
+                   st)))))
           ;; `timeout-ticks` is not #f:
           (let ((eng (make-engine
                        (lambda ()                                                  
@@ -322,35 +385,44 @@
                                 (printf
                                  "* underconstraint ~s failed\n"
                                  name)
-                                #f))
+                                (begin
+                                  (increment-counter! *fail-counter*)
+                                  #f)))
                               ((f)
                                (begin-when-trace
                                 (printf
                                  "* underconstraint ~s encountered `(f)` case of case-inf\n"
                                  name)
-                                ;; force `f` immediately, since we have
-                                ;; a timeout to protect us
-                                (loop (f))))
+                                (begin
+                                  (increment-counter! *immature-stream-counter*)
+                                  ;; force `f` immediately, since we have
+                                  ;; a timeout to protect us
+                                  (loop (f)))))
                               ((c)
                                (begin-when-trace
                                 (printf
                                  "* underconstraint ~s succeeded with singleton result\n"
                                  name)
-                                ;; TODO should consider returning `c` here; since the
-                                ;; singleton state is being returned, it is safe to
-                                ;; commit to the new state returned (updated with
-                                ;; underconstraints, perhaps).
-                                st))
+                                (begin
+                                  (increment-counter! *singleton-succeed-counter*)
+                                  ;; TODO should consider returning `c` here; since the
+                                  ;; singleton state is being returned, it is safe to
+                                  ;; commit to the new state returned (updated with
+                                  ;; underconstraints, perhaps).
+                                  st)))
                               ((c f^)
                                (begin-when-trace
                                 (printf
                                  "* underconstraint ~s succeeded with non-singleton stream\n"
                                  name)
-                                st))))))))
+                                (begin
+                                  (increment-counter! *non-singleton-succeed-counter*)
+                                  st)))))))))
             (maybe-time
              (eng timeout-ticks
                   ;; engine "completed" procedure
                   (lambda (ticks-left-over value)
+                    (increment-counter! *engine-completed-counter*)
                     (begin-when-trace
                      (printf
                       "* underconstraint ~s engine completed after ~s of ~s ticks\n"
@@ -360,6 +432,7 @@
                      value))
                   ;; engine "expired" procedure
                   (lambda (new-engine)
+                    (increment-counter! *engine-timedout-counter*)
                     (begin-when-trace
                      (printf
                       "* underconstraint ~s engine ran out of gas after ~s ticks (treating as success)\n"
