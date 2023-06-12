@@ -5,7 +5,7 @@
 (define empty-env/g '())
 
 (define (lookupo/g x env t type)
-  (fresh (y b rest)
+  (freshg (y b rest)
     (== `((,y . ,b) . ,rest) env)
     (condg
      ([]
@@ -55,7 +55,7 @@
     [(ext-env*o/g dx* da* dt* env2 out)])))
 
 (define (evalo/g expr val)
-  (fresh (type)
+  (freshg (type)
     (eval-expo/g expr empty-env/g val 'I type)))
 
 (define (eval-expo/g expr env val EI type)

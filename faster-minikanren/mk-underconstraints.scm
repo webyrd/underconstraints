@@ -135,6 +135,9 @@
 (define (underconstraint-g u)
   (caddr u))
 
+(define (underconstraint-with-g u g)
+  (cons (car u) (cons (cadr u) (cons g (cdddr u)))))
+
 (define (underconstraint-timeout-info u)
   (cadddr u))
 
@@ -284,7 +287,7 @@
                            (st st))
                   (cond
                     ((null? unders) st)
-                    (else (bind (run-and-add-underconstraint (car unders) st)
+                    (else (bind (run-and-add-committing-underconstraint (car unders) st)
                                 (lambda (st) (loop (cdr unders) st)))))))))))))
 
 (define (run-underconstraint-onceo name ge g timeout-info trace-arg? general?)  
@@ -516,11 +519,13 @@
   (lambda (st)
     (let* ((unique-name (parameterize ([gensym-prefix user-name]) (gensym)))
            (under (underconstraint user-name unique-name te t ge g timeout-info trace?)))
-      (run-and-add-underconstraint under st))))
+      (run-and-add-committing-underconstraint under st))))
 
 (define (run-and-add-underconstraint under st)
   (bind (run-general-underconstraint under st)
         (add-underconstraint-to-store under)))
+
+
 
 (define-syntax underconstraino
   (syntax-rules ()
@@ -559,6 +564,18 @@
        (add-underconstraino name 'te t 'ge g `(timeout ,timeout-ticks) #t))]))
 
 
+(define-syntax case-infg
+  (syntax-rules ()
+    ((_ e (() e0) ((c^) e2) ((c f) e3))
+     (let ((stream e))
+       (cond
+         ((not stream) e0)
+         ((not (and (pair? stream)
+                 (procedure? (cdr stream))))
+          (let ((c^ stream)) e2))
+         (else (let ((c (car stream)) (f (cdr stream)))
+                 e3)))))))
+
 (define-syntax (condg stx)
   (syntax-case stx ()
    ((_ ((x ...) (g ...) (b ...)) ...)
@@ -568,35 +585,198 @@
                               (let ([scope (subst-scope (state-S st))])
                                 (let ([x (var scope)] ...)
                                   (cons
-                                    (bind* st g ...)
-                                    (lambda (st) (bind* st b ...))))))
+                                    (bindg* st g ...)
+                                    (lambda (st) (bindg* st b ...))))))
                             ...)
                             (lambda () condg-g))])
          condg-g))))
 
-(define (condg-runtime clauses g)
+(define (condg-runtime clauses g-thunk)
   (lambda (st)
-    (define (nondeterministic) st #;(cons 'progress st g))
+    (define (nondeterministic) (cons st (g-thunk)))
     (let ((st (state-with-scope st (new-scope)))) ;; for set-var-val at choice point entry
       (let loop ([clauses clauses] [previously-found-clause #f])
         (if (null? clauses)
             (and previously-found-clause
                  (let ([guard-result (car previously-found-clause)]
                        [body (cdr previously-found-clause)])
+                   ;; commit, evaluate body
                    (body guard-result)))
             (let* ([clause-evaluated ((car clauses) st)]
-                   [guard-stream (car clause-evaluated)])
-              (let ([guard-result (evaluate-guard guard-stream)])
+                   [guard-stream (car clause-evaluated)]
+                   [body-g (cdr clause-evaluated)])
+              (let ([guard-result (evaluate-guard guard-stream body-g)])
                 (cond
-                  [(eq? 'nondet guard-result) (nondeterministic)]
                   [(not guard-result) (loop (cdr clauses) previously-found-clause)]
                   [else (if previously-found-clause
                             (nondeterministic)
-                            (loop (cdr clauses) (cons guard-result (cdr clause-evaluated))))]))))))))
+                            (loop (cdr clauses) guard-result))]))))))))
 
-(define (evaluate-guard stream)
-  (let ([result (take 2 (lambda () stream))])
-    (cond
-      [(null? result) #f]
-      [(null? (cdr result)) (car result)]
-      [else 'nondet])))
+(define (evaluate-guard stream body-g)
+  (case-infg stream
+    (() #f)
+    ((c) (cons c body-g))
+    ((c f) (cons c (lambda (st) (bindg f body-g))))))
+
+
+
+(define (bindg stream g)
+  (case-infg stream
+    (() #f)
+    ((c) (g c))   ;; committed and finished, so just g left to do
+    ((c1 f1)      ;; committed but suspened...
+     (let ([s2 (g c1)])
+       (case-infg s2
+         (() #f)              ;; g fails, so whole thing fails
+         ((c2) (cons c2 f1))  ;; committed and finished, so just f1 to return to
+         ;; when we return we need to do both f1 and f2
+         ((c2 f2) (cons c2 (lambda (st) (bindg (f1 st) f2)))))))))
+
+(define-syntax bindg*
+  (syntax-rules ()
+    ((_ e) e)
+    ((_ e g0 g ...) (bindg* (bindg e g0) g ...))))
+
+(define-syntax freshg
+  (syntax-rules ()
+    ((_ (x ...) g0 g ...)
+     (lambda (st)
+       (let ((scope (subst-scope (state-S st))))
+         (let ((x (var scope)) ...)
+           (bindg* (g0 st) g ...)))))))
+
+
+
+(define (run-committing-underconstraint-onceo name ge g timeout-info trace-arg? general?)  
+  (define (trace?)
+    (or trace-arg?
+        (*trace-underconstraint-param*)))
+  (define (get-timeout-ticks)
+    (pmatch timeout-info
+      [#f
+       ;; no timeout argument passed to macro, so use the global
+       ;; default parameter
+       (*underconstraint-default-timeout-param*)]
+      [(timeout #f)
+       ;; argument passed to macro that overrides the global default
+       ;; value---timeout disabled
+       #f]
+      [(timeout ,timeout-ticks)
+       (guard (and (integer? timeout-ticks)
+                   (positive? timeout-ticks)))
+       ;; argument passed to macro that overrides the default global
+       ;; parameter---timeout enabled, with `timeout-ticks` ticks
+       ;; (gas) for the engine
+       timeout-ticks]
+      [else
+       (error
+        'run-underconstraint-onceo
+        (printf
+         "ticks argument must be #f or a positive integer: given ~s"
+         rest))]))
+  (define-syntax maybe-time
+    (syntax-rules ()
+      [(_ e) (if (trace?) (time e) e)]))
+  (define-syntax begin-when-trace
+    (syntax-rules ()
+      [(_ e* ... e)
+       (begin
+         (when (trace?)
+           e*)
+         ...
+         e)]))
+  (lambda (st)
+    (let ((st (state-with-scope st (new-scope)))
+          (timeout-ticks (get-timeout-ticks)))
+      (define (do-run)
+        (let ([$ (g st)])
+          (case-infg $
+            (()
+             (begin-when-trace
+                 (printf
+                  "* underconstraint ~s failed\n"
+                  name)
+                 (begin
+                   (increment-counter! *fail-counter*)
+                   #f)))
+            ((c)
+             (begin-when-trace
+               (printf
+                "* underconstraint ~s succeeded with singleton result\n"
+                name)
+               (begin
+                 (increment-counter! *singleton-succeed-counter*)
+                 c)))
+            ((c f^)
+             (begin-when-trace
+               (printf
+                "* underconstraint ~s succeeded with non-singleton stream\n"
+                name)
+               (begin
+                 (increment-counter! *non-singleton-succeed-counter*)
+                 (cons c f^)))))))
+      
+      (when (trace?)
+        (newline)
+        (printf
+         "* underconstraint ~s with timeout ~s trying goal expression:\n~s\n"
+         name timeout-ticks ge))
+
+      (if (not timeout-ticks)
+          (do-run)
+          ;; `timeout-ticks` is not #f:
+          (let ((eng (make-engine do-run)))
+            (maybe-time
+             (eng timeout-ticks
+                  ;; engine "completed" procedure
+                  (lambda (ticks-left-over value)
+                    (increment-counter! *engine-completed-counter*)
+                    (begin-when-trace
+                     (printf
+                      "* underconstraint ~s engine completed after ~s of ~s ticks\n"
+                      name
+                      (- timeout-ticks ticks-left-over)
+                      timeout-ticks)
+                     value))
+                  ;; engine "expired" procedure
+                  (lambda (new-engine)
+                    (increment-counter! *engine-timedout-counter*)
+                    (begin-when-trace
+                     (printf
+                      "* underconstraint ~s engine ran out of gas after ~s ticks (treating as success)\n"
+                      name
+                      timeout-ticks)
+                     ;; to maintain soundness, we must treat
+                     ;; engine timeout timeout as
+                     ;; success---return the original state
+                     (cons st g))))))))))
+
+
+(define (run-and-add-committing-underconstraint under st)
+  (let ((user-name (underconstraint-user-name under))
+        (unique-name (underconstraint-unique-name under))
+        (ge (underconstraint-ge under))
+        (g (underconstraint-g under))
+        (timeout-info (underconstraint-timeout-info under))
+        (trace? (underconstraint-trace? under)))
+  
+    (let ([$ ((run-committing-underconstraint-onceo `(,user-name . ,unique-name) ge g timeout-info trace? #t)
+              (state-with-U/V st empty-U/V))])
+
+      (case-infg $
+       (() #f)
+       ((c^) c^) ;; could remove underconstraint, here
+       ((c^ f^)
+
+        (let ((t (underconstraint-t under)))
+          (let ((vars-to-attribute (vars (walk* t (state-S c^)))))
+            (let* ((under^ (underconstraint-with-t under vars-to-attribute))
+                   (under^ (underconstraint-with-g under^ f^)))
+              (fold-left
+               (lambda (st v)
+                 (set-u/nonduplicate st v under^))
+               c^ vars-to-attribute))))
+
+        ))
+      
+      )))

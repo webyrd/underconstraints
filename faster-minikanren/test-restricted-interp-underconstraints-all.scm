@@ -44,7 +44,7 @@
 
 
 (*trace-underconstraint-param* #f)
-(define max-ticks 300000)
+(define max-ticks 100000)
 
 (time (test "synthesize rember with 3 top-level general underconstraint"
   (run 1 (q)
