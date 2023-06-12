@@ -446,8 +446,7 @@
       (run-and-add-underconstraint under st))))
 
 (define (run-and-add-underconstraint under st)
-  ((add-underconstraint-to-store under) st)
-  #;(bind (run-general-underconstraint under st)
+  (bind (run-general-underconstraint under st)
         (add-underconstraint-to-store under)))
 
 (define-syntax underconstraino
