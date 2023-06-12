@@ -133,12 +133,12 @@
 
 max-ticks 1_000_000
 Testing "synthesize rember with one top-level general underconstraint base-case last"
-*engine-completed-counter*: 152402
-*engine-timedout-counter*: 13899
-*immature-stream-counter*: 41984048
-*fail-counter*: 10648
+*engine-completed-counter*: 152_402
+*engine-timedout-counter*: 13_899
+*immature-stream-counter*: 41_984_048
+*fail-counter*: 10_648
 *singleton-succeed-counter*: 0
-*non-singleton-succeed-counter*: 141754
+*non-singleton-succeed-counter*: 141_754
 (time (test "synthesize rember with one top-level general underconstraint base-case last" ...))
     15278 collections
     146.604183149s elapsed cpu time, including 10.803580174s collecting
@@ -147,12 +147,12 @@ Testing "synthesize rember with one top-level general underconstraint base-case 
 
 max-ticks 100_000:
 Testing "synthesize rember with one top-level general underconstraint base-case last"
-*engine-completed-counter*: 147832
-*engine-timedout-counter*: 17755
-*immature-stream-counter*: 20865094
+*engine-completed-counter*: 147_832
+*engine-timedout-counter*: 17_755
+*immature-stream-counter*: 20_865_094
 *fail-counter*: 9384
 *singleton-succeed-counter*: 0
-*non-singleton-succeed-counter*: 138448
+*non-singleton-succeed-counter*: 138_448
 (time (test "synthesize rember with one top-level general underconstraint base-case last" ...))
     3628 collections
     49.926226171s elapsed cpu time, including 4.417145891s collecting
