@@ -346,7 +346,145 @@
 
 
 (*trace-underconstraint-param* #f)
-(define max-ticks 300000)
+(define max-ticks 100000)
+
+
+(time (test "synthesize rember with conjoined top-level general underconstraint"
+            (run 1 (q)
+              (absento 3 q)
+              (absento 4 q)
+              (absento 5 q)
+              (absento 6 q)
+              (absento 7 q)
+       
+              (underconstraino
+               'u1
+               q
+               (freshg ()
+                       ;; ex1
+                       (evalo/g `(letrec ((rember (lambda (e l) : ((number list) -> list)
+                                                    ,q)))
+                                   (rember 5 '())) '())
+                       ;; ex2
+                       (evalo/g `(letrec ((rember (lambda (e l) : ((number list) -> list)
+                                                    ,q)))
+                                   (rember 6 (cons 6 '()))) '())
+                       ;; ex3
+                       (evalo/g `(letrec ((rember (lambda (e l) : ((number list) -> list)
+                                                    ,q)))
+                                   (rember 7 (cons 3 (cons 4 (cons 7 (cons 6 '())))))) '(3 4 6))
+                       ;; ex4
+                       (evalo/g `(letrec ((rember (lambda (e l) : ((number list) -> list)
+                                                    ,q)))
+                                   (rember 5 (cons 3 (cons 4 (cons 6 (cons 7 '())))))) '(3 4 6 7)))
+               max-ticks)
+
+              ;; ex1
+              (evalo `(letrec ((rember (lambda (e l) : ((number list) -> list)
+                                         ,q)))
+                        (rember 5 '())) '())
+
+              ;; ex2
+              (evalo `(letrec ((rember (lambda (e l) : ((number list) -> list)
+                                         ,q)))
+                        (rember 6 (cons 6 '()))) '())
+
+              ;; ex3
+              (evalo `(letrec ((rember (lambda (e l) : ((number list) -> list)
+                                         ,q)))
+                        (rember 7 (cons 3 (cons 4 (cons 7 (cons 6 '())))))) '(3 4 6))
+
+              ;; ex4
+              (evalo `(letrec ((rember (lambda (e l) : ((number list) -> list)
+                                         ,q)))
+                        (rember 5 (cons 3 (cons 4 (cons 6 (cons 7 '())))))) '(3 4 6 7))
+              
+              )
+            '(((match l
+                 ('() l)
+                 ((cons _.0 _.1) (if (= _.0 e) _.1 (cons _.0 (rember e _.1)))))
+               (=/=
+                ((_.0 _.1))
+                ((_.0 cons))
+                ((_.0 e))
+                ((_.0 if))
+                ((_.0 rember))
+                ((_.1 cons))
+       ((_.1 e))
+       ((_.1 if))
+       ((_.1 rember)))
+     (sym _.0 _.1)))))
+
+
+(time (test "synthesize rember with conjoined top-level general underconstraint, reversed examples"
+            (run 1 (q)
+              (absento 3 q)
+              (absento 4 q)
+              (absento 5 q)
+              (absento 6 q)
+              (absento 7 q)
+       
+              (underconstraino
+               'u1
+               q
+               (freshg ()
+                       ;; ex4
+                       (evalo/g `(letrec ((rember (lambda (e l) : ((number list) -> list)
+                                                    ,q)))
+                                   (rember 5 (cons 3 (cons 4 (cons 6 (cons 7 '())))))) '(3 4 6 7))
+                       ;; ex3
+                       (evalo/g `(letrec ((rember (lambda (e l) : ((number list) -> list)
+                                                    ,q)))
+                                   (rember 7 (cons 3 (cons 4 (cons 7 (cons 6 '())))))) '(3 4 6))
+                       ;; ex2
+                       (evalo/g `(letrec ((rember (lambda (e l) : ((number list) -> list)
+                                                    ,q)))
+                                   (rember 6 (cons 6 '()))) '())
+                       ;; ex1
+                       (evalo/g `(letrec ((rember (lambda (e l) : ((number list) -> list)
+                                                    ,q)))
+                                   (rember 5 '())) '()))
+               max-ticks)
+
+              ;; ex4
+              (evalo `(letrec ((rember (lambda (e l) : ((number list) -> list)
+                                         ,q)))
+                        (rember 5 (cons 3 (cons 4 (cons 6 (cons 7 '())))))) '(3 4 6 7))
+
+              ;; ex3
+              (evalo `(letrec ((rember (lambda (e l) : ((number list) -> list)
+                                         ,q)))
+                        (rember 7 (cons 3 (cons 4 (cons 7 (cons 6 '())))))) '(3 4 6))
+
+              ;; ex2
+              (evalo `(letrec ((rember (lambda (e l) : ((number list) -> list)
+                                         ,q)))
+                        (rember 6 (cons 6 '()))) '())
+              
+              ;; ex1
+              (evalo `(letrec ((rember (lambda (e l) : ((number list) -> list)
+                                         ,q)))
+                        (rember 5 '())) '())
+
+
+
+              
+              )
+            '(((match l
+                 ('() l)
+                 ((cons _.0 _.1) (if (= _.0 e) _.1 (cons _.0 (rember e _.1)))))
+               (=/=
+                ((_.0 _.1))
+                ((_.0 cons))
+                ((_.0 e))
+                ((_.0 if))
+                ((_.0 rember))
+                ((_.1 cons))
+       ((_.1 e))
+       ((_.1 if))
+       ((_.1 rember)))
+     (sym _.0 _.1)))))
+
 
 #;(time (test "synthesize rember with 4 top-level general underconstraint"
             (run 1 (q)
@@ -421,8 +559,8 @@
        ((_.1 rember)))
      (sym _.0 _.1)))))
 
-;; TODO: why is this succeeding with just `l`? Shouldn't match all the underconstraints.
-(time (test "synthesize rember with 4 top-level general underconstraint, just 1 evalo"
+
+#;(time (test "partially synthesize rember with conjoined top-level general underconstraint, just 1 evalo"
             (run 1 (q)
               (absento 3 q)
               (absento 4 q)
@@ -433,12 +571,49 @@
               (underconstraino
                'u1
                q
+               (freshg ()
+                       (evalo/g `(letrec ((rember (lambda (e l) : ((number list) -> list)
+                                                    ,q)))
+                                   (rember 5 '())) '())
+                       (evalo/g `(letrec ((rember (lambda (e l) : ((number list) -> list)
+                                            ,q)))
+                           (rember 6 (cons 6 '()))) '())
+                       (evalo/g `(letrec ((rember (lambda (e l) : ((number list) -> list)
+                                            ,q)))
+                           (rember 7 (cons 3 (cons 4 (cons 7 (cons 6 '())))))) '(3 4 6))
+                       (evalo/g `(letrec ((rember (lambda (e l) : ((number list) -> list)
+                                            ,q)))
+                           (rember 5 (cons 3 (cons 4 (cons 6 (cons 7 '())))))) '(3 4 6 7)))
+               max-ticks)
+
+              (evalo `(letrec ((rember (lambda (e l) : ((number list) -> list)
+                                         ,q)))
+                        (rember 5 '())) '()))
+
+            ;; the unknown syntax _.2 was not explored because examples using recursion case were only in the underconstraint.
+            '(((match l ['() l] [(cons _.0 _.1) _.2]) 
+               (sym _.0 _.1)
+               (absento (3 _.2) (4 _.2) (5 _.2) (6 _.2) (7 _.2))))))
+
+;; TODO: why is this succeeding with just `l`? Shouldn't match all the underconstraints.
+;; Hypothesis: committed results from one underconstraint aren't triggering others.
+#;(time (test "synthesize rember with 4 top-level general underconstraint, just 1 evalo"
+            (run 1 (q)
+              (absento 3 q)
+              (absento 4 q)
+              (absento 5 q)
+              (absento 6 q)
+              (absento 7 q)
+       
+              (trace-underconstraino
+               'u1
+               q
                (evalo/g `(letrec ((rember (lambda (e l) : ((number list) -> list)
                                             ,q)))
                         (rember 5 '())) '())
                max-ticks)
     
-              (underconstraino
+              (trace-underconstraino
                'u2
                q
                (evalo/g `(letrec ((rember (lambda (e l) : ((number list) -> list)
@@ -446,7 +621,7 @@
                            (rember 6 (cons 6 '()))) '())
                max-ticks)
 
-              (underconstraino
+              (trace-underconstraino
                'u3
                q
                (evalo/g `(letrec ((rember (lambda (e l) : ((number list) -> list)
@@ -454,7 +629,7 @@
                            (rember 7 (cons 3 (cons 4 (cons 7 (cons 6 '())))))) '(3 4 6))
                max-ticks)
               
-              (underconstraino
+              (trace-underconstraino
                'u4
                q
                (evalo/g `(letrec ((rember (lambda (e l) : ((number list) -> list)
