@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv=Content-Type content="text/html;charset=utf-8">
+<title>mk-vicare.scm</title>
+<style type="text/css">
+* { border: 0; margin: 0; outline: 0; padding: 0; vertical-align: baseline; }
+code, kbd, pre, samp { font-family: monospace, monospace; font-size: 1rem; }
+html { -moz-osx-font-smoothing: grayscale; -webkit-font-smoothing: antialiased; }
+table { border-collapse: collapse; border-spacing: 0; }
+body { padding: 1rem; }
+h1, h2, h3, h4 { line-height: 1.25; margin-bottom: 0.5rem; }
+h1 { font-size: 1.296rem; }
+h2 { font-size: 1.215rem; }
+h3 { font-size: 1.138rem; }
+h4 { font-size: 1.067rem; }
+html { font-family: monospace, monospace; font-size: 1rem; }
+p { margin-bottom: 1.25rem; }
+.pc0 { background-color: #111111; color: white; white-space: nowrap; }
+.pc1 { background-color: #607D8B; color: white; white-space: nowrap; }
+.pc2 { background-color: #9C27B0; color: black; white-space: nowrap; }
+.pc3 { background-color: #673AB7; color: white; white-space: nowrap; }
+.pc4 { background-color: #3F51B5; color: white; white-space: nowrap; }
+.pc5 { background-color: #2196F3; color: black; white-space: nowrap; }
+.pc6 { background-color: #00BCD4; color: black; white-space: nowrap; }
+.pc7 { background-color: #4CAF50; color: black; white-space: nowrap; }
+.pc8 { background-color: #CDDC39; color: black; white-space: nowrap; }
+.pc9 { background-color: #FFEB3B; color: black; white-space: nowrap; }
+.pc10 { background-color: #FFC107; color: black; white-space: nowrap; }
+.pc11 { background-color: #FF9800; color: black; white-space: nowrap; }
+.pc12 { background-color: #F44336; color: white; white-space: nowrap; }
+</style>
+</head>
+<body class=pc0>
+<h1 style="margin-bottom: 1rem">mk-vicare.scm<span style="opacity: 0.5"> on Mon Jun 12 01:41:21 2023</span></h1>
+<table><tr><td style="color: #666666; font-weight: bold; padding-right: 1rem; text-align: right"><pre>
+<span id=line1>1
+</span><span id=line2>2
+</span><span id=line3>3
+</span><span id=line4>4
+</span><span id=line5>5
+</span><span id=line6>6
+</span><span id=line7>7
+</span><span id=line8>8
+</span><span id=line9>9
+</span><span id=line10>10
+</span><span id=line11>11
+</span><span id=line12>12
+</span><span id=line13>13
+</span><span id=line14>14
+</span><span id=line15>15
+</span><span id=line16>16
+</span><span id=line17>17
+</span><span id=line18>18
+</span><span id=line19>19
+</span><span id=line20>20
+</span><span id=line21>21
+</span><span id=line22>22
+</span><span id=line23>23
+</span><span id=line24>24
+</span><span id=line25>25
+</span><span id=line26>26
+</span><span id=line27>27
+</span><span id=line28>28
+</span><span id=line29>29
+</span><span id=line30>30
+</span><span id=line31>31
+</span><span id=line32>32
+</span><span id=line33>33
+</span><span id=line34>34
+</span><span id=line35>35
+</span><span id=line36>36
+</span><span id=line37>37
+</span><span id=line38>38
+</span><span id=line39>39
+</span><span id=line40>40
+</span><span id=line41>41
+</span><span id=line42>42
+</span><span id=line43>43
+</span><span id=line44>44
+</span><span id=line45>45
+</span><span id=line46>46
+</span><span id=line47>47
+</span><span id=line48>48
+</span><span id=line49>49
+</span><span id=line50>50
+</span><span id=line51>51
+</span><span id=line52>52
+</span><span id=line53>53
+</span><span id=line54>54
+</span><span id=line55>55
+</span><span id=line56>56
+</span><span id=line57>57
+</span><span id=line58>58
+</span><span id=line59>59
+</span><span id=line60>60
+</span><span id=line61>61
+</span><span id=line62>62
+</span><span id=line63>63
+</span><span id=line64>64
+</span><span id=line65>65
+</span><span id=line66>66
+</span><span id=line67>67
+</span><span id=line68>68
+</span><span id=line69>69
+</span><span id=line70>70
+</span><span id=line71>71
+</span><span id=line72>72
+</span><span id=line73>73
+</span><span id=line74>74
+</span><span id=line75>75
+</span><span id=line76>76
+</span><span id=line77>77
+</span><span id=line78>78
+</span><span id=line79>79
+</span><span id=line80>80
+</span><span id=line81>81
+</span><span id=line82>82
+</span><span id=line83>83
+</span><span id=line84>84
+</span><span id=line85>85
+</span><span id=line86>86
+</span><span id=line87>87
+</span><span id=line88>88
+</span><span id=line89>89
+</span><span id=line90>90
+</span><span id=line91>91
+</span><span id=line92>92
+</span><span id=line93>93
+</span><span id=line94>94
+</span><span id=line95>95
+</span><span id=line96>96
+</span><span id=line97>97
+</span><span id=line98>98
+</span><span id=line99>99
+</span><span id=line100>100
+</span><span id=line101>101
+</span><span id=line102>102
+</span><span id=line103>103
+</span><span id=line104>104
+</span><span id=line105>105
+</span><span id=line106>106
+</span><span id=line107>107
+</span><span id=line108>108
+</span><span id=line109>109
+</span><span id=line110>110
+</span><span id=line111>111
+</span><span id=line112>112
+</span></pre></td><td><pre>
+; This file needs to be loaded before mk.scm for Vicare. I can't figure
+; out how to do loads relative to a source file rather than the working
+; directory, else this file would load mk.scm.
+
+; Trie implementation. The initial original trie version was due to Abdulaziz Ghuloum.
+; Greg Rosenblatt changed it to an N-way Trie to reduce depth.
+
+;;; subst ::= (empty)
+;;;         | (node even odd)
+;;;         | (data idx val)
+
+(define-record-type node (fields e o))
+(define-record-type data (fields idx val))
+
+<span class=pc2 title="line 15 char 1 count 1">(define shift </span><span class=pc2 title="line 15 char 15 count 1">(lambda (n) </span><span class=pc1 title="line 15 char 27 count 0">(</span><span class=pc1 title="line 15 char 28 count 0">fxsra</span><span class=pc1 title="line 15 char 27 count 0"> </span><span class=pc1 title="line 15 char 34 count 0">n</span><span class=pc1 title="line 15 char 27 count 0"> </span><span class=pc1 title="line 15 char 36 count 0">1</span><span class=pc1 title="line 15 char 27 count 0">)</span><span class=pc2 title="line 15 char 15 count 1">)</span><span class=pc2 title="line 15 char 1 count 1">)</span>
+<span class=pc2 title="line 16 char 1 count 1">(define unshift </span><span class=pc2 title="line 16 char 17 count 1">(lambda (n i) </span><span class=pc1 title="line 16 char 31 count 0">(</span><span class=pc1 title="line 16 char 32 count 0">fx+</span><span class=pc1 title="line 16 char 31 count 0"> </span><span class=pc1 title="line 16 char 36 count 0">(</span><span class=pc1 title="line 16 char 37 count 0">fxsll</span><span class=pc1 title="line 16 char 36 count 0"> </span><span class=pc1 title="line 16 char 43 count 0">n</span><span class=pc1 title="line 16 char 36 count 0"> </span><span class=pc1 title="line 16 char 45 count 0">1</span><span class=pc1 title="line 16 char 36 count 0">)</span><span class=pc1 title="line 16 char 31 count 0"> </span><span class=pc1 title="line 16 char 48 count 0">i</span><span class=pc1 title="line 16 char 31 count 0">)</span><span class=pc2 title="line 16 char 17 count 1">)</span><span class=pc2 title="line 16 char 1 count 1">)</span>
+
+<span class=pc2 title="line 18 char 1 count 1">(define shift-size </span><span class=pc2 title="line 18 char 20 count 1">4</span><span class=pc2 title="line 18 char 1 count 1">)</span>
+<span class=pc2 title="line 19 char 1 count 1">(define node-size </span><span class=pc2 title="line 19 char 19 count 1">(</span><span class=pc2 title="line 19 char 20 count 1">fxsll</span><span class=pc2 title="line 19 char 19 count 1"> </span><span class=pc2 title="line 19 char 26 count 1">1</span><span class=pc2 title="line 19 char 19 count 1"> </span><span class=pc2 title="line 19 char 28 count 1">shift-size</span><span class=pc2 title="line 19 char 19 count 1">)</span><span class=pc2 title="line 19 char 1 count 1">)</span>
+<span class=pc2 title="line 20 char 1 count 1">(define local-mask </span><span class=pc2 title="line 20 char 20 count 1">(</span><span class=pc2 title="line 20 char 21 count 1">fx-</span><span class=pc2 title="line 20 char 20 count 1"> </span><span class=pc2 title="line 20 char 25 count 1">node-size</span><span class=pc2 title="line 20 char 20 count 1"> </span><span class=pc2 title="line 20 char 35 count 1">1</span><span class=pc2 title="line 20 char 20 count 1">)</span><span class=pc2 title="line 20 char 1 count 1">)</span>
+<span class=pc2 title="line 21 char 1 count 1">(define (shift-n xi) </span><span class=pc9 title="line 21 char 22 count 2,170,771,032">(</span><span class=pc9 title="line 21 char 23 count 2,170,771,032">fxsra</span><span class=pc9 title="line 21 char 22 count 2,170,771,032"> </span><span class=pc9 title="line 21 char 29 count 2,170,771,032">xi</span><span class=pc9 title="line 21 char 22 count 2,170,771,032"> </span><span class=pc9 title="line 21 char 32 count 2,170,771,032">shift-size</span><span class=pc9 title="line 21 char 22 count 2,170,771,032">)</span><span class=pc2 title="line 21 char 1 count 1">)</span>
+<span class=pc2 title="line 22 char 1 count 1">(define (local-n xi) </span><span class=pc9 title="line 22 char 22 count 2,170,771,032">(</span><span class=pc9 title="line 22 char 23 count 2,170,771,032">fxand</span><span class=pc9 title="line 22 char 22 count 2,170,771,032"> </span><span class=pc9 title="line 22 char 29 count 2,170,771,032">xi</span><span class=pc9 title="line 22 char 22 count 2,170,771,032"> </span><span class=pc9 title="line 22 char 32 count 2,170,771,032">local-mask</span><span class=pc9 title="line 22 char 22 count 2,170,771,032">)</span><span class=pc2 title="line 22 char 1 count 1">)</span>
+<span class=pc2 title="line 23 char 1 count 1">(define node-n? </span><span class=pc2 title="line 23 char 17 count 1">vector?</span><span class=pc2 title="line 23 char 1 count 1">)</span>
+<span class=pc2 title="line 24 char 1 count 1">(define (node-n-new i0 v0)</span>
+  <span class=pc2 title="line 24 char 1 count 1">(define result </span><span class=pc2 title="line 25 char 18 count 10,254,631">(</span><span class=pc2 title="line 25 char 19 count 10,254,631">make-vector</span><span class=pc2 title="line 25 char 18 count 10,254,631"> </span><span class=pc2 title="line 25 char 31 count 10,254,631">(</span><span class=pc2 title="line 25 char 32 count 10,254,631">fx+</span><span class=pc2 title="line 25 char 31 count 10,254,631"> </span><span class=pc2 title="line 25 char 36 count 10,254,631">i0</span><span class=pc2 title="line 25 char 31 count 10,254,631"> </span><span class=pc2 title="line 25 char 39 count 10,254,631">1</span><span class=pc2 title="line 25 char 31 count 10,254,631">)</span><span class=pc2 title="line 25 char 18 count 10,254,631"> </span><span class=pc2 title="line 25 char 42 count 10,254,631">'()</span><span class=pc2 title="line 25 char 18 count 10,254,631">)</span><span class=pc2 title="line 24 char 1 count 1">)</span>
+  <span class=pc2 title="line 26 char 3 count 10,254,631">(</span><span class=pc2 title="line 26 char 4 count 10,254,631">vector-set!</span><span class=pc2 title="line 26 char 3 count 10,254,631"> </span><span class=pc2 title="line 26 char 16 count 10,254,631">result</span><span class=pc2 title="line 26 char 3 count 10,254,631"> </span><span class=pc2 title="line 26 char 23 count 10,254,631">i0</span><span class=pc2 title="line 26 char 3 count 10,254,631"> </span><span class=pc2 title="line 26 char 26 count 10,254,631">v0</span><span class=pc2 title="line 26 char 3 count 10,254,631">)</span>
+  <span class=pc2 title="line 27 char 3 count 10,254,631">result</span><span class=pc2 title="line 24 char 1 count 1">)</span>
+<span class=pc2 title="line 28 char 1 count 1">(define (node-n-get nd idx)</span>
+  <span class=pc9 title="line 29 char 3 count 2,160,516,391">(if </span><span class=pc9 title="line 29 char 7 count 2,160,516,391">(</span><span class=pc9 title="line 29 char 8 count 2,160,516,391">fx&lt;?</span><span class=pc9 title="line 29 char 7 count 2,160,516,391"> </span><span class=pc9 title="line 29 char 13 count 2,160,516,391">idx</span><span class=pc9 title="line 29 char 7 count 2,160,516,391"> </span><span class=pc9 title="line 29 char 17 count 2,160,516,391">(</span><span class=pc9 title="line 29 char 18 count 2,160,516,391">vector-length</span><span class=pc9 title="line 29 char 17 count 2,160,516,391"> </span><span class=pc9 title="line 29 char 32 count 2,160,516,391">nd</span><span class=pc9 title="line 29 char 17 count 2,160,516,391">)</span><span class=pc9 title="line 29 char 7 count 2,160,516,391">)</span><span class=pc9 title="line 29 char 3 count 2,160,516,391"> </span><span class=pc9 title="line 29 char 37 count 2,086,329,597">(</span><span class=pc9 title="line 29 char 38 count 2,086,329,597">vector-ref</span><span class=pc9 title="line 29 char 37 count 2,086,329,597"> </span><span class=pc9 title="line 29 char 49 count 2,086,329,597">nd</span><span class=pc9 title="line 29 char 37 count 2,086,329,597"> </span><span class=pc9 title="line 29 char 52 count 2,086,329,597">idx</span><span class=pc9 title="line 29 char 37 count 2,086,329,597">)</span><span class=pc9 title="line 29 char 3 count 2,160,516,391"> </span><span class=pc2 title="line 29 char 57 count 74,186,794">'()</span><span class=pc9 title="line 29 char 3 count 2,160,516,391">)</span><span class=pc2 title="line 28 char 1 count 1">)</span>
+<span class=pc2 title="line 30 char 1 count 1">(define (node-n-put nd idx val)</span>
+  <span class=pc2 title="line 30 char 1 count 1">(define len0 </span><span class=pc2 title="line 31 char 16 count 143,853,393">(</span><span class=pc2 title="line 31 char 17 count 143,853,393">vector-length</span><span class=pc2 title="line 31 char 16 count 143,853,393"> </span><span class=pc2 title="line 31 char 31 count 143,853,393">nd</span><span class=pc2 title="line 31 char 16 count 143,853,393">)</span><span class=pc2 title="line 30 char 1 count 1">)</span>
+  <span class=pc2 title="line 30 char 1 count 1">(define len1 </span><span class=pc2 title="line 32 char 16 count 143,853,393">(</span><span class=pc2 title="line 32 char 17 count 143,853,393">fxmax</span><span class=pc2 title="line 32 char 16 count 143,853,393"> </span><span class=pc2 title="line 32 char 23 count 143,853,393">len0</span><span class=pc2 title="line 32 char 16 count 143,853,393"> </span><span class=pc2 title="line 32 char 28 count 143,853,393">(</span><span class=pc2 title="line 32 char 29 count 143,853,393">fx+</span><span class=pc2 title="line 32 char 28 count 143,853,393"> </span><span class=pc2 title="line 32 char 33 count 143,853,393">idx</span><span class=pc2 title="line 32 char 28 count 143,853,393"> </span><span class=pc2 title="line 32 char 37 count 143,853,393">1</span><span class=pc2 title="line 32 char 28 count 143,853,393">)</span><span class=pc2 title="line 32 char 16 count 143,853,393">)</span><span class=pc2 title="line 30 char 1 count 1">)</span>
+  <span class=pc2 title="line 30 char 1 count 1">(define result </span><span class=pc2 title="line 33 char 18 count 143,853,393">(</span><span class=pc2 title="line 33 char 19 count 143,853,393">make-vector</span><span class=pc2 title="line 33 char 18 count 143,853,393"> </span><span class=pc2 title="line 33 char 31 count 143,853,393">len1</span><span class=pc2 title="line 33 char 18 count 143,853,393"> </span><span class=pc2 title="line 33 char 36 count 143,853,393">'()</span><span class=pc2 title="line 33 char 18 count 143,853,393">)</span><span class=pc2 title="line 30 char 1 count 1">)</span>
+  <span class=pc2 title="line 34 char 3 count 143,853,393">(let copy ((ci </span><span class=pc2 title="line 34 char 18 count 143,853,393">0</span><span class=pc2 title="line 34 char 3 count 143,853,393">))</span>
+    <span class=pc9 title="line 35 char 5 count 2,153,208,717">(if </span><span class=pc9 title="line 35 char 9 count 2,153,208,717">(</span><span class=pc9 title="line 35 char 10 count 2,153,208,717">fx=?</span><span class=pc9 title="line 35 char 9 count 2,153,208,717"> </span><span class=pc9 title="line 35 char 15 count 2,153,208,717">len0</span><span class=pc9 title="line 35 char 9 count 2,153,208,717"> </span><span class=pc9 title="line 35 char 20 count 2,153,208,717">ci</span><span class=pc9 title="line 35 char 9 count 2,153,208,717">)</span><span class=pc9 title="line 35 char 5 count 2,153,208,717"> </span><span class=pc2 title="line 35 char 24 count 143,852,048">(begin </span><span class=pc2 title="line 35 char 31 count 143,852,048">(</span><span class=pc2 title="line 35 char 32 count 143,852,048">vector-set!</span><span class=pc2 title="line 35 char 31 count 143,852,048"> </span><span class=pc2 title="line 35 char 44 count 143,852,048">result</span><span class=pc2 title="line 35 char 31 count 143,852,048"> </span><span class=pc2 title="line 35 char 51 count 143,852,048">idx</span><span class=pc2 title="line 35 char 31 count 143,852,048"> </span><span class=pc2 title="line 35 char 55 count 143,852,048">val</span><span class=pc2 title="line 35 char 31 count 143,852,048">)</span><span class=pc2 title="line 35 char 24 count 143,852,048"> </span><span class=pc2 title="line 35 char 60 count 143,852,048">result</span><span class=pc2 title="line 35 char 24 count 143,852,048">)</span>
+      <span class=pc9 title="line 36 char 7 count 2,009,355,324">(begin </span><span class=pc9 title="line 36 char 14 count 2,009,355,324">(</span><span class=pc9 title="line 36 char 15 count 2,009,355,324">vector-set!</span><span class=pc9 title="line 36 char 14 count 2,009,355,324"> </span><span class=pc9 title="line 36 char 27 count 2,009,355,324">result</span><span class=pc9 title="line 36 char 14 count 2,009,355,324"> </span><span class=pc9 title="line 36 char 34 count 2,009,355,324">ci</span><span class=pc9 title="line 36 char 14 count 2,009,355,324"> </span><span class=pc9 title="line 36 char 37 count 2,009,355,324">(</span><span class=pc9 title="line 36 char 38 count 2,009,355,324">vector-ref</span><span class=pc9 title="line 36 char 37 count 2,009,355,324"> </span><span class=pc9 title="line 36 char 49 count 2,009,355,324">nd</span><span class=pc9 title="line 36 char 37 count 2,009,355,324"> </span><span class=pc9 title="line 36 char 52 count 2,009,355,324">ci</span><span class=pc9 title="line 36 char 37 count 2,009,355,324">)</span><span class=pc9 title="line 36 char 14 count 2,009,355,324">)</span><span class=pc9 title="line 36 char 7 count 2,009,355,324"> </span><span class=pc9 title="line 36 char 57 count 2,009,355,324">(</span><span class=pc9 title="line 36 char 58 count 2,009,355,324">copy</span><span class=pc9 title="line 36 char 57 count 2,009,355,324"> </span><span class=pc9 title="line 36 char 63 count 2,009,355,324">(</span><span class=pc9 title="line 36 char 64 count 2,009,355,324">fx+</span><span class=pc9 title="line 36 char 63 count 2,009,355,324"> </span><span class=pc9 title="line 36 char 68 count 2,009,355,324">ci</span><span class=pc9 title="line 36 char 63 count 2,009,355,324"> </span><span class=pc9 title="line 36 char 71 count 2,009,355,324">1</span><span class=pc9 title="line 36 char 63 count 2,009,355,324">)</span><span class=pc9 title="line 36 char 57 count 2,009,355,324">)</span><span class=pc9 title="line 36 char 7 count 2,009,355,324">)</span><span class=pc9 title="line 35 char 5 count 2,153,208,717">)</span><span class=pc2 title="line 34 char 3 count 143,853,393">)</span><span class=pc2 title="line 30 char 1 count 1">)</span>
+
+<span class=pc2 title="line 38 char 1 count 1">(define (nwt:size trie)</span>
+  <span class=pc2 title="line 39 char 3 count 2">(cond</span>
+    <span class=pc2 title="line 39 char 3 count 2">(</span><span class=pc2 title="line 40 char 6 count 2">(</span><span class=pc2 title="line 40 char 7 count 2">node-n?</span><span class=pc2 title="line 40 char 6 count 2"> </span><span class=pc2 title="line 40 char 15 count 2">trie</span><span class=pc2 title="line 40 char 6 count 2">)</span>
+     <span class=pc1 title="line 41 char 6 count 0">(let loop ((ci </span><span class=pc1 title="line 41 char 21 count 0">0</span><span class=pc1 title="line 41 char 6 count 0">) (sz </span><span class=pc1 title="line 41 char 28 count 0">0</span><span class=pc1 title="line 41 char 6 count 0">))</span>
+       <span class=pc1 title="line 42 char 8 count 0">(if </span><span class=pc1 title="line 42 char 12 count 0">(</span><span class=pc1 title="line 42 char 13 count 0">fx=?</span><span class=pc1 title="line 42 char 12 count 0"> </span><span class=pc1 title="line 42 char 18 count 0">node-size</span><span class=pc1 title="line 42 char 12 count 0"> </span><span class=pc1 title="line 42 char 28 count 0">ci</span><span class=pc1 title="line 42 char 12 count 0">)</span><span class=pc1 title="line 42 char 8 count 0"> </span><span class=pc1 title="line 42 char 32 count 0">sz</span>
+         <span class=pc1 title="line 43 char 10 count 0">(</span><span class=pc1 title="line 43 char 11 count 0">loop</span><span class=pc1 title="line 43 char 10 count 0"> </span><span class=pc1 title="line 43 char 16 count 0">(</span><span class=pc1 title="line 43 char 17 count 0">fx+</span><span class=pc1 title="line 43 char 16 count 0"> </span><span class=pc1 title="line 43 char 21 count 0">ci</span><span class=pc1 title="line 43 char 16 count 0"> </span><span class=pc1 title="line 43 char 24 count 0">1</span><span class=pc1 title="line 43 char 16 count 0">)</span><span class=pc1 title="line 43 char 10 count 0"> </span><span class=pc1 title="line 43 char 27 count 0">(</span><span class=pc1 title="line 43 char 28 count 0">fx+</span><span class=pc1 title="line 43 char 27 count 0"> </span><span class=pc1 title="line 43 char 32 count 0">sz</span><span class=pc1 title="line 43 char 27 count 0"> </span><span class=pc1 title="line 43 char 35 count 0">(</span><span class=pc1 title="line 43 char 36 count 0">nwt:size</span><span class=pc1 title="line 43 char 35 count 0"> </span><span class=pc1 title="line 43 char 45 count 0">(</span><span class=pc1 title="line 43 char 46 count 0">node-n-get</span><span class=pc1 title="line 43 char 45 count 0"> </span><span class=pc1 title="line 43 char 57 count 0">trie</span><span class=pc1 title="line 43 char 45 count 0"> </span><span class=pc1 title="line 43 char 62 count 0">ci</span><span class=pc1 title="line 43 char 45 count 0">)</span><span class=pc1 title="line 43 char 35 count 0">)</span><span class=pc1 title="line 43 char 27 count 0">)</span><span class=pc1 title="line 43 char 10 count 0">)</span><span class=pc1 title="line 42 char 8 count 0">)</span><span class=pc1 title="line 41 char 6 count 0">)</span><span class=pc2 title="line 39 char 3 count 2">)</span>
+    <span class=pc2 title="line 39 char 3 count 2">(</span><span class=pc2 title="line 44 char 6 count 2">(</span><span class=pc2 title="line 44 char 7 count 2">data?</span><span class=pc2 title="line 44 char 6 count 2"> </span><span class=pc2 title="line 44 char 13 count 2">trie</span><span class=pc2 title="line 44 char 6 count 2">)</span><span class=pc2 title="line 39 char 3 count 2"> </span><span class=pc2 title="line 44 char 19 count 1">1</span><span class=pc2 title="line 39 char 3 count 2">)</span>
+    <span class=pc2 title="line 39 char 3 count 2">(else </span><span class=pc2 title="line 45 char 11 count 1">0</span><span class=pc2 title="line 39 char 3 count 2">))</span><span class=pc2 title="line 38 char 1 count 1">)</span>
+
+<span class=pc2 title="line 47 char 1 count 1">(define (nwt:lookup trie xi)</span>
+  <span class=pc11 title="line 48 char 3 count 2,966,684,511">(cond</span>
+    <span class=pc11 title="line 48 char 3 count 2,966,684,511">(</span><span class=pc11 title="line 49 char 6 count 2,966,684,511">(</span><span class=pc11 title="line 49 char 7 count 2,966,684,511">node-n?</span><span class=pc11 title="line 49 char 6 count 2,966,684,511"> </span><span class=pc11 title="line 49 char 15 count 2,966,684,511">trie</span><span class=pc11 title="line 49 char 6 count 2,966,684,511">)</span><span class=pc11 title="line 48 char 3 count 2,966,684,511"> </span><span class=pc9 title="line 49 char 21 count 2,016,661,775">(</span><span class=pc9 title="line 49 char 22 count 2,016,661,775">nwt:lookup</span><span class=pc9 title="line 49 char 21 count 2,016,661,775"> </span><span class=pc9 title="line 49 char 33 count 2,016,661,775">(</span><span class=pc9 title="line 49 char 34 count 2,016,661,775">node-n-get</span><span class=pc9 title="line 49 char 33 count 2,016,661,775"> </span><span class=pc9 title="line 49 char 45 count 2,016,661,775">trie</span><span class=pc9 title="line 49 char 33 count 2,016,661,775"> </span><span class=pc9 title="line 49 char 50 count 2,016,661,775">(</span><span class=pc9 title="line 49 char 51 count 2,016,661,775">local-n</span><span class=pc9 title="line 49 char 50 count 2,016,661,775"> </span><span class=pc9 title="line 49 char 59 count 2,016,661,775">xi</span><span class=pc9 title="line 49 char 50 count 2,016,661,775">)</span><span class=pc9 title="line 49 char 33 count 2,016,661,775">)</span><span class=pc9 title="line 49 char 21 count 2,016,661,775"> </span><span class=pc9 title="line 49 char 64 count 2,016,661,775">(</span><span class=pc9 title="line 49 char 65 count 2,016,661,775">shift-n</span><span class=pc9 title="line 49 char 64 count 2,016,661,775"> </span><span class=pc9 title="line 49 char 73 count 2,016,661,775">xi</span><span class=pc9 title="line 49 char 64 count 2,016,661,775">)</span><span class=pc9 title="line 49 char 21 count 2,016,661,775">)</span><span class=pc11 title="line 48 char 3 count 2,966,684,511">)</span>
+    <span class=pc11 title="line 48 char 3 count 2,966,684,511">(</span><span class=pc6 title="line 50 char 6 count 950,022,736">(</span><span class=pc6 title="line 50 char 7 count 950,022,736">data?</span><span class=pc6 title="line 50 char 6 count 950,022,736"> </span><span class=pc6 title="line 50 char 13 count 950,022,736">trie</span><span class=pc6 title="line 50 char 6 count 950,022,736">)</span><span class=pc11 title="line 48 char 3 count 2,966,684,511"> </span><span class=pc4 title="line 50 char 19 count 602,561,434">(and </span><span class=pc4 title="line 50 char 24 count 602,561,434">(</span><span class=pc4 title="line 50 char 25 count 602,561,434">fx=?</span><span class=pc4 title="line 50 char 24 count 602,561,434"> </span><span class=pc4 title="line 50 char 30 count 602,561,434">xi</span><span class=pc4 title="line 50 char 24 count 602,561,434"> </span><span class=pc4 title="line 50 char 33 count 602,561,434">(</span><span class=pc4 title="line 50 char 34 count 602,561,434">data-idx</span><span class=pc4 title="line 50 char 33 count 602,561,434"> </span><span class=pc4 title="line 50 char 43 count 602,561,434">trie</span><span class=pc4 title="line 50 char 33 count 602,561,434">)</span><span class=pc4 title="line 50 char 24 count 602,561,434">)</span><span class=pc4 title="line 50 char 19 count 602,561,434"> </span><span class=pc4 title="line 50 char 50 count 454,112,029">trie</span><span class=pc4 title="line 50 char 19 count 602,561,434">)</span><span class=pc11 title="line 48 char 3 count 2,966,684,511">)</span>
+    <span class=pc11 title="line 48 char 3 count 2,966,684,511">(else </span><span class=pc3 title="line 51 char 11 count 347,461,302">#f</span><span class=pc11 title="line 48 char 3 count 2,966,684,511">))</span><span class=pc2 title="line 47 char 1 count 1">)</span>
+
+<span class=pc2 title="line 53 char 1 count 1">(define (nwt:bind trie xi val)</span>
+  <span class=pc3 title="line 54 char 3 count 219,677,034">(cond</span>
+    <span class=pc3 title="line 54 char 3 count 219,677,034">(</span><span class=pc3 title="line 55 char 6 count 219,677,034">(</span><span class=pc3 title="line 55 char 7 count 219,677,034">node-n?</span><span class=pc3 title="line 55 char 6 count 219,677,034"> </span><span class=pc3 title="line 55 char 15 count 219,677,034">trie</span><span class=pc3 title="line 55 char 6 count 219,677,034">)</span>
+     <span class=pc2 title="line 56 char 6 count 143,854,616">(let ((li </span><span class=pc2 title="line 56 char 16 count 143,854,616">(</span><span class=pc2 title="line 56 char 17 count 143,854,616">local-n</span><span class=pc2 title="line 56 char 16 count 143,854,616"> </span><span class=pc2 title="line 56 char 25 count 143,854,616">xi</span><span class=pc2 title="line 56 char 16 count 143,854,616">)</span><span class=pc2 title="line 56 char 6 count 143,854,616">))</span>
+       <span class=pc2 title="line 57 char 8 count 143,854,616">(</span><span class=pc2 title="line 57 char 9 count 143,854,616">node-n-put</span><span class=pc2 title="line 57 char 8 count 143,854,616"> </span><span class=pc2 title="line 57 char 20 count 143,854,616">trie</span><span class=pc2 title="line 57 char 8 count 143,854,616"> </span><span class=pc2 title="line 57 char 25 count 143,854,616">li</span><span class=pc2 title="line 57 char 8 count 143,854,616"> </span><span class=pc2 title="line 57 char 28 count 143,854,616">(</span><span class=pc2 title="line 57 char 29 count 143,854,616">nwt:bind</span><span class=pc2 title="line 57 char 28 count 143,854,616"> </span><span class=pc2 title="line 57 char 38 count 143,854,616">(</span><span class=pc2 title="line 57 char 39 count 143,854,616">node-n-get</span><span class=pc2 title="line 57 char 38 count 143,854,616"> </span><span class=pc2 title="line 57 char 50 count 143,854,616">trie</span><span class=pc2 title="line 57 char 38 count 143,854,616"> </span><span class=pc2 title="line 57 char 55 count 143,854,616">li</span><span class=pc2 title="line 57 char 38 count 143,854,616">)</span><span class=pc2 title="line 57 char 28 count 143,854,616"> </span><span class=pc2 title="line 57 char 59 count 143,854,616">(</span><span class=pc2 title="line 57 char 60 count 143,854,616">shift-n</span><span class=pc2 title="line 57 char 59 count 143,854,616"> </span><span class=pc2 title="line 57 char 68 count 143,854,616">xi</span><span class=pc2 title="line 57 char 59 count 143,854,616">)</span><span class=pc2 title="line 57 char 28 count 143,854,616"> </span><span class=pc2 title="line 57 char 72 count 143,854,616">val</span><span class=pc2 title="line 57 char 28 count 143,854,616">)</span><span class=pc2 title="line 57 char 8 count 143,854,616">)</span><span class=pc2 title="line 56 char 6 count 143,854,616">)</span><span class=pc3 title="line 54 char 3 count 219,677,034">)</span>
+    <span class=pc3 title="line 54 char 3 count 219,677,034">(</span><span class=pc2 title="line 58 char 6 count 75,822,418">(</span><span class=pc2 title="line 58 char 7 count 75,822,418">data?</span><span class=pc2 title="line 58 char 6 count 75,822,418"> </span><span class=pc2 title="line 58 char 13 count 75,822,418">trie</span><span class=pc2 title="line 58 char 6 count 75,822,418">)</span>
+     <span class=pc2 title="line 59 char 6 count 43,257,858">(let ((xi0 </span><span class=pc2 title="line 59 char 17 count 43,257,858">(</span><span class=pc2 title="line 59 char 18 count 43,257,858">data-idx</span><span class=pc2 title="line 59 char 17 count 43,257,858"> </span><span class=pc2 title="line 59 char 27 count 43,257,858">trie</span><span class=pc2 title="line 59 char 17 count 43,257,858">)</span><span class=pc2 title="line 59 char 6 count 43,257,858">))</span>
+       <span class=pc2 title="line 60 char 8 count 43,257,858">(if </span><span class=pc2 title="line 60 char 12 count 43,257,858">(</span><span class=pc2 title="line 60 char 13 count 43,257,858">fx=?</span><span class=pc2 title="line 60 char 12 count 43,257,858"> </span><span class=pc2 title="line 60 char 18 count 43,257,858">xi0</span><span class=pc2 title="line 60 char 12 count 43,257,858"> </span><span class=pc2 title="line 60 char 22 count 43,257,858">xi</span><span class=pc2 title="line 60 char 12 count 43,257,858">)</span><span class=pc2 title="line 60 char 8 count 43,257,858"> </span><span class=pc2 title="line 60 char 26 count 33,003,217">(</span><span class=pc2 title="line 60 char 27 count 33,003,217">make-data</span><span class=pc2 title="line 60 char 26 count 33,003,217"> </span><span class=pc2 title="line 60 char 37 count 33,003,217">xi</span><span class=pc2 title="line 60 char 26 count 33,003,217"> </span><span class=pc2 title="line 60 char 40 count 33,003,217">val</span><span class=pc2 title="line 60 char 26 count 33,003,217">)</span>
+         <span class=pc2 title="line 61 char 10 count 10,254,641">(</span><span class=pc2 title="line 61 char 11 count 10,254,641">nwt:bind</span><span class=pc2 title="line 61 char 10 count 10,254,641"> </span><span class=pc2 title="line 61 char 20 count 10,254,641">(</span><span class=pc2 title="line 61 char 21 count 10,254,641">node-n-new</span><span class=pc2 title="line 61 char 20 count 10,254,641"> </span><span class=pc2 title="line 61 char 32 count 10,254,641">(</span><span class=pc2 title="line 61 char 33 count 10,254,641">local-n</span><span class=pc2 title="line 61 char 32 count 10,254,641"> </span><span class=pc2 title="line 61 char 41 count 10,254,641">xi0</span><span class=pc2 title="line 61 char 32 count 10,254,641">)</span><span class=pc2 title="line 61 char 20 count 10,254,641"> </span><span class=pc2 title="line 61 char 46 count 10,254,641">(</span><span class=pc2 title="line 61 char 47 count 10,254,641">make-data</span><span class=pc2 title="line 61 char 46 count 10,254,641"> </span><span class=pc2 title="line 61 char 57 count 10,254,641">(</span><span class=pc2 title="line 61 char 58 count 10,254,641">shift-n</span><span class=pc2 title="line 61 char 57 count 10,254,641"> </span><span class=pc2 title="line 61 char 66 count 10,254,641">xi0</span><span class=pc2 title="line 61 char 57 count 10,254,641">)</span><span class=pc2 title="line 61 char 46 count 10,254,641"> </span><span class=pc2 title="line 61 char 71 count 10,254,641">(</span><span class=pc2 title="line 61 char 72 count 10,254,641">data-val</span><span class=pc2 title="line 61 char 71 count 10,254,641"> </span><span class=pc2 title="line 61 char 81 count 10,254,641">trie</span><span class=pc2 title="line 61 char 71 count 10,254,641">)</span><span class=pc2 title="line 61 char 46 count 10,254,641">)</span><span class=pc2 title="line 61 char 20 count 10,254,641">)</span>
+                   <span class=pc2 title="line 62 char 20 count 10,254,641">xi</span><span class=pc2 title="line 61 char 10 count 10,254,641"> </span><span class=pc2 title="line 62 char 23 count 10,254,641">val</span><span class=pc2 title="line 61 char 10 count 10,254,641">)</span><span class=pc2 title="line 60 char 8 count 43,257,858">)</span><span class=pc2 title="line 59 char 6 count 43,257,858">)</span><span class=pc3 title="line 54 char 3 count 219,677,034">)</span>
+    <span class=pc3 title="line 54 char 3 count 219,677,034">(else </span><span class=pc2 title="line 63 char 11 count 32,564,560">(</span><span class=pc2 title="line 63 char 12 count 32,564,560">make-data</span><span class=pc2 title="line 63 char 11 count 32,564,560"> </span><span class=pc2 title="line 63 char 22 count 32,564,560">xi</span><span class=pc2 title="line 63 char 11 count 32,564,560"> </span><span class=pc2 title="line 63 char 25 count 32,564,560">val</span><span class=pc2 title="line 63 char 11 count 32,564,560">)</span><span class=pc3 title="line 54 char 3 count 219,677,034">))</span><span class=pc2 title="line 53 char 1 count 1">)</span>
+
+
+<span class=pc2 title="line 66 char 1 count 1">(define t:size </span><span class=pc2 title="line 66 char 16 count 1">nwt:size</span><span class=pc2 title="line 66 char 1 count 1">)</span>
+
+<span class=pc2 title="line 68 char 1 count 1">(define t:bind</span>
+  <span class=pc2 title="line 69 char 3 count 1">(lambda (xi v s)</span>
+    <span class=pc2 title="line 70 char 5 count 65,567,929">(unless </span><span class=pc2 title="line 70 char 13 count 65,567,929">(and </span><span class=pc2 title="line 70 char 18 count 65,567,929">(</span><span class=pc2 title="line 70 char 19 count 65,567,929">fixnum?</span><span class=pc2 title="line 70 char 18 count 65,567,929"> </span><span class=pc2 title="line 70 char 27 count 65,567,929">xi</span><span class=pc2 title="line 70 char 18 count 65,567,929">)</span><span class=pc2 title="line 70 char 13 count 65,567,929"> </span><span class=pc2 title="line 70 char 31 count 65,567,929">(</span><span class=pc2 title="line 70 char 32 count 65,567,929">&gt;=</span><span class=pc2 title="line 70 char 31 count 65,567,929"> </span><span class=pc2 title="line 70 char 35 count 65,567,929">xi</span><span class=pc2 title="line 70 char 31 count 65,567,929"> </span><span class=pc2 title="line 70 char 38 count 65,567,929">0</span><span class=pc2 title="line 70 char 31 count 65,567,929">)</span><span class=pc2 title="line 70 char 13 count 65,567,929">)</span>
+      <span class=pc1 title="line 71 char 7 count 0">(</span><span class=pc1 title="line 71 char 8 count 0">error</span><span class=pc1 title="line 71 char 7 count 0"> </span><span class=pc1 title="line 71 char 14 count 0">'t:bind</span><span class=pc1 title="line 71 char 7 count 0"> </span><span class=pc1 title="line 71 char 22 count 0">"index must be a fixnum, got ~s"</span><span class=pc1 title="line 71 char 7 count 0"> </span><span class=pc1 title="line 71 char 55 count 0">xi</span><span class=pc1 title="line 71 char 7 count 0">)</span><span class=pc2 title="line 70 char 5 count 65,567,929">)</span>
+    <span class=pc2 title="line 72 char 5 count 65,567,929">(</span><span class=pc2 title="line 72 char 6 count 65,567,929">nwt:bind</span><span class=pc2 title="line 72 char 5 count 65,567,929"> </span><span class=pc2 title="line 72 char 15 count 65,567,929">s</span><span class=pc2 title="line 72 char 5 count 65,567,929"> </span><span class=pc2 title="line 72 char 17 count 65,567,929">xi</span><span class=pc2 title="line 72 char 5 count 65,567,929"> </span><span class=pc2 title="line 72 char 20 count 65,567,929">v</span><span class=pc2 title="line 72 char 5 count 65,567,929">)</span><span class=pc2 title="line 69 char 3 count 1">)</span><span class=pc2 title="line 68 char 1 count 1">)</span>
+
+<span class=pc2 title="line 74 char 1 count 1">(define t:lookup</span>
+  <span class=pc2 title="line 75 char 3 count 1">(lambda (xi s)</span>
+    <span class=pc6 title="line 76 char 5 count 950,024,948">(unless </span><span class=pc6 title="line 76 char 13 count 950,024,948">(and </span><span class=pc6 title="line 76 char 18 count 950,024,948">(</span><span class=pc6 title="line 76 char 19 count 950,024,948">fixnum?</span><span class=pc6 title="line 76 char 18 count 950,024,948"> </span><span class=pc6 title="line 76 char 27 count 950,024,948">xi</span><span class=pc6 title="line 76 char 18 count 950,024,948">)</span><span class=pc6 title="line 76 char 13 count 950,024,948"> </span><span class=pc6 title="line 76 char 31 count 950,024,948">(</span><span class=pc6 title="line 76 char 32 count 950,024,948">&gt;=</span><span class=pc6 title="line 76 char 31 count 950,024,948"> </span><span class=pc6 title="line 76 char 35 count 950,024,948">xi</span><span class=pc6 title="line 76 char 31 count 950,024,948"> </span><span class=pc6 title="line 76 char 38 count 950,024,948">0</span><span class=pc6 title="line 76 char 31 count 950,024,948">)</span><span class=pc6 title="line 76 char 13 count 950,024,948">)</span>
+      <span class=pc1 title="line 77 char 7 count 0">(</span><span class=pc1 title="line 77 char 8 count 0">error</span><span class=pc1 title="line 77 char 7 count 0"> </span><span class=pc1 title="line 77 char 14 count 0">'t:lookup</span><span class=pc1 title="line 77 char 7 count 0"> </span><span class=pc1 title="line 77 char 24 count 0">"index must be a fixnum, got ~s"</span><span class=pc1 title="line 77 char 7 count 0"> </span><span class=pc1 title="line 77 char 57 count 0">xi</span><span class=pc1 title="line 77 char 7 count 0">)</span><span class=pc6 title="line 76 char 5 count 950,024,948">)</span>
+    <span class=pc6 title="line 78 char 5 count 950,024,948">(</span><span class=pc6 title="line 78 char 6 count 950,024,948">nwt:lookup</span><span class=pc6 title="line 78 char 5 count 950,024,948"> </span><span class=pc6 title="line 78 char 17 count 950,024,948">s</span><span class=pc6 title="line 78 char 5 count 950,024,948"> </span><span class=pc6 title="line 78 char 19 count 950,024,948">xi</span><span class=pc6 title="line 78 char 5 count 950,024,948">)</span><span class=pc2 title="line 75 char 3 count 1">)</span><span class=pc2 title="line 74 char 1 count 1">)</span>
+
+
+; intmap
+
+<span class=pc2 title="line 83 char 1 count 1">(define empty-intmap </span><span class=pc2 title="line 83 char 22 count 1">'()</span><span class=pc2 title="line 83 char 1 count 1">)</span>
+<span class=pc2 title="line 84 char 1 count 1">(define (intmap-count m) </span><span class=pc2 title="line 84 char 26 count 2">(</span><span class=pc2 title="line 84 char 27 count 2">t:size</span><span class=pc2 title="line 84 char 26 count 2"> </span><span class=pc2 title="line 84 char 34 count 2">m</span><span class=pc2 title="line 84 char 26 count 2">)</span><span class=pc2 title="line 84 char 1 count 1">)</span>
+<span class=pc2 title="line 85 char 1 count 1">(define (intmap-ref m k)</span>
+  <span class=pc6 title="line 86 char 3 count 950,025,606">(let ([res </span><span class=pc6 title="line 86 char 14 count 950,025,606">(</span><span class=pc6 title="line 86 char 15 count 950,025,606">t:lookup</span><span class=pc6 title="line 86 char 14 count 950,025,606"> </span><span class=pc6 title="line 86 char 24 count 950,025,606">k</span><span class=pc6 title="line 86 char 14 count 950,025,606"> </span><span class=pc6 title="line 86 char 26 count 950,025,606">m</span><span class=pc6 title="line 86 char 14 count 950,025,606">)</span><span class=pc6 title="line 86 char 3 count 950,025,606">])</span>
+    <span class=pc6 title="line 87 char 5 count 950,022,736">(if </span><span class=pc6 title="line 87 char 9 count 950,022,736">res</span>
+      <span class=pc4 title="line 88 char 7 count 454,112,029">(</span><span class=pc4 title="line 88 char 8 count 454,112,029">data-val</span><span class=pc4 title="line 88 char 7 count 454,112,029"> </span><span class=pc4 title="line 88 char 17 count 454,112,029">res</span><span class=pc4 title="line 88 char 7 count 454,112,029">)</span>
+      <span class=pc4 title="line 89 char 7 count 495,910,707">unbound</span><span class=pc6 title="line 87 char 5 count 950,022,736">)</span><span class=pc6 title="line 86 char 3 count 950,025,606">)</span><span class=pc2 title="line 85 char 1 count 1">)</span>
+<span class=pc2 title="line 90 char 1 count 1">(define (intmap-set m k v) </span><span class=pc2 title="line 90 char 28 count 65,567,971">(</span><span class=pc2 title="line 90 char 29 count 65,567,971">t:bind</span><span class=pc2 title="line 90 char 28 count 65,567,971"> </span><span class=pc2 title="line 90 char 36 count 65,567,971">k</span><span class=pc2 title="line 90 char 28 count 65,567,971"> </span><span class=pc2 title="line 90 char 38 count 65,567,971">v</span><span class=pc2 title="line 90 char 28 count 65,567,971"> </span><span class=pc2 title="line 90 char 40 count 65,567,971">m</span><span class=pc2 title="line 90 char 28 count 65,567,971">)</span><span class=pc2 title="line 90 char 1 count 1">)</span>
+
+
+; Misc. missing functions
+
+<span class=pc2 title="line 95 char 1 count 1">(define (remove-duplicates l)</span>
+  <span class=pc2 title="line 96 char 3 count 3,343,371">(cond (</span><span class=pc2 title="line 96 char 10 count 3,343,371">(</span><span class=pc2 title="line 96 char 11 count 3,343,371">null?</span><span class=pc2 title="line 96 char 10 count 3,343,371"> </span><span class=pc2 title="line 96 char 17 count 3,343,371">l</span><span class=pc2 title="line 96 char 10 count 3,343,371">)</span>
+         <span class=pc2 title="line 97 char 10 count 233,262">'()</span><span class=pc2 title="line 96 char 3 count 3,343,371">)</span>
+        <span class=pc2 title="line 96 char 3 count 3,343,371">(</span><span class=pc2 title="line 98 char 10 count 3,110,109">(</span><span class=pc2 title="line 98 char 11 count 3,110,109">member</span><span class=pc2 title="line 98 char 10 count 3,110,109"> </span><span class=pc2 title="line 98 char 18 count 3,110,109">(</span><span class=pc2 title="line 98 char 19 count 3,110,109">car</span><span class=pc2 title="line 98 char 18 count 3,110,109"> </span><span class=pc2 title="line 98 char 23 count 3,110,109">l</span><span class=pc2 title="line 98 char 18 count 3,110,109">)</span><span class=pc2 title="line 98 char 10 count 3,110,109"> </span><span class=pc2 title="line 98 char 26 count 3,110,109">(</span><span class=pc2 title="line 98 char 27 count 3,110,109">cdr</span><span class=pc2 title="line 98 char 26 count 3,110,109"> </span><span class=pc2 title="line 98 char 31 count 3,110,109">l</span><span class=pc2 title="line 98 char 26 count 3,110,109">)</span><span class=pc2 title="line 98 char 10 count 3,110,109">)</span>
+         <span class=pc2 title="line 99 char 10 count 26,941">(</span><span class=pc2 title="line 99 char 11 count 26,941">remove-duplicates</span><span class=pc2 title="line 99 char 10 count 26,941"> </span><span class=pc2 title="line 99 char 29 count 26,941">(</span><span class=pc2 title="line 99 char 30 count 26,941">cdr</span><span class=pc2 title="line 99 char 29 count 26,941"> </span><span class=pc2 title="line 99 char 34 count 26,941">l</span><span class=pc2 title="line 99 char 29 count 26,941">)</span><span class=pc2 title="line 99 char 10 count 26,941">)</span><span class=pc2 title="line 96 char 3 count 3,343,371">)</span>
+        <span class=pc2 title="line 96 char 3 count 3,343,371">(else</span>
+         <span class=pc2 title="line 101 char 10 count 3,083,168">(</span><span class=pc2 title="line 101 char 11 count 3,083,168">cons</span><span class=pc2 title="line 101 char 10 count 3,083,168"> </span><span class=pc2 title="line 101 char 16 count 3,083,168">(</span><span class=pc2 title="line 101 char 17 count 3,083,168">car</span><span class=pc2 title="line 101 char 16 count 3,083,168"> </span><span class=pc2 title="line 101 char 21 count 3,083,168">l</span><span class=pc2 title="line 101 char 16 count 3,083,168">)</span><span class=pc2 title="line 101 char 10 count 3,083,168"> </span><span class=pc2 title="line 101 char 24 count 3,083,168">(</span><span class=pc2 title="line 101 char 25 count 3,083,168">remove-duplicates</span><span class=pc2 title="line 101 char 24 count 3,083,168"> </span><span class=pc2 title="line 101 char 43 count 3,083,168">(</span><span class=pc2 title="line 101 char 44 count 3,083,168">cdr</span><span class=pc2 title="line 101 char 43 count 3,083,168"> </span><span class=pc2 title="line 101 char 48 count 3,083,168">l</span><span class=pc2 title="line 101 char 43 count 3,083,168">)</span><span class=pc2 title="line 101 char 24 count 3,083,168">)</span><span class=pc2 title="line 101 char 10 count 3,083,168">)</span><span class=pc2 title="line 96 char 3 count 3,343,371">))</span><span class=pc2 title="line 95 char 1 count 1">)</span>
+
+<span class=pc2 title="line 103 char 1 count 1">(define (foldl f init seq)</span>
+  <span class=pc1 title="line 104 char 3 count 0">(if </span><span class=pc1 title="line 104 char 7 count 0">(</span><span class=pc1 title="line 104 char 8 count 0">null?</span><span class=pc1 title="line 104 char 7 count 0"> </span><span class=pc1 title="line 104 char 14 count 0">seq</span><span class=pc1 title="line 104 char 7 count 0">)</span>
+    <span class=pc1 title="line 105 char 5 count 0">init</span>
+    <span class=pc1 title="line 106 char 5 count 0">(</span><span class=pc1 title="line 106 char 6 count 0">foldl</span><span class=pc1 title="line 106 char 5 count 0"> </span><span class=pc1 title="line 106 char 12 count 0">f</span>
+           <span class=pc1 title="line 107 char 12 count 0">(</span><span class=pc1 title="line 107 char 13 count 0">f</span><span class=pc1 title="line 107 char 12 count 0"> </span><span class=pc1 title="line 107 char 15 count 0">(</span><span class=pc1 title="line 107 char 16 count 0">car</span><span class=pc1 title="line 107 char 15 count 0"> </span><span class=pc1 title="line 107 char 20 count 0">seq</span><span class=pc1 title="line 107 char 15 count 0">)</span><span class=pc1 title="line 107 char 12 count 0"> </span><span class=pc1 title="line 107 char 25 count 0">init</span><span class=pc1 title="line 107 char 12 count 0">)</span>
+           <span class=pc1 title="line 108 char 12 count 0">(</span><span class=pc1 title="line 108 char 13 count 0">cdr</span><span class=pc1 title="line 108 char 12 count 0"> </span><span class=pc1 title="line 108 char 17 count 0">seq</span><span class=pc1 title="line 108 char 12 count 0">)</span><span class=pc1 title="line 106 char 5 count 0">)</span><span class=pc1 title="line 104 char 3 count 0">)</span><span class=pc2 title="line 103 char 1 count 1">)</span>
+
+<span class=pc2 title="line 110 char 1 count 1">(define (filter-map f l) </span><span class=pc2 title="line 110 char 26 count 6">(</span><span class=pc2 title="line 110 char 27 count 6">filter</span><span class=pc2 title="line 110 char 26 count 6"> </span><span class=pc2 title="line 110 char 34 count 6">(lambda (x) </span><span class=pc2 title="line 110 char 46 count 151">x</span><span class=pc2 title="line 110 char 34 count 6">)</span><span class=pc2 title="line 110 char 26 count 6"> </span><span class=pc2 title="line 110 char 49 count 6">(</span><span class=pc2 title="line 110 char 50 count 6">map</span><span class=pc2 title="line 110 char 49 count 6"> </span><span class=pc2 title="line 110 char 54 count 6">f</span><span class=pc2 title="line 110 char 49 count 6"> </span><span class=pc2 title="line 110 char 56 count 6">l</span><span class=pc2 title="line 110 char 49 count 6">)</span><span class=pc2 title="line 110 char 26 count 6">)</span><span class=pc2 title="line 110 char 1 count 1">)</span>
+
+<span class=pc2 title="line 112 char 1 count 1">(define (append* l*) </span><span class=pc2 title="line 112 char 22 count 2">(</span><span class=pc2 title="line 112 char 23 count 2">apply</span><span class=pc2 title="line 112 char 22 count 2"> </span><span class=pc2 title="line 112 char 29 count 2">append</span><span class=pc2 title="line 112 char 22 count 2"> </span><span class=pc2 title="line 112 char 36 count 2">l*</span><span class=pc2 title="line 112 char 22 count 2">)</span><span class=pc2 title="line 112 char 1 count 1">)</span>
+</pre></td></tr></table>
+</body>
+</html>

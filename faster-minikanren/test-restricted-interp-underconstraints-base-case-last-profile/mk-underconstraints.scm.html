@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv=Content-Type content="text/html;charset=utf-8">
+<title>mk-underconstraints.scm</title>
+<style type="text/css">
+* { border: 0; margin: 0; outline: 0; padding: 0; vertical-align: baseline; }
+code, kbd, pre, samp { font-family: monospace, monospace; font-size: 1rem; }
+html { -moz-osx-font-smoothing: grayscale; -webkit-font-smoothing: antialiased; }
+table { border-collapse: collapse; border-spacing: 0; }
+body { padding: 1rem; }
+h1, h2, h3, h4 { line-height: 1.25; margin-bottom: 0.5rem; }
+h1 { font-size: 1.296rem; }
+h2 { font-size: 1.215rem; }
+h3 { font-size: 1.138rem; }
+h4 { font-size: 1.067rem; }
+html { font-family: monospace, monospace; font-size: 1rem; }
+p { margin-bottom: 1.25rem; }
+.pc0 { background-color: #111111; color: white; white-space: nowrap; }
+.pc1 { background-color: #607D8B; color: white; white-space: nowrap; }
+.pc2 { background-color: #9C27B0; color: black; white-space: nowrap; }
+.pc3 { background-color: #673AB7; color: white; white-space: nowrap; }
+.pc4 { background-color: #3F51B5; color: white; white-space: nowrap; }
+.pc5 { background-color: #2196F3; color: black; white-space: nowrap; }
+.pc6 { background-color: #00BCD4; color: black; white-space: nowrap; }
+.pc7 { background-color: #4CAF50; color: black; white-space: nowrap; }
+.pc8 { background-color: #CDDC39; color: black; white-space: nowrap; }
+.pc9 { background-color: #FFEB3B; color: black; white-space: nowrap; }
+.pc10 { background-color: #FFC107; color: black; white-space: nowrap; }
+.pc11 { background-color: #FF9800; color: black; white-space: nowrap; }
+.pc12 { background-color: #F44336; color: white; white-space: nowrap; }
+</style>
+</head>
+<body class=pc0>
+<h1 style="margin-bottom: 1rem">mk-underconstraints.scm<span style="opacity: 0.5"> on Mon Jun 12 01:41:21 2023</span></h1>
+<table><tr><td style="color: #666666; font-weight: bold; padding-right: 1rem; text-align: right"><pre>
+<span id=line1>1
+</span><span id=line2>2
+</span><span id=line3>3
+</span><span id=line4>4
+</span><span id=line5>5
+</span><span id=line6>6
+</span><span id=line7>7
+</span><span id=line8>8
+</span><span id=line9>9
+</span><span id=line10>10
+</span><span id=line11>11
+</span><span id=line12>12
+</span><span id=line13>13
+</span><span id=line14>14
+</span><span id=line15>15
+</span><span id=line16>16
+</span><span id=line17>17
+</span><span id=line18>18
+</span><span id=line19>19
+</span><span id=line20>20
+</span><span id=line21>21
+</span><span id=line22>22
+</span><span id=line23>23
+</span><span id=line24>24
+</span><span id=line25>25
+</span><span id=line26>26
+</span><span id=line27>27
+</span><span id=line28>28
+</span><span id=line29>29
+</span><span id=line30>30
+</span><span id=line31>31
+</span><span id=line32>32
+</span><span id=line33>33
+</span><span id=line34>34
+</span><span id=line35>35
+</span><span id=line36>36
+</span><span id=line37>37
+</span><span id=line38>38
+</span><span id=line39>39
+</span><span id=line40>40
+</span><span id=line41>41
+</span><span id=line42>42
+</span><span id=line43>43
+</span><span id=line44>44
+</span><span id=line45>45
+</span><span id=line46>46
+</span><span id=line47>47
+</span><span id=line48>48
+</span><span id=line49>49
+</span><span id=line50>50
+</span><span id=line51>51
+</span><span id=line52>52
+</span><span id=line53>53
+</span><span id=line54>54
+</span><span id=line55>55
+</span><span id=line56>56
+</span><span id=line57>57
+</span><span id=line58>58
+</span><span id=line59>59
+</span><span id=line60>60
+</span><span id=line61>61
+</span><span id=line62>62
+</span><span id=line63>63
+</span><span id=line64>64
+</span><span id=line65>65
+</span><span id=line66>66
+</span><span id=line67>67
+</span><span id=line68>68
+</span><span id=line69>69
+</span><span id=line70>70
+</span><span id=line71>71
+</span><span id=line72>72
+</span><span id=line73>73
+</span><span id=line74>74
+</span><span id=line75>75
+</span><span id=line76>76
+</span><span id=line77>77
+</span><span id=line78>78
+</span><span id=line79>79
+</span><span id=line80>80
+</span><span id=line81>81
+</span><span id=line82>82
+</span><span id=line83>83
+</span><span id=line84>84
+</span><span id=line85>85
+</span><span id=line86>86
+</span><span id=line87>87
+</span><span id=line88>88
+</span><span id=line89>89
+</span><span id=line90>90
+</span><span id=line91>91
+</span><span id=line92>92
+</span><span id=line93>93
+</span><span id=line94>94
+</span><span id=line95>95
+</span><span id=line96>96
+</span><span id=line97>97
+</span><span id=line98>98
+</span><span id=line99>99
+</span><span id=line100>100
+</span><span id=line101>101
+</span><span id=line102>102
+</span><span id=line103>103
+</span><span id=line104>104
+</span><span id=line105>105
+</span><span id=line106>106
+</span><span id=line107>107
+</span><span id=line108>108
+</span><span id=line109>109
+</span><span id=line110>110
+</span><span id=line111>111
+</span><span id=line112>112
+</span><span id=line113>113
+</span><span id=line114>114
+</span><span id=line115>115
+</span><span id=line116>116
+</span><span id=line117>117
+</span><span id=line118>118
+</span><span id=line119>119
+</span><span id=line120>120
+</span><span id=line121>121
+</span><span id=line122>122
+</span><span id=line123>123
+</span><span id=line124>124
+</span><span id=line125>125
+</span><span id=line126>126
+</span><span id=line127>127
+</span><span id=line128>128
+</span><span id=line129>129
+</span><span id=line130>130
+</span><span id=line131>131
+</span><span id=line132>132
+</span><span id=line133>133
+</span><span id=line134>134
+</span><span id=line135>135
+</span><span id=line136>136
+</span><span id=line137>137
+</span><span id=line138>138
+</span><span id=line139>139
+</span><span id=line140>140
+</span><span id=line141>141
+</span><span id=line142>142
+</span><span id=line143>143
+</span><span id=line144>144
+</span><span id=line145>145
+</span><span id=line146>146
+</span><span id=line147>147
+</span><span id=line148>148
+</span><span id=line149>149
+</span><span id=line150>150
+</span><span id=line151>151
+</span><span id=line152>152
+</span><span id=line153>153
+</span><span id=line154>154
+</span><span id=line155>155
+</span><span id=line156>156
+</span><span id=line157>157
+</span><span id=line158>158
+</span><span id=line159>159
+</span><span id=line160>160
+</span><span id=line161>161
+</span><span id=line162>162
+</span><span id=line163>163
+</span><span id=line164>164
+</span><span id=line165>165
+</span><span id=line166>166
+</span><span id=line167>167
+</span><span id=line168>168
+</span><span id=line169>169
+</span><span id=line170>170
+</span><span id=line171>171
+</span><span id=line172>172
+</span><span id=line173>173
+</span><span id=line174>174
+</span><span id=line175>175
+</span><span id=line176>176
+</span><span id=line177>177
+</span><span id=line178>178
+</span><span id=line179>179
+</span><span id=line180>180
+</span><span id=line181>181
+</span><span id=line182>182
+</span><span id=line183>183
+</span><span id=line184>184
+</span><span id=line185>185
+</span><span id=line186>186
+</span><span id=line187>187
+</span><span id=line188>188
+</span><span id=line189>189
+</span><span id=line190>190
+</span><span id=line191>191
+</span><span id=line192>192
+</span><span id=line193>193
+</span><span id=line194>194
+</span><span id=line195>195
+</span><span id=line196>196
+</span><span id=line197>197
+</span><span id=line198>198
+</span><span id=line199>199
+</span><span id=line200>200
+</span><span id=line201>201
+</span><span id=line202>202
+</span><span id=line203>203
+</span><span id=line204>204
+</span><span id=line205>205
+</span><span id=line206>206
+</span><span id=line207>207
+</span><span id=line208>208
+</span><span id=line209>209
+</span><span id=line210>210
+</span><span id=line211>211
+</span><span id=line212>212
+</span><span id=line213>213
+</span><span id=line214>214
+</span><span id=line215>215
+</span><span id=line216>216
+</span><span id=line217>217
+</span><span id=line218>218
+</span><span id=line219>219
+</span><span id=line220>220
+</span><span id=line221>221
+</span><span id=line222>222
+</span><span id=line223>223
+</span><span id=line224>224
+</span><span id=line225>225
+</span><span id=line226>226
+</span><span id=line227>227
+</span><span id=line228>228
+</span><span id=line229>229
+</span><span id=line230>230
+</span><span id=line231>231
+</span><span id=line232>232
+</span><span id=line233>233
+</span><span id=line234>234
+</span><span id=line235>235
+</span><span id=line236>236
+</span><span id=line237>237
+</span><span id=line238>238
+</span><span id=line239>239
+</span><span id=line240>240
+</span><span id=line241>241
+</span><span id=line242>242
+</span><span id=line243>243
+</span><span id=line244>244
+</span><span id=line245>245
+</span><span id=line246>246
+</span><span id=line247>247
+</span><span id=line248>248
+</span><span id=line249>249
+</span><span id=line250>250
+</span><span id=line251>251
+</span><span id=line252>252
+</span><span id=line253>253
+</span><span id=line254>254
+</span><span id=line255>255
+</span><span id=line256>256
+</span><span id=line257>257
+</span><span id=line258>258
+</span><span id=line259>259
+</span><span id=line260>260
+</span><span id=line261>261
+</span><span id=line262>262
+</span><span id=line263>263
+</span><span id=line264>264
+</span><span id=line265>265
+</span><span id=line266>266
+</span><span id=line267>267
+</span><span id=line268>268
+</span><span id=line269>269
+</span><span id=line270>270
+</span><span id=line271>271
+</span><span id=line272>272
+</span><span id=line273>273
+</span><span id=line274>274
+</span><span id=line275>275
+</span><span id=line276>276
+</span><span id=line277>277
+</span><span id=line278>278
+</span><span id=line279>279
+</span><span id=line280>280
+</span><span id=line281>281
+</span><span id=line282>282
+</span><span id=line283>283
+</span><span id=line284>284
+</span><span id=line285>285
+</span><span id=line286>286
+</span><span id=line287>287
+</span><span id=line288>288
+</span><span id=line289>289
+</span><span id=line290>290
+</span><span id=line291>291
+</span><span id=line292>292
+</span><span id=line293>293
+</span><span id=line294>294
+</span><span id=line295>295
+</span><span id=line296>296
+</span><span id=line297>297
+</span><span id=line298>298
+</span><span id=line299>299
+</span><span id=line300>300
+</span><span id=line301>301
+</span><span id=line302>302
+</span><span id=line303>303
+</span><span id=line304>304
+</span><span id=line305>305
+</span><span id=line306>306
+</span><span id=line307>307
+</span><span id=line308>308
+</span><span id=line309>309
+</span><span id=line310>310
+</span><span id=line311>311
+</span><span id=line312>312
+</span><span id=line313>313
+</span><span id=line314>314
+</span><span id=line315>315
+</span><span id=line316>316
+</span><span id=line317>317
+</span><span id=line318>318
+</span><span id=line319>319
+</span><span id=line320>320
+</span><span id=line321>321
+</span><span id=line322>322
+</span><span id=line323>323
+</span><span id=line324>324
+</span><span id=line325>325
+</span><span id=line326>326
+</span><span id=line327>327
+</span><span id=line328>328
+</span><span id=line329>329
+</span><span id=line330>330
+</span><span id=line331>331
+</span><span id=line332>332
+</span><span id=line333>333
+</span><span id=line334>334
+</span><span id=line335>335
+</span><span id=line336>336
+</span><span id=line337>337
+</span><span id=line338>338
+</span><span id=line339>339
+</span><span id=line340>340
+</span><span id=line341>341
+</span><span id=line342>342
+</span><span id=line343>343
+</span><span id=line344>344
+</span><span id=line345>345
+</span><span id=line346>346
+</span><span id=line347>347
+</span><span id=line348>348
+</span><span id=line349>349
+</span><span id=line350>350
+</span><span id=line351>351
+</span><span id=line352>352
+</span><span id=line353>353
+</span><span id=line354>354
+</span><span id=line355>355
+</span><span id=line356>356
+</span><span id=line357>357
+</span><span id=line358>358
+</span><span id=line359>359
+</span><span id=line360>360
+</span><span id=line361>361
+</span><span id=line362>362
+</span><span id=line363>363
+</span><span id=line364>364
+</span><span id=line365>365
+</span><span id=line366>366
+</span><span id=line367>367
+</span><span id=line368>368
+</span><span id=line369>369
+</span><span id=line370>370
+</span><span id=line371>371
+</span><span id=line372>372
+</span><span id=line373>373
+</span><span id=line374>374
+</span><span id=line375>375
+</span><span id=line376>376
+</span><span id=line377>377
+</span><span id=line378>378
+</span><span id=line379>379
+</span><span id=line380>380
+</span><span id=line381>381
+</span><span id=line382>382
+</span><span id=line383>383
+</span><span id=line384>384
+</span><span id=line385>385
+</span><span id=line386>386
+</span><span id=line387>387
+</span><span id=line388>388
+</span><span id=line389>389
+</span><span id=line390>390
+</span><span id=line391>391
+</span><span id=line392>392
+</span><span id=line393>393
+</span><span id=line394>394
+</span><span id=line395>395
+</span><span id=line396>396
+</span><span id=line397>397
+</span><span id=line398>398
+</span><span id=line399>399
+</span><span id=line400>400
+</span><span id=line401>401
+</span><span id=line402>402
+</span><span id=line403>403
+</span><span id=line404>404
+</span><span id=line405>405
+</span><span id=line406>406
+</span><span id=line407>407
+</span><span id=line408>408
+</span><span id=line409>409
+</span><span id=line410>410
+</span><span id=line411>411
+</span><span id=line412>412
+</span><span id=line413>413
+</span><span id=line414>414
+</span><span id=line415>415
+</span><span id=line416>416
+</span><span id=line417>417
+</span><span id=line418>418
+</span><span id=line419>419
+</span><span id=line420>420
+</span><span id=line421>421
+</span><span id=line422>422
+</span><span id=line423>423
+</span><span id=line424>424
+</span><span id=line425>425
+</span><span id=line426>426
+</span><span id=line427>427
+</span><span id=line428>428
+</span><span id=line429>429
+</span><span id=line430>430
+</span><span id=line431>431
+</span><span id=line432>432
+</span><span id=line433>433
+</span><span id=line434>434
+</span><span id=line435>435
+</span><span id=line436>436
+</span><span id=line437>437
+</span><span id=line438>438
+</span><span id=line439>439
+</span><span id=line440>440
+</span><span id=line441>441
+</span><span id=line442>442
+</span><span id=line443>443
+</span><span id=line444>444
+</span><span id=line445>445
+</span><span id=line446>446
+</span><span id=line447>447
+</span><span id=line448>448
+</span><span id=line449>449
+</span><span id=line450>450
+</span><span id=line451>451
+</span><span id=line452>452
+</span><span id=line453>453
+</span><span id=line454>454
+</span><span id=line455>455
+</span><span id=line456>456
+</span><span id=line457>457
+</span><span id=line458>458
+</span><span id=line459>459
+</span><span id=line460>460
+</span><span id=line461>461
+</span><span id=line462>462
+</span><span id=line463>463
+</span><span id=line464>464
+</span><span id=line465>465
+</span><span id=line466>466
+</span><span id=line467>467
+</span><span id=line468>468
+</span><span id=line469>469
+</span><span id=line470>470
+</span><span id=line471>471
+</span><span id=line472>472
+</span><span id=line473>473
+</span><span id=line474>474
+</span><span id=line475>475
+</span><span id=line476>476
+</span><span id=line477>477
+</span><span id=line478>478
+</span><span id=line479>479
+</span><span id=line480>480
+</span><span id=line481>481
+</span><span id=line482>482
+</span><span id=line483>483
+</span><span id=line484>484
+</span><span id=line485>485
+</span><span id=line486>486
+</span><span id=line487>487
+</span><span id=line488>488
+</span><span id=line489>489
+</span><span id=line490>490
+</span><span id=line491>491
+</span><span id=line492>492
+</span><span id=line493>493
+</span><span id=line494>494
+</span><span id=line495>495
+</span><span id=line496>496
+</span><span id=line497>497
+</span><span id=line498>498
+</span><span id=line499>499
+</span><span id=line500>500
+</span><span id=line501>501
+</span><span id=line502>502
+</span><span id=line503>503
+</span><span id=line504>504
+</span><span id=line505>505
+</span><span id=line506>506
+</span><span id=line507>507
+</span><span id=line508>508
+</span><span id=line509>509
+</span><span id=line510>510
+</span><span id=line511>511
+</span><span id=line512>512
+</span><span id=line513>513
+</span><span id=line514>514
+</span><span id=line515>515
+</span><span id=line516>516
+</span><span id=line517>517
+</span><span id=line518>518
+</span><span id=line519>519
+</span><span id=line520>520
+</span><span id=line521>521
+</span><span id=line522>522
+</span><span id=line523>523
+</span><span id=line524>524
+</span><span id=line525>525
+</span><span id=line526>526
+</span><span id=line527>527
+</span><span id=line528>528
+</span><span id=line529>529
+</span><span id=line530>530
+</span><span id=line531>531
+</span><span id=line532>532
+</span><span id=line533>533
+</span><span id=line534>534
+</span><span id=line535>535
+</span><span id=line536>536
+</span><span id=line537>537
+</span><span id=line538>538
+</span><span id=line539>539
+</span><span id=line540>540
+</span><span id=line541>541
+</span><span id=line542>542
+</span><span id=line543>543
+</span><span id=line544>544
+</span><span id=line545>545
+</span><span id=line546>546
+</span><span id=line547>547
+</span><span id=line548>548
+</span><span id=line549>549
+</span><span id=line550>550
+</span><span id=line551>551
+</span><span id=line552>552
+</span><span id=line553>553
+</span><span id=line554>554
+</span><span id=line555>555
+</span><span id=line556>556
+</span><span id=line557>557
+</span><span id=line558>558
+</span><span id=line559>559
+</span></pre></td><td><pre>
+;; WEB 7 May 02023 -- 5 June 02023
+;;
+;; Extend faster-miniKanren's `mk.scm` with underconstraints.
+
+<span class=pc2 title="line 5 char 1 count 1">(</span><span class=pc2 title="line 5 char 2 count 1">load</span><span class=pc2 title="line 5 char 1 count 1"> </span><span class=pc2 title="line 5 char 7 count 1">"pmatch.scm"</span><span class=pc2 title="line 5 char 1 count 1">)</span>
+
+;; Global default timeout parameter: number of ticks/gas for engine,
+;; or `#f` if the default is no timeout.  Can be overriden by optional
+;; timeout argument (number ticks or `#f`) to individual
+;; underconstraint call.  Upon timeout being reached, the
+;; underconstraint *succeeds* (necessary for soundness).
+<span class=pc2 title="line 12 char 1 count 1">(define *underconstraint-default-timeout-param*</span>
+  <span class=pc2 title="line 13 char 3 count 1">(</span><span class=pc2 title="line 13 char 4 count 1">make-parameter</span><span class=pc2 title="line 13 char 3 count 1"> </span><span class=pc2 title="line 13 char 19 count 1">#f</span><span class=pc2 title="line 13 char 3 count 1">)</span><span class=pc2 title="line 12 char 1 count 1">)</span>
+
+;; Global Boolean parameter for whether to trace underconstraints,
+;; including: the goal expression passed to the underconstraint,
+;; whether the uderconstraint succeeded or failed, and timing/resource
+;; usage information (including whether the underconstraint timed out,
+;; and after how many ticks the timeout occurred).  Underconstraint
+;; calls beginning with `trace-` (`trace-underconstraino`,
+;; `trace-one-shot-underconstraino`) are always traced, regardless of
+;; the value of this parameter.
+<span class=pc2 title="line 23 char 1 count 1">(define *trace-underconstraint-param*</span>
+  <span class=pc2 title="line 24 char 3 count 1">(</span><span class=pc2 title="line 24 char 4 count 1">make-parameter</span><span class=pc2 title="line 24 char 3 count 1"> </span><span class=pc2 title="line 24 char 19 count 1">#f</span><span class=pc2 title="line 24 char 3 count 1">)</span><span class=pc2 title="line 23 char 1 count 1">)</span>
+
+<span class=pc2 title="line 26 char 1 count 1">(define *engine-completed-counter* </span><span class=pc2 title="line 26 char 36 count 1">0</span><span class=pc2 title="line 26 char 1 count 1">)</span>
+<span class=pc2 title="line 27 char 1 count 1">(define *engine-timedout-counter* </span><span class=pc2 title="line 27 char 35 count 1">0</span><span class=pc2 title="line 27 char 1 count 1">)</span>
+
+<span class=pc2 title="line 29 char 1 count 1">(define *immature-stream-counter* </span><span class=pc2 title="line 29 char 35 count 1">0</span><span class=pc2 title="line 29 char 1 count 1">)</span>
+<span class=pc2 title="line 30 char 1 count 1">(define *fail-counter* </span><span class=pc2 title="line 30 char 24 count 1">0</span><span class=pc2 title="line 30 char 1 count 1">)</span>
+<span class=pc2 title="line 31 char 1 count 1">(define *singleton-succeed-counter* </span><span class=pc2 title="line 31 char 37 count 1">0</span><span class=pc2 title="line 31 char 1 count 1">)</span>
+<span class=pc2 title="line 32 char 1 count 1">(define *non-singleton-succeed-counter* </span><span class=pc2 title="line 32 char 41 count 1">0</span><span class=pc2 title="line 32 char 1 count 1">)</span>
+
+(define-syntax increment-counter!
+  (syntax-rules ()
+    [(_ c) (set! c (<span class=pc2 title="line 36 char 21 count 42,326,873">add1</span> c))]))
+
+<span class=pc2 title="line 38 char 1 count 1">(define (reset-counters!)</span>
+  <span class=pc2 title="line 39 char 3 count 1">(set! *engine-completed-counter* </span><span class=pc2 title="line 39 char 36 count 1">0</span><span class=pc2 title="line 39 char 3 count 1">)</span>
+  <span class=pc2 title="line 40 char 3 count 1">(set! *engine-timedout-counter* </span><span class=pc2 title="line 40 char 35 count 1">0</span><span class=pc2 title="line 40 char 3 count 1">)</span>
+  <span class=pc2 title="line 38 char 1 count 1">;;</span>
+  <span class=pc2 title="line 42 char 3 count 1">(set! *immature-stream-counter* </span><span class=pc2 title="line 42 char 35 count 1">0</span><span class=pc2 title="line 42 char 3 count 1">)</span>
+  <span class=pc2 title="line 43 char 3 count 1">(set! *fail-counter* </span><span class=pc2 title="line 43 char 24 count 1">0</span><span class=pc2 title="line 43 char 3 count 1">)</span>
+  <span class=pc2 title="line 44 char 3 count 1">(set! *singleton-succeed-counter* </span><span class=pc2 title="line 44 char 37 count 1">0</span><span class=pc2 title="line 44 char 3 count 1">)</span>
+  <span class=pc2 title="line 45 char 3 count 1">(set! *non-singleton-succeed-counter* </span><span class=pc2 title="line 45 char 41 count 1">0</span><span class=pc2 title="line 45 char 3 count 1">)</span><span class=pc2 title="line 38 char 1 count 1">)</span>
+
+<span class=pc2 title="line 47 char 1 count 1">(define (print-counters!)</span>
+  <span class=pc2 title="line 48 char 3 count 1">(</span><span class=pc2 title="line 48 char 4 count 1">printf</span><span class=pc2 title="line 48 char 3 count 1"> </span><span class=pc2 title="line 48 char 11 count 1">"*engine-completed-counter*: ~s\n"</span><span class=pc2 title="line 48 char 3 count 1"> </span><span class=pc2 title="line 48 char 46 count 1">*engine-completed-counter*</span><span class=pc2 title="line 48 char 3 count 1">)</span>
+  <span class=pc2 title="line 49 char 3 count 1">(</span><span class=pc2 title="line 49 char 4 count 1">printf</span><span class=pc2 title="line 49 char 3 count 1"> </span><span class=pc2 title="line 49 char 11 count 1">"*engine-timedout-counter*: ~s\n"</span><span class=pc2 title="line 49 char 3 count 1"> </span><span class=pc2 title="line 49 char 45 count 1">*engine-timedout-counter*</span><span class=pc2 title="line 49 char 3 count 1">)</span>
+  <span class=pc2 title="line 47 char 1 count 1">;;</span>
+  <span class=pc2 title="line 51 char 3 count 1">(</span><span class=pc2 title="line 51 char 4 count 1">printf</span><span class=pc2 title="line 51 char 3 count 1"> </span><span class=pc2 title="line 51 char 11 count 1">"*immature-stream-counter*: ~s\n"</span><span class=pc2 title="line 51 char 3 count 1"> </span><span class=pc2 title="line 51 char 45 count 1">*immature-stream-counter*</span><span class=pc2 title="line 51 char 3 count 1">)</span>
+  <span class=pc2 title="line 52 char 3 count 1">(</span><span class=pc2 title="line 52 char 4 count 1">printf</span><span class=pc2 title="line 52 char 3 count 1"> </span><span class=pc2 title="line 52 char 11 count 1">"*fail-counter*: ~s\n"</span><span class=pc2 title="line 52 char 3 count 1"> </span><span class=pc2 title="line 52 char 34 count 1">*fail-counter*</span><span class=pc2 title="line 52 char 3 count 1">)</span>
+  <span class=pc2 title="line 53 char 3 count 1">(</span><span class=pc2 title="line 53 char 4 count 1">printf</span><span class=pc2 title="line 53 char 3 count 1"> </span><span class=pc2 title="line 53 char 11 count 1">"*singleton-succeed-counter*: ~s\n"</span><span class=pc2 title="line 53 char 3 count 1"> </span><span class=pc2 title="line 53 char 47 count 1">*singleton-succeed-counter*</span><span class=pc2 title="line 53 char 3 count 1">)</span>
+  <span class=pc2 title="line 54 char 3 count 1">(</span><span class=pc2 title="line 54 char 4 count 1">printf</span><span class=pc2 title="line 54 char 3 count 1"> </span><span class=pc2 title="line 54 char 11 count 1">"*non-singleton-succeed-counter*: ~s\n"</span><span class=pc2 title="line 54 char 3 count 1"> </span><span class=pc2 title="line 54 char 51 count 1">*non-singleton-succeed-counter*</span><span class=pc2 title="line 54 char 3 count 1">)</span><span class=pc2 title="line 47 char 1 count 1">)</span>
+
+
+(define-syntax run
+  (syntax-rules ()
+    ((_ n (q) g0 g ...)
+     (begin
+       <span class=pc2 title="line 61 char 8 count 1">(</span><span class=pc2 title="line 61 char 9 count 1">reset-counters!</span><span class=pc2 title="line 61 char 8 count 1">)</span>
+       (let ((result
+              (<span class=pc2 title="line 63 char 16 count 1">take</span> n
+                    (suspend
+                     ((fresh (q) g0 g ...
+                             (lambda (st)
+                               (let ((st <span class=pc2 title="line 67 char 42 count 1">(</span><span class=pc2 title="line 67 char 43 count 1">state-with-scope</span><span class=pc2 title="line 67 char 42 count 1"> </span><span class=pc2 title="line 67 char 60 count 1">st</span><span class=pc2 title="line 67 char 42 count 1"> </span><span class=pc2 title="line 67 char 63 count 1">nonlocal-scope</span><span class=pc2 title="line 67 char 42 count 1">)</span>))
+                                 (let ((z ((<span class=pc2 title="line 68 char 45 count 1">reify</span> q) <span class=pc2 title="line 68 char 54 count 1">st</span>)))
+                                   <span class=pc2 title="line 69 char 36 count 1">(</span><span class=pc2 title="line 69 char 37 count 1">cons</span><span class=pc2 title="line 69 char 36 count 1"> </span><span class=pc2 title="line 69 char 42 count 1">z</span><span class=pc2 title="line 69 char 36 count 1"> </span><span class=pc2 title="line 69 char 44 count 1">(lambda () </span><span class=pc1 title="line 69 char 55 count 0">(lambda () </span><span class=pc1 title="line 69 char 66 count 0">#f</span><span class=pc1 title="line 69 char 55 count 0">)</span><span class=pc2 title="line 69 char 44 count 1">)</span><span class=pc2 title="line 69 char 36 count 1">)</span>))))
+                      <span class=pc2 title="line 70 char 23 count 1">empty-state</span>)))))
+         <span class=pc2 title="line 71 char 10 count 1">(</span><span class=pc2 title="line 71 char 11 count 1">print-counters!</span><span class=pc2 title="line 71 char 10 count 1">)</span>
+         <span class=pc2 title="line 72 char 10 count 1">result</span>)))
+    ((_ n (q0 q1 q ...) g0 g ...)
+     (run n (x)
+       (fresh (q0 q1 q ...)
+         g0 g ...
+         (== (list q0 q1 q ...) x))))))
+
+(define-syntax run*
+  (syntax-rules ()
+    ((_ (q0 q ...) g0 g ...) (run #f (q0 q ...) g0 g ...))))
+
+
+; Underconstraint record object.
+;
+; An underconstraint record object is a proper list.
+;
+; When an underconstraint is first created, it is given a unique name
+; so that duplicate underconstraints on a variable can be avoided, to
+; aid with tracing, and to help keep track of which underconstraints
+; have already been run when running all the underconstraints
+; associated with a set of variables.
+;
+; Contains:
+;
+;   user-name    - user-specified name for the underconstraint. Used for
+;                    tracing.
+;   unique-name  - generated globally-unique name for the
+;                    underconstraint.  Used for `eq?`-based lookup of the
+;                    underconstraint, to ensure no variable includes
+;                    duplicate underconstraints, and to ensure no
+;                    underconstraint is run more than once when running
+;                    underconstraints on multiple variables.
+;   te           - the original term expression specified by the user.
+;                    Used for tracing.
+;   t            - term with which that the underconstraint is currently
+;                    associated.  The same underconstraint might currently
+;                    be associated with other terms as well, since
+;                    underconstraints are "pushed down" when a fresh
+;                    variable is associated with a pair containing fresh
+;                    variables.  `t` might not be a fresh variable; if `t`
+;                    is a pair that contains fresh variables when the
+;                    underconstaint is run, the underconstraint will need
+;                    to be "pushed down" onto those fresh variables if the
+;                    underconstraint succeeds.
+;   ge           - the original goal expression specified by the user.
+;                    Used for tracing.
+;   g            - the underconstraint goal specified by the user.
+;   timeout-info - the engine timeout value specified by the user.
+;   trace?       - whether the user used a tracing version of the
+;                    `underconstraino` macro.
+
+<span class=pc2 title="line 123 char 1 count 1">(define (underconstraint user-name unique-name te t ge g timeout-info trace?)</span>
+  <span class=pc2 title="line 124 char 3 count 1">`(,</span><span class=pc2 title="line 124 char 6 count 1">unique-name</span><span class=pc2 title="line 124 char 3 count 1"> ,</span><span class=pc2 title="line 124 char 19 count 1">t</span><span class=pc2 title="line 124 char 3 count 1"> ,</span><span class=pc2 title="line 124 char 22 count 1">g</span><span class=pc2 title="line 124 char 3 count 1"> ,</span><span class=pc2 title="line 124 char 25 count 1">timeout-info</span><span class=pc2 title="line 124 char 3 count 1"> ,</span><span class=pc2 title="line 124 char 39 count 1">trace?</span><span class=pc2 title="line 124 char 3 count 1"> ,</span><span class=pc2 title="line 124 char 47 count 1">user-name</span><span class=pc2 title="line 124 char 3 count 1"> ,</span><span class=pc2 title="line 124 char 58 count 1">te</span><span class=pc2 title="line 124 char 3 count 1"> ,</span><span class=pc2 title="line 124 char 62 count 1">ge</span><span class=pc2 title="line 124 char 3 count 1">)</span><span class=pc2 title="line 123 char 1 count 1">)</span>
+
+<span class=pc2 title="line 126 char 1 count 1">(define (underconstraint-unique-name u)</span>
+  <span class=pc2 title="line 127 char 3 count 2,977,812">(</span><span class=pc2 title="line 127 char 4 count 2,977,812">car</span><span class=pc2 title="line 127 char 3 count 2,977,812"> </span><span class=pc2 title="line 127 char 8 count 2,977,812">u</span><span class=pc2 title="line 127 char 3 count 2,977,812">)</span><span class=pc2 title="line 126 char 1 count 1">)</span>
+
+<span class=pc2 title="line 129 char 1 count 1">(define (underconstraint-t u)</span>
+  <span class=pc2 title="line 130 char 3 count 155,653">(</span><span class=pc2 title="line 130 char 4 count 155,653">cadr</span><span class=pc2 title="line 130 char 3 count 155,653"> </span><span class=pc2 title="line 130 char 9 count 155,653">u</span><span class=pc2 title="line 130 char 3 count 155,653">)</span><span class=pc2 title="line 129 char 1 count 1">)</span>
+
+<span class=pc2 title="line 132 char 1 count 1">(define (underconstraint-with-t u t)</span>
+  <span class=pc2 title="line 133 char 3 count 155,653">(</span><span class=pc2 title="line 133 char 4 count 155,653">cons</span><span class=pc2 title="line 133 char 3 count 155,653"> </span><span class=pc2 title="line 133 char 9 count 155,653">(</span><span class=pc2 title="line 133 char 10 count 155,653">car</span><span class=pc2 title="line 133 char 9 count 155,653"> </span><span class=pc2 title="line 133 char 14 count 155,653">u</span><span class=pc2 title="line 133 char 9 count 155,653">)</span><span class=pc2 title="line 133 char 3 count 155,653"> </span><span class=pc2 title="line 133 char 17 count 155,653">(</span><span class=pc2 title="line 133 char 18 count 155,653">cons</span><span class=pc2 title="line 133 char 17 count 155,653"> </span><span class=pc2 title="line 133 char 23 count 155,653">t</span><span class=pc2 title="line 133 char 17 count 155,653"> </span><span class=pc2 title="line 133 char 25 count 155,653">(</span><span class=pc2 title="line 133 char 26 count 155,653">cddr</span><span class=pc2 title="line 133 char 25 count 155,653"> </span><span class=pc2 title="line 133 char 31 count 155,653">u</span><span class=pc2 title="line 133 char 25 count 155,653">)</span><span class=pc2 title="line 133 char 17 count 155,653">)</span><span class=pc2 title="line 133 char 3 count 155,653">)</span><span class=pc2 title="line 132 char 1 count 1">)</span>
+
+<span class=pc2 title="line 135 char 1 count 1">(define (underconstraint-g u)</span>
+  <span class=pc2 title="line 136 char 3 count 166,300">(</span><span class=pc2 title="line 136 char 4 count 166,300">caddr</span><span class=pc2 title="line 136 char 3 count 166,300"> </span><span class=pc2 title="line 136 char 10 count 166,300">u</span><span class=pc2 title="line 136 char 3 count 166,300">)</span><span class=pc2 title="line 135 char 1 count 1">)</span>
+
+<span class=pc2 title="line 138 char 1 count 1">(define (underconstraint-timeout-info u)</span>
+  <span class=pc2 title="line 139 char 3 count 166,300">(</span><span class=pc2 title="line 139 char 4 count 166,300">cadddr</span><span class=pc2 title="line 139 char 3 count 166,300"> </span><span class=pc2 title="line 139 char 11 count 166,300">u</span><span class=pc2 title="line 139 char 3 count 166,300">)</span><span class=pc2 title="line 138 char 1 count 1">)</span>
+
+<span class=pc2 title="line 141 char 1 count 1">(define (underconstraint-trace? u)</span>
+  <span class=pc2 title="line 142 char 3 count 166,300">(</span><span class=pc2 title="line 142 char 4 count 166,300">list-ref</span><span class=pc2 title="line 142 char 3 count 166,300"> </span><span class=pc2 title="line 142 char 13 count 166,300">u</span><span class=pc2 title="line 142 char 3 count 166,300"> </span><span class=pc2 title="line 142 char 15 count 166,300">4</span><span class=pc2 title="line 142 char 3 count 166,300">)</span><span class=pc2 title="line 141 char 1 count 1">)</span>
+
+<span class=pc2 title="line 144 char 1 count 1">(define (underconstraint-user-name u)</span>
+  <span class=pc2 title="line 145 char 3 count 166,300">(</span><span class=pc2 title="line 145 char 4 count 166,300">list-ref</span><span class=pc2 title="line 145 char 3 count 166,300"> </span><span class=pc2 title="line 145 char 13 count 166,300">u</span><span class=pc2 title="line 145 char 3 count 166,300"> </span><span class=pc2 title="line 145 char 15 count 166,300">5</span><span class=pc2 title="line 145 char 3 count 166,300">)</span><span class=pc2 title="line 144 char 1 count 1">)</span>
+
+<span class=pc2 title="line 147 char 1 count 1">(define (underconstraint-te u)</span>
+  <span class=pc1 title="line 148 char 3 count 0">(</span><span class=pc1 title="line 148 char 4 count 0">list-ref</span><span class=pc1 title="line 148 char 3 count 0"> </span><span class=pc1 title="line 148 char 13 count 0">u</span><span class=pc1 title="line 148 char 3 count 0"> </span><span class=pc1 title="line 148 char 15 count 0">6</span><span class=pc1 title="line 148 char 3 count 0">)</span><span class=pc2 title="line 147 char 1 count 1">)</span>
+
+<span class=pc2 title="line 150 char 1 count 1">(define (underconstraint-ge u)</span>
+  <span class=pc2 title="line 151 char 3 count 166,300">(</span><span class=pc2 title="line 151 char 4 count 166,300">list-ref</span><span class=pc2 title="line 151 char 3 count 166,300"> </span><span class=pc2 title="line 151 char 13 count 166,300">u</span><span class=pc2 title="line 151 char 3 count 166,300"> </span><span class=pc2 title="line 151 char 15 count 166,300">7</span><span class=pc2 title="line 151 char 3 count 166,300">)</span><span class=pc2 title="line 150 char 1 count 1">)</span>
+
+
+; `u` is an association list (without duplicates) of
+;
+;   (&lt;unique-name&gt; . &lt;underconstraint record object&gt;)
+;
+; pairs associated with a variable.
+
+<span class=pc2 title="line 160 char 1 count 1">(define empty-u </span><span class=pc2 title="line 160 char 17 count 1">'()</span><span class=pc2 title="line 160 char 1 count 1">)</span>
+
+<span class=pc2 title="line 162 char 1 count 1">(define (u-unique-name u unique-name)</span>
+  <span class=pc1 title="line 163 char 3 count 0">(cond</span>
+    <span class=pc1 title="line 163 char 3 count 0">(</span><span class=pc1 title="line 164 char 6 count 0">(</span><span class=pc1 title="line 164 char 7 count 0">assq</span><span class=pc1 title="line 164 char 6 count 0"> </span><span class=pc1 title="line 164 char 12 count 0">unique-name</span><span class=pc1 title="line 164 char 6 count 0"> </span><span class=pc1 title="line 164 char 24 count 0">u</span><span class=pc1 title="line 164 char 6 count 0">)</span><span class=pc1 title="line 163 char 3 count 0"> =&gt; </span><span class=pc1 title="line 164 char 30 count 0">cdr</span><span class=pc1 title="line 163 char 3 count 0">)</span>
+    <span class=pc1 title="line 163 char 3 count 0">(else </span><span class=pc1 title="line 165 char 11 count 0">#f</span><span class=pc1 title="line 163 char 3 count 0">))</span><span class=pc2 title="line 162 char 1 count 1">)</span>
+
+<span class=pc2 title="line 167 char 1 count 1">(define (u-with-underconstraint u underconstraint)</span>
+  <span class=pc1 title="line 168 char 3 count 0">(let ((unique-name </span><span class=pc1 title="line 168 char 22 count 0">(</span><span class=pc1 title="line 168 char 23 count 0">underconstraint-unique-name</span><span class=pc1 title="line 168 char 22 count 0"> </span><span class=pc1 title="line 168 char 51 count 0">u</span><span class=pc1 title="line 168 char 22 count 0">)</span><span class=pc1 title="line 168 char 3 count 0">))</span>
+    <span class=pc1 title="line 169 char 5 count 0">(if </span><span class=pc1 title="line 169 char 9 count 0">(</span><span class=pc1 title="line 169 char 10 count 0">u-unique-name</span><span class=pc1 title="line 169 char 9 count 0"> </span><span class=pc1 title="line 169 char 24 count 0">u</span><span class=pc1 title="line 169 char 9 count 0"> </span><span class=pc1 title="line 169 char 26 count 0">unique-name</span><span class=pc1 title="line 169 char 9 count 0">)</span>
+        <span class=pc1 title="line 170 char 9 count 0">u</span>
+        <span class=pc1 title="line 171 char 9 count 0">`((,</span><span class=pc1 title="line 171 char 13 count 0">unique-name</span><span class=pc1 title="line 171 char 9 count 0"> . ,</span><span class=pc1 title="line 171 char 28 count 0">underconstraint</span><span class=pc1 title="line 171 char 9 count 0">) . ,</span><span class=pc1 title="line 171 char 48 count 0">u</span><span class=pc1 title="line 171 char 9 count 0">)</span><span class=pc1 title="line 169 char 5 count 0">)</span><span class=pc1 title="line 168 char 3 count 0">)</span><span class=pc2 title="line 167 char 1 count 1">)</span>
+
+; Underconstraint store object.
+
+; Mapping of a representative variable `x` to an association list `u`
+; (without duplicates) of
+;
+;   (&lt;unique-name&gt; . &lt;underconstraint record object&gt;)
+;
+; pairs. The association list of underconstraint record objects is
+; always on the representative element and must be moved / merged when
+; that element changes.
+
+<span class=pc2 title="line 184 char 1 count 1">(define empty-U </span><span class=pc2 title="line 184 char 17 count 1">empty-intmap</span><span class=pc2 title="line 184 char 1 count 1">)</span>
+
+<span class=pc2 title="line 186 char 1 count 1">(define (set-u st x u)</span>
+  <span class=pc2 title="line 187 char 3 count 2,516,754">(</span><span class=pc2 title="line 187 char 4 count 2,516,754">state-with-U</span>
+    <span class=pc2 title="line 188 char 5 count 2,516,754">st</span>
+    <span class=pc2 title="line 189 char 5 count 2,516,754">(</span><span class=pc2 title="line 189 char 6 count 2,516,754">intmap-set</span><span class=pc2 title="line 189 char 5 count 2,516,754"> </span><span class=pc2 title="line 189 char 17 count 2,516,754">(</span><span class=pc2 title="line 189 char 18 count 2,516,754">state-U</span><span class=pc2 title="line 189 char 17 count 2,516,754"> </span><span class=pc2 title="line 189 char 26 count 2,516,754">st</span><span class=pc2 title="line 189 char 17 count 2,516,754">)</span><span class=pc2 title="line 189 char 5 count 2,516,754"> </span><span class=pc2 title="line 189 char 30 count 2,516,754">(</span><span class=pc2 title="line 189 char 31 count 2,516,754">var-idx</span><span class=pc2 title="line 189 char 30 count 2,516,754"> </span><span class=pc2 title="line 189 char 39 count 2,516,754">x</span><span class=pc2 title="line 189 char 30 count 2,516,754">)</span><span class=pc2 title="line 189 char 5 count 2,516,754"> </span><span class=pc2 title="line 189 char 42 count 2,516,754">u</span><span class=pc2 title="line 189 char 5 count 2,516,754">)</span><span class=pc2 title="line 187 char 3 count 2,516,754">)</span><span class=pc2 title="line 186 char 1 count 1">)</span>
+
+<span class=pc2 title="line 191 char 1 count 1">(define (lookup-u st x)</span>
+  <span class=pc2 title="line 192 char 3 count 49,473,815">(let ((res </span><span class=pc2 title="line 192 char 14 count 49,473,815">(</span><span class=pc2 title="line 192 char 15 count 49,473,815">intmap-ref</span><span class=pc2 title="line 192 char 14 count 49,473,815"> </span><span class=pc2 title="line 192 char 26 count 49,473,815">(</span><span class=pc2 title="line 192 char 27 count 49,473,815">state-U</span><span class=pc2 title="line 192 char 26 count 49,473,815"> </span><span class=pc2 title="line 192 char 35 count 49,473,815">st</span><span class=pc2 title="line 192 char 26 count 49,473,815">)</span><span class=pc2 title="line 192 char 14 count 49,473,815"> </span><span class=pc2 title="line 192 char 39 count 49,473,815">(</span><span class=pc2 title="line 192 char 40 count 49,473,815">var-idx</span><span class=pc2 title="line 192 char 39 count 49,473,815"> </span><span class=pc2 title="line 192 char 48 count 49,473,815">x</span><span class=pc2 title="line 192 char 39 count 49,473,815">)</span><span class=pc2 title="line 192 char 14 count 49,473,815">)</span><span class=pc2 title="line 192 char 3 count 49,473,815">))</span>
+    <span class=pc2 title="line 193 char 5 count 49,473,726">(if </span><span class=pc2 title="line 193 char 9 count 49,473,726">(</span><span class=pc2 title="line 193 char 10 count 49,473,726">unbound?</span><span class=pc2 title="line 193 char 9 count 49,473,726"> </span><span class=pc2 title="line 193 char 19 count 49,473,726">res</span><span class=pc2 title="line 193 char 9 count 49,473,726">)</span>
+      <span class=pc2 title="line 194 char 7 count 49,178,968">empty-u</span>
+      <span class=pc2 title="line 195 char 7 count 294,758">res</span><span class=pc2 title="line 193 char 5 count 49,473,726">)</span><span class=pc2 title="line 192 char 3 count 49,473,815">)</span><span class=pc2 title="line 191 char 1 count 1">)</span>
+
+; t:unbind in mk-vicare.scm either is buggy or doesn't do what I would expect, so
+; I implement remove by setting the value to the empty constraint record.
+<span class=pc2 title="line 199 char 1 count 1">(define (remove-u x st)</span>
+  <span class=pc1 title="line 200 char 3 count 0">(</span><span class=pc1 title="line 200 char 4 count 0">state-with-U</span><span class=pc1 title="line 200 char 3 count 0"> </span><span class=pc1 title="line 200 char 17 count 0">st</span><span class=pc1 title="line 200 char 3 count 0"> </span><span class=pc1 title="line 200 char 20 count 0">(</span><span class=pc1 title="line 200 char 21 count 0">intmap-set</span><span class=pc1 title="line 200 char 20 count 0"> </span><span class=pc1 title="line 200 char 32 count 0">(</span><span class=pc1 title="line 200 char 33 count 0">state-U</span><span class=pc1 title="line 200 char 32 count 0"> </span><span class=pc1 title="line 200 char 41 count 0">st</span><span class=pc1 title="line 200 char 32 count 0">)</span><span class=pc1 title="line 200 char 20 count 0"> </span><span class=pc1 title="line 200 char 45 count 0">(</span><span class=pc1 title="line 200 char 46 count 0">var-idx</span><span class=pc1 title="line 200 char 45 count 0"> </span><span class=pc1 title="line 200 char 54 count 0">x</span><span class=pc1 title="line 200 char 45 count 0">)</span><span class=pc1 title="line 200 char 20 count 0"> </span><span class=pc1 title="line 200 char 57 count 0">empty-u</span><span class=pc1 title="line 200 char 20 count 0">)</span><span class=pc1 title="line 200 char 3 count 0">)</span><span class=pc2 title="line 199 char 1 count 1">)</span>
+
+; "touched" variables store
+;
+; The store is a list of variables that have been updated, either
+; through unification or through "normal" constraint solving, since
+; the last time that underconstraints were run.
+;
+; The list of "touched" variables does not contain duplicates.
+
+<span class=pc2 title="line 210 char 1 count 1">(define empty-V </span><span class=pc2 title="line 210 char 17 count 1">'()</span><span class=pc2 title="line 210 char 1 count 1">)</span>
+
+<span class=pc2 title="line 212 char 1 count 1">(define (set-v st v)</span>
+  <span class=pc2 title="line 213 char 3 count 73,867,651">(let ((V </span><span class=pc2 title="line 213 char 12 count 73,867,651">(</span><span class=pc2 title="line 213 char 13 count 73,867,651">state-V</span><span class=pc2 title="line 213 char 12 count 73,867,651"> </span><span class=pc2 title="line 213 char 21 count 73,867,651">st</span><span class=pc2 title="line 213 char 12 count 73,867,651">)</span><span class=pc2 title="line 213 char 3 count 73,867,651">))</span>
+    <span class=pc2 title="line 214 char 5 count 73,867,600">(if </span><span class=pc2 title="line 214 char 9 count 73,867,600">(</span><span class=pc2 title="line 214 char 10 count 73,867,600">memq</span><span class=pc2 title="line 214 char 9 count 73,867,600"> </span><span class=pc2 title="line 214 char 15 count 73,867,600">v</span><span class=pc2 title="line 214 char 9 count 73,867,600"> </span><span class=pc2 title="line 214 char 17 count 73,867,600">V</span><span class=pc2 title="line 214 char 9 count 73,867,600">)</span>
+        <span class=pc2 title="line 215 char 9 count 24,286,023">st</span>
+        <span class=pc2 title="line 216 char 9 count 49,581,521">(</span><span class=pc2 title="line 216 char 10 count 49,581,521">state-with-V</span><span class=pc2 title="line 216 char 9 count 49,581,521"> </span><span class=pc2 title="line 216 char 23 count 49,581,521">st</span><span class=pc2 title="line 216 char 9 count 49,581,521"> </span><span class=pc2 title="line 216 char 26 count 49,581,521">(</span><span class=pc2 title="line 216 char 27 count 49,581,521">cons</span><span class=pc2 title="line 216 char 26 count 49,581,521"> </span><span class=pc2 title="line 216 char 32 count 49,581,521">v</span><span class=pc2 title="line 216 char 26 count 49,581,521"> </span><span class=pc2 title="line 216 char 34 count 49,581,521">V</span><span class=pc2 title="line 216 char 26 count 49,581,521">)</span><span class=pc2 title="line 216 char 9 count 49,581,521">)</span><span class=pc2 title="line 214 char 5 count 73,867,600">)</span><span class=pc2 title="line 213 char 3 count 73,867,651">)</span><span class=pc2 title="line 212 char 1 count 1">)</span>
+
+; underconstraint/"touched" variable store
+
+<span class=pc2 title="line 220 char 1 count 1">(define empty-U/V </span><span class=pc2 title="line 220 char 19 count 1">(</span><span class=pc2 title="line 220 char 20 count 1">cons</span><span class=pc2 title="line 220 char 19 count 1"> </span><span class=pc2 title="line 220 char 25 count 1">empty-U</span><span class=pc2 title="line 220 char 19 count 1"> </span><span class=pc2 title="line 220 char 33 count 1">empty-V</span><span class=pc2 title="line 220 char 19 count 1">)</span><span class=pc2 title="line 220 char 1 count 1">)</span>
+
+; State object.
+; The state is the value that is monadically passed through the search
+; Contains:
+;   S - the substitution
+;   C - the constraint store
+;   U/V - the underconstraint store/list of "touched" variables (without duplicates)
+
+<span class=pc2 title="line 229 char 1 count 1">(define (state S C U/V) </span><span class=pc2 title="line 229 char 25 count 156,905,022">(</span><span class=pc2 title="line 229 char 26 count 156,905,022">list</span><span class=pc2 title="line 229 char 25 count 156,905,022"> </span><span class=pc2 title="line 229 char 31 count 156,905,022">S</span><span class=pc2 title="line 229 char 25 count 156,905,022"> </span><span class=pc2 title="line 229 char 33 count 156,905,022">C</span><span class=pc2 title="line 229 char 25 count 156,905,022"> </span><span class=pc2 title="line 229 char 35 count 156,905,022">U/V</span><span class=pc2 title="line 229 char 25 count 156,905,022">)</span><span class=pc2 title="line 229 char 1 count 1">)</span>
+
+<span class=pc2 title="line 231 char 1 count 1">(define (state-S st) </span><span class=pc3 title="line 231 char 22 count 397,185,537">(</span><span class=pc3 title="line 231 char 23 count 397,185,537">car</span><span class=pc3 title="line 231 char 22 count 397,185,537"> </span><span class=pc3 title="line 231 char 27 count 397,185,537">st</span><span class=pc3 title="line 231 char 22 count 397,185,537">)</span><span class=pc2 title="line 231 char 1 count 1">)</span>
+<span class=pc2 title="line 232 char 1 count 1">(define (state-C st) </span><span class=pc3 title="line 232 char 22 count 233,091,580">(</span><span class=pc3 title="line 232 char 23 count 233,091,580">cadr</span><span class=pc3 title="line 232 char 22 count 233,091,580"> </span><span class=pc3 title="line 232 char 28 count 233,091,580">st</span><span class=pc3 title="line 232 char 22 count 233,091,580">)</span><span class=pc2 title="line 232 char 1 count 1">)</span>
+;;
+<span class=pc2 title="line 234 char 1 count 1">(define (state-U/V st) </span><span class=pc3 title="line 234 char 24 count 300,536,224">(</span><span class=pc3 title="line 234 char 25 count 300,536,224">caddr</span><span class=pc3 title="line 234 char 24 count 300,536,224"> </span><span class=pc3 title="line 234 char 31 count 300,536,224">st</span><span class=pc3 title="line 234 char 24 count 300,536,224">)</span><span class=pc2 title="line 234 char 1 count 1">)</span>
+<span class=pc2 title="line 235 char 1 count 1">(define (state-U st) </span><span class=pc2 title="line 235 char 22 count 117,345,537">(</span><span class=pc2 title="line 235 char 23 count 117,345,537">car</span><span class=pc2 title="line 235 char 22 count 117,345,537"> </span><span class=pc2 title="line 235 char 27 count 117,345,537">(</span><span class=pc2 title="line 235 char 28 count 117,345,537">state-U/V</span><span class=pc2 title="line 235 char 27 count 117,345,537"> </span><span class=pc2 title="line 235 char 38 count 117,345,537">st</span><span class=pc2 title="line 235 char 27 count 117,345,537">)</span><span class=pc2 title="line 235 char 22 count 117,345,537">)</span><span class=pc2 title="line 235 char 1 count 1">)</span>
+<span class=pc2 title="line 236 char 1 count 1">(define (state-V st) </span><span class=pc2 title="line 236 char 22 count 94,323,706">(</span><span class=pc2 title="line 236 char 23 count 94,323,706">cdr</span><span class=pc2 title="line 236 char 22 count 94,323,706"> </span><span class=pc2 title="line 236 char 27 count 94,323,706">(</span><span class=pc2 title="line 236 char 28 count 94,323,706">state-U/V</span><span class=pc2 title="line 236 char 27 count 94,323,706"> </span><span class=pc2 title="line 236 char 38 count 94,323,706">st</span><span class=pc2 title="line 236 char 27 count 94,323,706">)</span><span class=pc2 title="line 236 char 22 count 94,323,706">)</span><span class=pc2 title="line 236 char 1 count 1">)</span>
+
+<span class=pc2 title="line 238 char 1 count 1">(define empty-state </span><span class=pc2 title="line 238 char 21 count 1">(</span><span class=pc2 title="line 238 char 22 count 1">state</span><span class=pc2 title="line 238 char 21 count 1"> </span><span class=pc2 title="line 238 char 28 count 1">empty-subst</span><span class=pc2 title="line 238 char 21 count 1"> </span><span class=pc2 title="line 238 char 40 count 1">empty-C</span><span class=pc2 title="line 238 char 21 count 1"> </span><span class=pc2 title="line 238 char 48 count 1">empty-U/V</span><span class=pc2 title="line 238 char 21 count 1">)</span><span class=pc2 title="line 238 char 1 count 1">)</span>
+
+<span class=pc2 title="line 240 char 1 count 1">(define (state-with-C st C^)</span>
+  <span class=pc2 title="line 241 char 3 count 35,408,358">(</span><span class=pc2 title="line 241 char 4 count 35,408,358">state</span><span class=pc2 title="line 241 char 3 count 35,408,358"> </span><span class=pc2 title="line 241 char 10 count 35,408,358">(</span><span class=pc2 title="line 241 char 11 count 35,408,358">state-S</span><span class=pc2 title="line 241 char 10 count 35,408,358"> </span><span class=pc2 title="line 241 char 19 count 35,408,358">st</span><span class=pc2 title="line 241 char 10 count 35,408,358">)</span><span class=pc2 title="line 241 char 3 count 35,408,358"> </span><span class=pc2 title="line 241 char 23 count 35,408,358">C^</span><span class=pc2 title="line 241 char 3 count 35,408,358"> </span><span class=pc2 title="line 241 char 26 count 35,408,358">(</span><span class=pc2 title="line 241 char 27 count 35,408,358">state-U/V</span><span class=pc2 title="line 241 char 26 count 35,408,358"> </span><span class=pc2 title="line 241 char 37 count 35,408,358">st</span><span class=pc2 title="line 241 char 26 count 35,408,358">)</span><span class=pc2 title="line 241 char 3 count 35,408,358">)</span><span class=pc2 title="line 240 char 1 count 1">)</span>
+
+<span class=pc2 title="line 243 char 1 count 1">(define (state-with-U/V st U/V^)</span>
+  <span class=pc2 title="line 244 char 3 count 166,300">(</span><span class=pc2 title="line 244 char 4 count 166,300">state</span><span class=pc2 title="line 244 char 3 count 166,300"> </span><span class=pc2 title="line 244 char 10 count 166,300">(</span><span class=pc2 title="line 244 char 11 count 166,300">state-S</span><span class=pc2 title="line 244 char 10 count 166,300"> </span><span class=pc2 title="line 244 char 19 count 166,300">st</span><span class=pc2 title="line 244 char 10 count 166,300">)</span><span class=pc2 title="line 244 char 3 count 166,300"> </span><span class=pc2 title="line 244 char 23 count 166,300">(</span><span class=pc2 title="line 244 char 24 count 166,300">state-C</span><span class=pc2 title="line 244 char 23 count 166,300"> </span><span class=pc2 title="line 244 char 32 count 166,300">st</span><span class=pc2 title="line 244 char 23 count 166,300">)</span><span class=pc2 title="line 244 char 3 count 166,300"> </span><span class=pc2 title="line 244 char 36 count 166,300">U/V^</span><span class=pc2 title="line 244 char 3 count 166,300">)</span><span class=pc2 title="line 243 char 1 count 1">)</span>
+
+<span class=pc2 title="line 246 char 1 count 1">(define (state-with-U st U)</span>
+  <span class=pc2 title="line 247 char 3 count 2,516,754">(</span><span class=pc2 title="line 247 char 4 count 2,516,754">state</span><span class=pc2 title="line 247 char 3 count 2,516,754"> </span><span class=pc2 title="line 247 char 10 count 2,516,754">(</span><span class=pc2 title="line 247 char 11 count 2,516,754">state-S</span><span class=pc2 title="line 247 char 10 count 2,516,754"> </span><span class=pc2 title="line 247 char 19 count 2,516,754">st</span><span class=pc2 title="line 247 char 10 count 2,516,754">)</span><span class=pc2 title="line 247 char 3 count 2,516,754"> </span><span class=pc2 title="line 247 char 23 count 2,516,754">(</span><span class=pc2 title="line 247 char 24 count 2,516,754">state-C</span><span class=pc2 title="line 247 char 23 count 2,516,754"> </span><span class=pc2 title="line 247 char 32 count 2,516,754">st</span><span class=pc2 title="line 247 char 23 count 2,516,754">)</span><span class=pc2 title="line 247 char 3 count 2,516,754"> </span><span class=pc2 title="line 247 char 36 count 2,516,754">(</span><span class=pc2 title="line 247 char 37 count 2,516,754">cons</span><span class=pc2 title="line 247 char 36 count 2,516,754"> </span><span class=pc2 title="line 247 char 42 count 2,516,754">U</span><span class=pc2 title="line 247 char 36 count 2,516,754"> </span><span class=pc2 title="line 247 char 44 count 2,516,754">(</span><span class=pc2 title="line 247 char 45 count 2,516,754">state-V</span><span class=pc2 title="line 247 char 44 count 2,516,754"> </span><span class=pc2 title="line 247 char 53 count 2,516,754">st</span><span class=pc2 title="line 247 char 44 count 2,516,754">)</span><span class=pc2 title="line 247 char 36 count 2,516,754">)</span><span class=pc2 title="line 247 char 3 count 2,516,754">)</span><span class=pc2 title="line 246 char 1 count 1">)</span>
+
+<span class=pc2 title="line 249 char 1 count 1">(define (state-with-V st V)</span>
+  <span class=pc2 title="line 250 char 3 count 65,355,019">(</span><span class=pc2 title="line 250 char 4 count 65,355,019">state</span><span class=pc2 title="line 250 char 3 count 65,355,019"> </span><span class=pc2 title="line 250 char 10 count 65,354,994">(</span><span class=pc2 title="line 250 char 11 count 65,354,994">state-S</span><span class=pc2 title="line 250 char 10 count 65,354,994"> </span><span class=pc2 title="line 250 char 19 count 65,354,994">st</span><span class=pc2 title="line 250 char 10 count 65,354,994">)</span><span class=pc2 title="line 250 char 3 count 65,355,019"> </span><span class=pc2 title="line 250 char 23 count 65,354,994">(</span><span class=pc2 title="line 250 char 24 count 65,354,994">state-C</span><span class=pc2 title="line 250 char 23 count 65,354,994"> </span><span class=pc2 title="line 250 char 32 count 65,354,994">st</span><span class=pc2 title="line 250 char 23 count 65,354,994">)</span><span class=pc2 title="line 250 char 3 count 65,355,019"> </span><span class=pc2 title="line 250 char 36 count 65,355,019">(</span><span class=pc2 title="line 250 char 37 count 65,355,019">cons</span><span class=pc2 title="line 250 char 36 count 65,355,019"> </span><span class=pc2 title="line 250 char 42 count 65,355,019">(</span><span class=pc2 title="line 250 char 43 count 65,355,019">state-U</span><span class=pc2 title="line 250 char 42 count 65,355,019"> </span><span class=pc2 title="line 250 char 51 count 65,355,019">st</span><span class=pc2 title="line 250 char 42 count 65,355,019">)</span><span class=pc2 title="line 250 char 36 count 65,355,019"> </span><span class=pc2 title="line 250 char 55 count 65,355,019">V</span><span class=pc2 title="line 250 char 36 count 65,355,019">)</span><span class=pc2 title="line 250 char 3 count 65,355,019">)</span><span class=pc2 title="line 249 char 1 count 1">)</span>
+
+<span class=pc2 title="line 252 char 1 count 1">(define state-with-scope</span>
+  <span class=pc2 title="line 253 char 3 count 1">(lambda (st new-scope)</span>
+    <span class=pc2 title="line 254 char 5 count 17,717,330">(</span><span class=pc2 title="line 254 char 6 count 17,717,330">state</span><span class=pc2 title="line 254 char 5 count 17,717,330"> </span><span class=pc2 title="line 254 char 12 count 17,717,330">(</span><span class=pc2 title="line 254 char 13 count 17,717,330">subst-with-scope</span><span class=pc2 title="line 254 char 12 count 17,717,330"> </span><span class=pc2 title="line 254 char 30 count 17,717,330">(</span><span class=pc2 title="line 254 char 31 count 17,717,330">state-S</span><span class=pc2 title="line 254 char 30 count 17,717,330"> </span><span class=pc2 title="line 254 char 39 count 17,717,330">st</span><span class=pc2 title="line 254 char 30 count 17,717,330">)</span><span class=pc2 title="line 254 char 12 count 17,717,330"> </span><span class=pc2 title="line 254 char 43 count 17,717,330">new-scope</span><span class=pc2 title="line 254 char 12 count 17,717,330">)</span><span class=pc2 title="line 254 char 5 count 17,717,330"> </span><span class=pc2 title="line 254 char 54 count 17,717,330">(</span><span class=pc2 title="line 254 char 55 count 17,717,330">state-C</span><span class=pc2 title="line 254 char 54 count 17,717,330"> </span><span class=pc2 title="line 254 char 63 count 17,717,330">st</span><span class=pc2 title="line 254 char 54 count 17,717,330">)</span><span class=pc2 title="line 254 char 5 count 17,717,330"> </span><span class=pc2 title="line 254 char 67 count 17,717,330">(</span><span class=pc2 title="line 254 char 68 count 17,717,330">state-U/V</span><span class=pc2 title="line 254 char 67 count 17,717,330"> </span><span class=pc2 title="line 254 char 78 count 17,717,330">st</span><span class=pc2 title="line 254 char 67 count 17,717,330">)</span><span class=pc2 title="line 254 char 5 count 17,717,330">)</span><span class=pc2 title="line 253 char 3 count 1">)</span><span class=pc2 title="line 252 char 1 count 1">)</span>
+
+
+<span class=pc2 title="line 257 char 1 count 1">(define (== u v)</span>
+  <span class=pc2 title="line 258 char 3 count 98,371,619">(lambda (st)</span>
+    <span class=pc2 title="line 259 char 5 count 72,760,692">(let-values (((S^ added) </span><span class=pc2 title="line 259 char 30 count 72,760,692">(</span><span class=pc2 title="line 259 char 31 count 72,760,692">unify</span><span class=pc2 title="line 259 char 30 count 72,760,692"> </span><span class=pc2 title="line 259 char 37 count 72,760,692">u</span><span class=pc2 title="line 259 char 30 count 72,760,692"> </span><span class=pc2 title="line 259 char 39 count 72,760,692">v</span><span class=pc2 title="line 259 char 30 count 72,760,692"> </span><span class=pc2 title="line 259 char 41 count 72,760,692">(</span><span class=pc2 title="line 259 char 42 count 72,760,692">state-S</span><span class=pc2 title="line 259 char 41 count 72,760,692"> </span><span class=pc2 title="line 259 char 50 count 72,760,692">st</span><span class=pc2 title="line 259 char 41 count 72,760,692">)</span><span class=pc2 title="line 259 char 30 count 72,760,692">)</span><span class=pc2 title="line 259 char 5 count 72,760,692">))</span>
+      <span class=pc2 title="line 260 char 7 count 72,753,119">(if </span><span class=pc2 title="line 260 char 11 count 72,753,119">S^</span>
+        <span class=pc2 title="line 261 char 9 count 35,741,293">(</span><span class=pc2 title="line 261 char 10 count 35,741,293">and-foldl</span><span class=pc2 title="line 261 char 9 count 35,741,293"> </span><span class=pc2 title="line 261 char 20 count 35,741,293">update-constraints</span><span class=pc2 title="line 261 char 9 count 35,741,293"> </span><span class=pc2 title="line 261 char 39 count 35,741,293">(</span><span class=pc2 title="line 261 char 40 count 35,741,293">state</span><span class=pc2 title="line 261 char 39 count 35,741,293"> </span><span class=pc2 title="line 261 char 46 count 35,741,293">S^</span><span class=pc2 title="line 261 char 39 count 35,741,293"> </span><span class=pc2 title="line 261 char 49 count 35,741,293">(</span><span class=pc2 title="line 261 char 50 count 35,741,293">state-C</span><span class=pc2 title="line 261 char 49 count 35,741,293"> </span><span class=pc2 title="line 261 char 58 count 35,741,293">st</span><span class=pc2 title="line 261 char 49 count 35,741,293">)</span><span class=pc2 title="line 261 char 39 count 35,741,293"> </span><span class=pc2 title="line 261 char 62 count 35,741,293">(</span><span class=pc2 title="line 261 char 63 count 35,741,293">state-U/V</span><span class=pc2 title="line 261 char 62 count 35,741,293"> </span><span class=pc2 title="line 261 char 73 count 35,741,293">st</span><span class=pc2 title="line 261 char 62 count 35,741,293">)</span><span class=pc2 title="line 261 char 39 count 35,741,293">)</span><span class=pc2 title="line 261 char 9 count 35,741,293"> </span><span class=pc2 title="line 261 char 78 count 35,741,293">added</span><span class=pc2 title="line 261 char 9 count 35,741,293">)</span>
+        <span class=pc2 title="line 262 char 9 count 37,011,826">#f</span><span class=pc2 title="line 260 char 7 count 72,753,119">)</span><span class=pc2 title="line 259 char 5 count 72,760,692">)</span><span class=pc2 title="line 258 char 3 count 98,371,619">)</span><span class=pc2 title="line 257 char 1 count 1">)</span>
+
+<span class=pc2 title="line 264 char 1 count 1">(define succeed </span><span class=pc2 title="line 264 char 17 count 1">(</span><span class=pc2 title="line 264 char 18 count 1">==</span><span class=pc2 title="line 264 char 17 count 1"> </span><span class=pc2 title="line 264 char 21 count 1">#f</span><span class=pc2 title="line 264 char 17 count 1"> </span><span class=pc2 title="line 264 char 24 count 1">#f</span><span class=pc2 title="line 264 char 17 count 1">)</span><span class=pc2 title="line 264 char 1 count 1">)</span>
+<span class=pc2 title="line 265 char 1 count 1">(define fail </span><span class=pc2 title="line 265 char 14 count 1">(</span><span class=pc2 title="line 265 char 15 count 1">==</span><span class=pc2 title="line 265 char 14 count 1"> </span><span class=pc2 title="line 265 char 18 count 1">#f</span><span class=pc2 title="line 265 char 14 count 1"> </span><span class=pc2 title="line 265 char 21 count 1">#t</span><span class=pc2 title="line 265 char 14 count 1">)</span><span class=pc2 title="line 265 char 1 count 1">)</span>
+
+<span class=pc2 title="line 267 char 1 count 1">(define (remove-duplicate-underconstraints u*)</span>
+  <span class=pc2 title="line 268 char 3 count 16,068,046">(cond</span>
+    <span class=pc2 title="line 268 char 3 count 16,068,046">(</span><span class=pc2 title="line 269 char 6 count 16,068,046">(</span><span class=pc2 title="line 269 char 7 count 16,068,046">null?</span><span class=pc2 title="line 269 char 6 count 16,068,046"> </span><span class=pc2 title="line 269 char 13 count 16,068,046">u*</span><span class=pc2 title="line 269 char 6 count 16,068,046">)</span><span class=pc2 title="line 268 char 3 count 16,068,046"> </span><span class=pc2 title="line 269 char 17 count 15,773,288">'()</span><span class=pc2 title="line 268 char 3 count 16,068,046">)</span>
+    <span class=pc2 title="line 268 char 3 count 16,068,046">(</span><span class=pc2 title="line 270 char 6 count 294,758">(</span><span class=pc2 title="line 270 char 7 count 294,758">assq</span><span class=pc2 title="line 270 char 6 count 294,758"> </span><span class=pc2 title="line 270 char 12 count 294,758">(</span><span class=pc2 title="line 270 char 13 count 294,758">underconstraint-unique-name</span><span class=pc2 title="line 270 char 12 count 294,758"> </span><span class=pc2 title="line 270 char 41 count 294,758">(</span><span class=pc2 title="line 270 char 42 count 294,758">car</span><span class=pc2 title="line 270 char 41 count 294,758"> </span><span class=pc2 title="line 270 char 46 count 294,758">u*</span><span class=pc2 title="line 270 char 41 count 294,758">)</span><span class=pc2 title="line 270 char 12 count 294,758">)</span><span class=pc2 title="line 270 char 6 count 294,758"> </span><span class=pc2 title="line 270 char 51 count 294,758">(</span><span class=pc2 title="line 270 char 52 count 294,758">cdr</span><span class=pc2 title="line 270 char 51 count 294,758"> </span><span class=pc2 title="line 270 char 56 count 294,758">u*</span><span class=pc2 title="line 270 char 51 count 294,758">)</span><span class=pc2 title="line 270 char 6 count 294,758">)</span>
+     <span class=pc2 title="line 271 char 6 count 128,459">(</span><span class=pc2 title="line 271 char 7 count 128,459">remove-duplicate-underconstraints</span><span class=pc2 title="line 271 char 6 count 128,459"> </span><span class=pc2 title="line 271 char 41 count 128,459">(</span><span class=pc2 title="line 271 char 42 count 128,459">cdr</span><span class=pc2 title="line 271 char 41 count 128,459"> </span><span class=pc2 title="line 271 char 46 count 128,459">u*</span><span class=pc2 title="line 271 char 41 count 128,459">)</span><span class=pc2 title="line 271 char 6 count 128,459">)</span><span class=pc2 title="line 268 char 3 count 16,068,046">)</span>
+    <span class=pc2 title="line 268 char 3 count 16,068,046">(else</span>
+     <span class=pc2 title="line 273 char 6 count 166,299">(</span><span class=pc2 title="line 273 char 7 count 166,299">cons</span><span class=pc2 title="line 273 char 6 count 166,299"> </span><span class=pc2 title="line 273 char 12 count 166,299">(</span><span class=pc2 title="line 273 char 13 count 166,299">car</span><span class=pc2 title="line 273 char 12 count 166,299"> </span><span class=pc2 title="line 273 char 17 count 166,299">u*</span><span class=pc2 title="line 273 char 12 count 166,299">)</span><span class=pc2 title="line 273 char 6 count 166,299"> </span><span class=pc2 title="line 273 char 21 count 166,299">(</span><span class=pc2 title="line 273 char 22 count 166,299">remove-duplicate-underconstraints</span><span class=pc2 title="line 273 char 21 count 166,299"> </span><span class=pc2 title="line 273 char 56 count 166,299">(</span><span class=pc2 title="line 273 char 57 count 166,299">cdr</span><span class=pc2 title="line 273 char 56 count 166,299"> </span><span class=pc2 title="line 273 char 61 count 166,299">u*</span><span class=pc2 title="line 273 char 56 count 166,299">)</span><span class=pc2 title="line 273 char 21 count 166,299">)</span><span class=pc2 title="line 273 char 6 count 166,299">)</span><span class=pc2 title="line 268 char 3 count 16,068,046">))</span><span class=pc2 title="line 267 char 1 count 1">)</span>
+
+<span class=pc2 title="line 275 char 1 count 1">(define (trigger-underconstraintso)</span>
+  <span class=pc2 title="line 276 char 3 count 17,939,377">(lambda (st)</span>
+    <span class=pc2 title="line 277 char 5 count 17,939,364">(let ((V </span><span class=pc2 title="line 277 char 14 count 17,939,364">(</span><span class=pc2 title="line 277 char 15 count 17,939,364">state-V</span><span class=pc2 title="line 277 char 14 count 17,939,364"> </span><span class=pc2 title="line 277 char 23 count 17,939,364">st</span><span class=pc2 title="line 277 char 14 count 17,939,364">)</span><span class=pc2 title="line 277 char 5 count 17,939,364">))</span>
+      <span class=pc2 title="line 278 char 7 count 17,939,352">(if </span><span class=pc2 title="line 278 char 11 count 17,939,352">(</span><span class=pc2 title="line 278 char 12 count 17,939,352">null?</span><span class=pc2 title="line 278 char 11 count 17,939,352"> </span><span class=pc2 title="line 278 char 18 count 17,939,352">V</span><span class=pc2 title="line 278 char 11 count 17,939,352">)</span>
+          <span class=pc2 title="line 279 char 11 count 2,165,811">st</span>
+          <span class=pc2 title="line 280 char 11 count 15,773,541">(let ((st </span><span class=pc2 title="line 280 char 21 count 15,773,541">(</span><span class=pc2 title="line 280 char 22 count 15,773,541">state-with-V</span><span class=pc2 title="line 280 char 21 count 15,773,541"> </span><span class=pc2 title="line 280 char 35 count 15,773,541">st</span><span class=pc2 title="line 280 char 21 count 15,773,541"> </span><span class=pc2 title="line 280 char 38 count 15,773,541">empty-V</span><span class=pc2 title="line 280 char 21 count 15,773,541">)</span><span class=pc2 title="line 280 char 11 count 15,773,541">))</span>
+            <span class=pc2 title="line 281 char 13 count 15,773,528">(let ((unders </span><span class=pc2 title="line 281 char 27 count 15,773,528">(</span><span class=pc2 title="line 281 char 28 count 15,773,528">apply</span><span class=pc2 title="line 281 char 27 count 15,773,528"> </span><span class=pc2 title="line 281 char 34 count 15,773,528">append</span><span class=pc2 title="line 281 char 27 count 15,773,528"> </span><span class=pc2 title="line 281 char 41 count 15,773,528">(</span><span class=pc2 title="line 281 char 42 count 15,773,528">map</span><span class=pc2 title="line 281 char 41 count 15,773,528"> </span><span class=pc2 title="line 281 char 46 count 15,773,528">(lambda (x) </span><span class=pc2 title="line 281 char 58 count 46,957,085">(</span><span class=pc2 title="line 281 char 59 count 46,957,085">lookup-u</span><span class=pc2 title="line 281 char 58 count 46,957,085"> </span><span class=pc2 title="line 281 char 68 count 46,957,085">st</span><span class=pc2 title="line 281 char 58 count 46,957,085"> </span><span class=pc2 title="line 281 char 71 count 46,957,085">x</span><span class=pc2 title="line 281 char 58 count 46,957,085">)</span><span class=pc2 title="line 281 char 46 count 15,773,528">)</span><span class=pc2 title="line 281 char 41 count 15,773,528"> </span><span class=pc2 title="line 281 char 75 count 15,773,528">V</span><span class=pc2 title="line 281 char 41 count 15,773,528">)</span><span class=pc2 title="line 281 char 27 count 15,773,528">)</span><span class=pc2 title="line 281 char 13 count 15,773,528">))</span>
+              <span class=pc2 title="line 282 char 15 count 15,773,288">(let ((unders </span><span class=pc2 title="line 282 char 29 count 15,773,288">(</span><span class=pc2 title="line 282 char 30 count 15,773,288">remove-duplicate-underconstraints</span><span class=pc2 title="line 282 char 29 count 15,773,288"> </span><span class=pc2 title="line 282 char 64 count 15,773,288">unders</span><span class=pc2 title="line 282 char 29 count 15,773,288">)</span><span class=pc2 title="line 282 char 15 count 15,773,288">))</span>
+                <span class=pc2 title="line 283 char 17 count 15,773,288">(let loop ((unders </span><span class=pc2 title="line 283 char 36 count 15,773,288">unders</span><span class=pc2 title="line 283 char 17 count 15,773,288">)</span>
+                           <span class=pc2 title="line 283 char 17 count 15,773,288">(st </span><span class=pc2 title="line 284 char 32 count 15,773,288">st</span><span class=pc2 title="line 283 char 17 count 15,773,288">))</span>
+                  <span class=pc2 title="line 285 char 19 count 15,928,940">(cond</span>
+                    <span class=pc2 title="line 285 char 19 count 15,928,940">(</span><span class=pc2 title="line 286 char 22 count 15,928,940">(</span><span class=pc2 title="line 286 char 23 count 15,928,940">null?</span><span class=pc2 title="line 286 char 22 count 15,928,940"> </span><span class=pc2 title="line 286 char 29 count 15,928,940">unders</span><span class=pc2 title="line 286 char 22 count 15,928,940">)</span><span class=pc2 title="line 285 char 19 count 15,928,940"> </span><span class=pc2 title="line 286 char 37 count 15,762,641">st</span><span class=pc2 title="line 285 char 19 count 15,928,940">)</span>
+                    <span class=pc2 title="line 285 char 19 count 15,928,940">(else </span><span class=pc2 title="line 287 char 27 count 166,299">(</span><span class=pc2 title="line 287 char 28 count 166,299">bind</span><span class=pc2 title="line 287 char 27 count 166,299"> </span><span class=pc2 title="line 287 char 33 count 166,299">(</span><span class=pc2 title="line 287 char 34 count 166,299">run-and-add-underconstraint</span><span class=pc2 title="line 287 char 33 count 166,299"> </span><span class=pc2 title="line 287 char 62 count 166,299">(</span><span class=pc2 title="line 287 char 63 count 166,299">car</span><span class=pc2 title="line 287 char 62 count 166,299"> </span><span class=pc2 title="line 287 char 67 count 166,299">unders</span><span class=pc2 title="line 287 char 62 count 166,299">)</span><span class=pc2 title="line 287 char 33 count 166,299"> </span><span class=pc2 title="line 287 char 75 count 166,299">st</span><span class=pc2 title="line 287 char 33 count 166,299">)</span>
+                                <span class=pc2 title="line 288 char 33 count 166,299">(lambda (st) </span><span class=pc2 title="line 288 char 46 count 155,652">(</span><span class=pc2 title="line 288 char 47 count 155,652">loop</span><span class=pc2 title="line 288 char 46 count 155,652"> </span><span class=pc2 title="line 288 char 52 count 155,652">(</span><span class=pc2 title="line 288 char 53 count 155,652">cdr</span><span class=pc2 title="line 288 char 52 count 155,652"> </span><span class=pc2 title="line 288 char 57 count 155,652">unders</span><span class=pc2 title="line 288 char 52 count 155,652">)</span><span class=pc2 title="line 288 char 46 count 155,652"> </span><span class=pc2 title="line 288 char 65 count 155,652">st</span><span class=pc2 title="line 288 char 46 count 155,652">)</span><span class=pc2 title="line 288 char 33 count 166,299">)</span><span class=pc2 title="line 287 char 27 count 166,299">)</span><span class=pc2 title="line 285 char 19 count 15,928,940">))</span><span class=pc2 title="line 283 char 17 count 15,773,288">)</span><span class=pc2 title="line 282 char 15 count 15,773,288">)</span><span class=pc2 title="line 281 char 13 count 15,773,528">)</span><span class=pc2 title="line 280 char 11 count 15,773,541">)</span><span class=pc2 title="line 278 char 7 count 17,939,352">)</span><span class=pc2 title="line 277 char 5 count 17,939,364">)</span><span class=pc2 title="line 276 char 3 count 17,939,377">)</span><span class=pc2 title="line 275 char 1 count 1">)</span>
+
+<span class=pc2 title="line 290 char 1 count 1">(define (run-underconstraint-onceo name ge g timeout-info trace-arg? general?)  </span>
+  <span class=pc2 title="line 291 char 3 count 166,300">(define (trace?)</span>
+    <span class=pc2 title="line 292 char 5 count 42,659,473">(or </span><span class=pc2 title="line 292 char 9 count 42,659,473">trace-arg?</span>
+        <span class=pc2 title="line 293 char 9 count 42,659,473">(</span><span class=pc2 title="line 293 char 10 count 42,659,473">*trace-underconstraint-param*</span><span class=pc2 title="line 293 char 9 count 42,659,473">)</span><span class=pc2 title="line 292 char 5 count 42,659,473">)</span><span class=pc2 title="line 291 char 3 count 166,300">)</span>
+  <span class=pc2 title="line 294 char 3 count 166,300">(define (get-timeout-ticks)</span>
+    <span class=pc2 title="line 295 char 5 count 166,300">(pmatch </span><span class=pc2 title="line 295 char 13 count 1,164,100">timeout-info</span>
+      <span class=pc2 title="line 295 char 5 count 166,300">[#f</span>
+       <span class=pc2 title="line 295 char 5 count 166,300">;; no timeout argument passed to macro, so use the global</span>
+       <span class=pc2 title="line 295 char 5 count 166,300">;; default parameter</span>
+       <span class=pc1 title="line 299 char 8 count 0">(</span><span class=pc1 title="line 299 char 9 count 0">*underconstraint-default-timeout-param*</span><span class=pc1 title="line 299 char 8 count 0">)</span><span class=pc2 title="line 295 char 5 count 166,300">]</span>
+      <span class=pc2 title="line 295 char 5 count 166,300">[(timeout #f)</span>
+       <span class=pc2 title="line 295 char 5 count 166,300">;; argument passed to macro that overrides the global default</span>
+       <span class=pc2 title="line 295 char 5 count 166,300">;; value---timeout disabled</span>
+       <span class=pc1 title="line 303 char 8 count 0">#f</span><span class=pc2 title="line 295 char 5 count 166,300">]</span>
+      <span class=pc2 title="line 295 char 5 count 166,300">[(timeout ,timeout-ticks)</span>
+       <span class=pc2 title="line 295 char 5 count 166,300">(guard </span><span class=pc2 title="line 305 char 15 count 166,300">(and </span><span class=pc2 title="line 305 char 20 count 166,300">(</span><span class=pc2 title="line 305 char 21 count 166,300">integer?</span><span class=pc2 title="line 305 char 20 count 166,300"> </span><span class=pc2 title="line 305 char 30 count 166,300">timeout-ticks</span><span class=pc2 title="line 305 char 20 count 166,300">)</span>
+                   <span class=pc2 title="line 306 char 20 count 166,300">(</span><span class=pc2 title="line 306 char 21 count 166,300">positive?</span><span class=pc2 title="line 306 char 20 count 166,300"> </span><span class=pc2 title="line 306 char 31 count 166,300">timeout-ticks</span><span class=pc2 title="line 306 char 20 count 166,300">)</span><span class=pc2 title="line 305 char 15 count 166,300">)</span><span class=pc2 title="line 295 char 5 count 166,300">)</span>
+       <span class=pc2 title="line 295 char 5 count 166,300">;; argument passed to macro that overrides the default global</span>
+       <span class=pc2 title="line 295 char 5 count 166,300">;; parameter---timeout enabled, with `timeout-ticks` ticks</span>
+       <span class=pc2 title="line 295 char 5 count 166,300">;; (gas) for the engine</span>
+       <span class=pc2 title="line 310 char 8 count 166,300">timeout-ticks</span><span class=pc2 title="line 295 char 5 count 166,300">]</span>
+      <span class=pc2 title="line 295 char 5 count 166,300">[else</span>
+       <span class=pc1 title="line 312 char 8 count 0">(</span><span class=pc1 title="line 312 char 9 count 0">error</span>
+        <span class=pc1 title="line 313 char 9 count 0">'run-underconstraint-onceo</span>
+        <span class=pc1 title="line 314 char 9 count 0">(</span><span class=pc1 title="line 314 char 10 count 0">printf</span>
+         <span class=pc1 title="line 315 char 10 count 0">"ticks argument must be #f or a positive integer: given ~s"</span>
+         <span class=pc1 title="line 316 char 10 count 0">rest</span><span class=pc1 title="line 314 char 9 count 0">)</span><span class=pc1 title="line 312 char 8 count 0">)</span><span class=pc2 title="line 295 char 5 count 166,300">])</span><span class=pc2 title="line 294 char 3 count 166,300">)</span>
+  <span class=pc2 title="line 290 char 1 count 1">(define-syntax maybe-time</span>
+    <span class=pc2 title="line 290 char 1 count 1">(syntax-rules ()</span>
+      <span class=pc2 title="line 290 char 1 count 1">[(_ e) (if </span><span class=pc2 title="line 319 char 18 count 166,300">(</span><span class=pc2 title="line 319 char 19 count 166,300">trace?</span><span class=pc2 title="line 319 char 18 count 166,300">)</span><span class=pc2 title="line 290 char 1 count 1"> (time e) e)]))</span>
+  <span class=pc2 title="line 290 char 1 count 1">(define-syntax begin-when-trace</span>
+    <span class=pc2 title="line 290 char 1 count 1">(syntax-rules ()</span>
+      <span class=pc2 title="line 290 char 1 count 1">[(_ e* ... e)</span>
+       <span class=pc2 title="line 290 char 1 count 1">(begin</span>
+         <span class=pc2 title="line 290 char 1 count 1">(when </span><span class=pc2 title="line 324 char 16 count 42,326,873">(</span><span class=pc2 title="line 324 char 17 count 42,326,873">trace?</span><span class=pc2 title="line 324 char 16 count 42,326,873">)</span>
+           <span class=pc2 title="line 290 char 1 count 1">e*)</span>
+         <span class=pc2 title="line 290 char 1 count 1">...</span>
+         <span class=pc2 title="line 290 char 1 count 1">e)]))</span>
+  <span class=pc2 title="line 328 char 3 count 166,300">(lambda (st)</span>
+    <span class=pc2 title="line 329 char 5 count 166,300">(let ((st </span><span class=pc2 title="line 329 char 15 count 166,300">(</span><span class=pc2 title="line 329 char 16 count 166,300">state-with-scope</span><span class=pc2 title="line 329 char 15 count 166,300"> </span><span class=pc2 title="line 329 char 33 count 166,300">st</span><span class=pc2 title="line 329 char 15 count 166,300"> </span><span class=pc2 title="line 329 char 36 count 166,300">(</span><span class=pc2 title="line 329 char 37 count 166,300">new-scope</span><span class=pc2 title="line 329 char 36 count 166,300">)</span><span class=pc2 title="line 329 char 15 count 166,300">)</span><span class=pc2 title="line 329 char 5 count 166,300">)</span>
+          <span class=pc2 title="line 329 char 5 count 166,300">(timeout-ticks </span><span class=pc2 title="line 330 char 26 count 166,300">(</span><span class=pc2 title="line 330 char 27 count 166,300">get-timeout-ticks</span><span class=pc2 title="line 330 char 26 count 166,300">)</span><span class=pc2 title="line 329 char 5 count 166,300">))</span>
+      <span class=pc2 title="line 331 char 7 count 166,300">(when </span><span class=pc2 title="line 331 char 13 count 166,300">(</span><span class=pc2 title="line 331 char 14 count 166,300">trace?</span><span class=pc2 title="line 331 char 13 count 166,300">)</span>
+        <span class=pc1 title="line 332 char 9 count 0">(</span><span class=pc1 title="line 332 char 10 count 0">newline</span><span class=pc1 title="line 332 char 9 count 0">)</span>
+        <span class=pc1 title="line 333 char 9 count 0">(</span><span class=pc1 title="line 333 char 10 count 0">printf</span>
+         <span class=pc1 title="line 334 char 10 count 0">"* underconstraint ~s with timeout ~s trying goal expression:\n~s\n"</span>
+         <span class=pc1 title="line 335 char 10 count 0">name</span><span class=pc1 title="line 333 char 9 count 0"> </span><span class=pc1 title="line 335 char 15 count 0">timeout-ticks</span><span class=pc1 title="line 333 char 9 count 0"> </span><span class=pc1 title="line 335 char 29 count 0">ge</span><span class=pc1 title="line 333 char 9 count 0">)</span><span class=pc2 title="line 331 char 7 count 166,300">)</span>
+      <span class=pc2 title="line 336 char 7 count 166,300">(if </span><span class=pc2 title="line 336 char 11 count 166,300">(</span><span class=pc2 title="line 336 char 12 count 166,300">not</span><span class=pc2 title="line 336 char 11 count 166,300"> </span><span class=pc2 title="line 336 char 16 count 166,300">timeout-ticks</span><span class=pc2 title="line 336 char 11 count 166,300">)</span>
+          <span class=pc1 title="line 337 char 11 count 0">(let loop (($ </span><span class=pc1 title="line 337 char 25 count 0">(</span><span class=pc1 title="line 337 char 26 count 0">g</span><span class=pc1 title="line 337 char 25 count 0"> </span><span class=pc1 title="line 337 char 28 count 0">st</span><span class=pc1 title="line 337 char 25 count 0">)</span><span class=pc1 title="line 337 char 11 count 0">))</span>
+             <span class=pc1 title="line 338 char 14 count 0">(case-inf </span><span class=pc1 title="line 338 char 24 count 0">$</span>
+               <span class=pc1 title="line 338 char 14 count 0">(()</span>
+                <span class=pc1 title="line 340 char 17 count 0">(begin-when-trace</span>
+                 <span class=pc1 title="line 341 char 18 count 0">(</span><span class=pc1 title="line 341 char 19 count 0">printf</span>
+                  <span class=pc1 title="line 342 char 19 count 0">"* underconstraint ~s failed\n"</span>
+                  <span class=pc1 title="line 343 char 19 count 0">name</span><span class=pc1 title="line 341 char 18 count 0">)</span>
+                 <span class=pc1 title="line 344 char 18 count 0">(begin</span>
+                   <span class=pc1 title="line 345 char 20 count 0">(increment-counter! </span><span class=pc1 title="line 345 char 40 count 0">*fail-counter*</span><span class=pc1 title="line 345 char 20 count 0">)</span>
+                   <span class=pc1 title="line 346 char 20 count 0">#f</span><span class=pc1 title="line 344 char 18 count 0">)</span><span class=pc1 title="line 340 char 17 count 0">)</span><span class=pc1 title="line 338 char 14 count 0">)</span>
+               <span class=pc1 title="line 338 char 14 count 0">((f)</span>
+                <span class=pc1 title="line 338 char 14 count 0">(begin-when-trace</span>
+                 <span class=pc1 title="line 349 char 18 count 0">(</span><span class=pc1 title="line 349 char 19 count 0">printf</span>
+                  <span class=pc1 title="line 350 char 19 count 0">"* underconstraint ~s encountered `(f)` case of case-inf\n"</span>
+                  <span class=pc1 title="line 351 char 19 count 0">name</span><span class=pc1 title="line 349 char 18 count 0">)</span>
+                 <span class=pc1 title="line 352 char 18 count 0">(begin</span>
+                   <span class=pc1 title="line 353 char 20 count 0">(increment-counter! </span><span class=pc1 title="line 353 char 40 count 0">*immature-stream-counter*</span><span class=pc1 title="line 353 char 20 count 0">)</span>
+                   <span class=pc1 title="line 354 char 20 count 0">(lambda ()</span>
+                     <span class=pc1 title="line 354 char 20 count 0">;; thunkify forcing of `f` to allow interleaving,</span>
+                     <span class=pc1 title="line 354 char 20 count 0">;; since we don't have timeout protection</span>
+                     <span class=pc1 title="line 357 char 22 count 0">(</span><span class=pc1 title="line 357 char 23 count 0">loop</span><span class=pc1 title="line 357 char 22 count 0"> </span><span class=pc1 title="line 357 char 28 count 0">(</span><span class=pc1 title="line 357 char 29 count 0">f</span><span class=pc1 title="line 357 char 28 count 0">)</span><span class=pc1 title="line 357 char 22 count 0">)</span><span class=pc1 title="line 354 char 20 count 0">)</span><span class=pc1 title="line 352 char 18 count 0">)</span><span class=pc1 title="line 338 char 14 count 0">))</span>
+               <span class=pc1 title="line 338 char 14 count 0">((c)</span>
+                <span class=pc1 title="line 338 char 14 count 0">(begin-when-trace</span>
+                 <span class=pc1 title="line 360 char 18 count 0">(</span><span class=pc1 title="line 360 char 19 count 0">printf</span>
+                  <span class=pc1 title="line 361 char 19 count 0">"* underconstraint ~s succeeded with singleton result\n"</span>
+                  <span class=pc1 title="line 362 char 19 count 0">name</span><span class=pc1 title="line 360 char 18 count 0">)</span>
+                 <span class=pc1 title="line 363 char 18 count 0">(begin</span>
+                   <span class=pc1 title="line 364 char 20 count 0">(increment-counter! </span><span class=pc1 title="line 364 char 40 count 0">*singleton-succeed-counter*</span><span class=pc1 title="line 364 char 20 count 0">)</span>
+                   <span class=pc1 title="line 363 char 18 count 0">;; TODO should consider returning `c` here; since the</span>
+                   <span class=pc1 title="line 363 char 18 count 0">;; singleton state is being returned, it is safe to</span>
+                   <span class=pc1 title="line 363 char 18 count 0">;; commit to the new state returned (updated with</span>
+                   <span class=pc1 title="line 363 char 18 count 0">;; underconstraints, perhaps).</span>
+                   <span class=pc1 title="line 369 char 20 count 0">st</span><span class=pc1 title="line 363 char 18 count 0">)</span><span class=pc1 title="line 338 char 14 count 0">))</span>
+               <span class=pc1 title="line 338 char 14 count 0">((c f^)</span>
+                <span class=pc1 title="line 338 char 14 count 0">(begin-when-trace</span>
+                 <span class=pc1 title="line 372 char 18 count 0">(</span><span class=pc1 title="line 372 char 19 count 0">printf</span>
+                  <span class=pc1 title="line 373 char 19 count 0">"* underconstraint ~s succeeded with non-singleton stream\n"</span>
+                  <span class=pc1 title="line 374 char 19 count 0">name</span><span class=pc1 title="line 372 char 18 count 0">)</span>
+                 <span class=pc1 title="line 375 char 18 count 0">(begin</span>
+                   <span class=pc1 title="line 376 char 20 count 0">(increment-counter! </span><span class=pc1 title="line 376 char 40 count 0">*non-singleton-succeed-counter*</span><span class=pc1 title="line 376 char 20 count 0">)</span>
+                   <span class=pc1 title="line 377 char 20 count 0">st</span><span class=pc1 title="line 375 char 18 count 0">)</span><span class=pc1 title="line 338 char 14 count 0">)))</span><span class=pc1 title="line 337 char 11 count 0">)</span>
+          <span class=pc2 title="line 336 char 7 count 166,300">;; `timeout-ticks` is not #f:</span>
+          <span class=pc2 title="line 379 char 11 count 166,300">(let ((eng </span><span class=pc2 title="line 379 char 22 count 166,300">(</span><span class=pc2 title="line 379 char 23 count 166,300">make-engine</span>
+                       <span class=pc2 title="line 380 char 24 count 166,300">(lambda ()                                                  </span>
+                         <span class=pc2 title="line 381 char 26 count 166,300">(let loop (($ </span><span class=pc2 title="line 381 char 40 count 166,300">(</span><span class=pc2 title="line 381 char 41 count 166,300">g</span><span class=pc2 title="line 381 char 40 count 166,300"> </span><span class=pc2 title="line 381 char 43 count 166,300">st</span><span class=pc2 title="line 381 char 40 count 166,300">)</span><span class=pc2 title="line 381 char 26 count 166,300">))</span>
+                            <span class=pc2 title="line 382 char 29 count 42,160,573">(case-inf </span><span class=pc2 title="line 382 char 39 count 42,160,573">$</span>
+                              <span class=pc2 title="line 382 char 29 count 42,160,573">(()</span>
+                               <span class=pc2 title="line 384 char 32 count 10,647">(begin-when-trace</span>
+                                <span class=pc1 title="line 385 char 33 count 0">(</span><span class=pc1 title="line 385 char 34 count 0">printf</span>
+                                 <span class=pc1 title="line 386 char 34 count 0">"* underconstraint ~s failed\n"</span>
+                                 <span class=pc1 title="line 387 char 34 count 0">name</span><span class=pc1 title="line 385 char 33 count 0">)</span>
+                                <span class=pc2 title="line 388 char 33 count 10,647">(begin</span>
+                                  <span class=pc2 title="line 389 char 35 count 10,647">(increment-counter! </span><span class=pc2 title="line 389 char 55 count 10,647">*fail-counter*</span><span class=pc2 title="line 389 char 35 count 10,647">)</span>
+                                  <span class=pc2 title="line 390 char 35 count 10,647">#f</span><span class=pc2 title="line 388 char 33 count 10,647">)</span><span class=pc2 title="line 384 char 32 count 10,647">)</span><span class=pc2 title="line 382 char 29 count 42,160,573">)</span>
+                              <span class=pc2 title="line 382 char 29 count 42,160,573">((f)</span>
+                               <span class=pc2 title="line 382 char 29 count 42,160,573">(begin-when-trace</span>
+                                <span class=pc1 title="line 393 char 33 count 0">(</span><span class=pc1 title="line 393 char 34 count 0">printf</span>
+                                 <span class=pc1 title="line 394 char 34 count 0">"* underconstraint ~s encountered `(f)` case of case-inf\n"</span>
+                                 <span class=pc1 title="line 395 char 34 count 0">name</span><span class=pc1 title="line 393 char 33 count 0">)</span>
+                                <span class=pc2 title="line 396 char 33 count 42,008,172">(begin</span>
+                                  <span class=pc2 title="line 397 char 35 count 42,008,172">(increment-counter! </span><span class=pc2 title="line 397 char 55 count 42,008,172">*immature-stream-counter*</span><span class=pc2 title="line 397 char 35 count 42,008,172">)</span>
+                                  <span class=pc2 title="line 396 char 33 count 42,008,172">;; force `f` immediately, since we have</span>
+                                  <span class=pc2 title="line 396 char 33 count 42,008,172">;; a timeout to protect us</span>
+                                  <span class=pc2 title="line 400 char 35 count 42,008,172">(</span><span class=pc2 title="line 400 char 36 count 42,008,172">loop</span><span class=pc2 title="line 400 char 35 count 42,008,172"> </span><span class=pc2 title="line 400 char 41 count 42,008,172">(</span><span class=pc2 title="line 400 char 42 count 42,008,172">f</span><span class=pc2 title="line 400 char 41 count 42,008,172">)</span><span class=pc2 title="line 400 char 35 count 42,008,172">)</span><span class=pc2 title="line 396 char 33 count 42,008,172">)</span><span class=pc2 title="line 382 char 29 count 42,160,573">))</span>
+                              <span class=pc2 title="line 382 char 29 count 42,160,573">((c)</span>
+                               <span class=pc2 title="line 382 char 29 count 42,160,573">(begin-when-trace</span>
+                                <span class=pc1 title="line 403 char 33 count 0">(</span><span class=pc1 title="line 403 char 34 count 0">printf</span>
+                                 <span class=pc1 title="line 404 char 34 count 0">"* underconstraint ~s succeeded with singleton result\n"</span>
+                                 <span class=pc1 title="line 405 char 34 count 0">name</span><span class=pc1 title="line 403 char 33 count 0">)</span>
+                                <span class=pc1 title="line 406 char 33 count 0">(begin</span>
+                                  <span class=pc1 title="line 407 char 35 count 0">(increment-counter! </span><span class=pc1 title="line 407 char 55 count 0">*singleton-succeed-counter*</span><span class=pc1 title="line 407 char 35 count 0">)</span>
+                                  <span class=pc1 title="line 406 char 33 count 0">;; TODO should consider returning `c` here; since the</span>
+                                  <span class=pc1 title="line 406 char 33 count 0">;; singleton state is being returned, it is safe to</span>
+                                  <span class=pc1 title="line 406 char 33 count 0">;; commit to the new state returned (updated with</span>
+                                  <span class=pc1 title="line 406 char 33 count 0">;; underconstraints, perhaps).</span>
+                                  <span class=pc1 title="line 412 char 35 count 0">st</span><span class=pc1 title="line 406 char 33 count 0">)</span><span class=pc2 title="line 382 char 29 count 42,160,573">))</span>
+                              <span class=pc2 title="line 382 char 29 count 42,160,573">((c f^)</span>
+                               <span class=pc2 title="line 382 char 29 count 42,160,573">(begin-when-trace</span>
+                                <span class=pc1 title="line 415 char 33 count 0">(</span><span class=pc1 title="line 415 char 34 count 0">printf</span>
+                                 <span class=pc1 title="line 416 char 34 count 0">"* underconstraint ~s succeeded with non-singleton stream\n"</span>
+                                 <span class=pc1 title="line 417 char 34 count 0">name</span><span class=pc1 title="line 415 char 33 count 0">)</span>
+                                <span class=pc2 title="line 418 char 33 count 141,754">(begin</span>
+                                  <span class=pc2 title="line 419 char 35 count 141,754">(increment-counter! </span><span class=pc2 title="line 419 char 55 count 141,754">*non-singleton-succeed-counter*</span><span class=pc2 title="line 419 char 35 count 141,754">)</span>
+                                  <span class=pc2 title="line 420 char 35 count 141,754">st</span><span class=pc2 title="line 418 char 33 count 141,754">)</span><span class=pc2 title="line 382 char 29 count 42,160,573">)))</span><span class=pc2 title="line 381 char 26 count 166,300">)</span><span class=pc2 title="line 380 char 24 count 166,300">)</span><span class=pc2 title="line 379 char 22 count 166,300">)</span><span class=pc2 title="line 379 char 11 count 166,300">))</span>
+            <span class=pc2 title="line 421 char 13 count 166,300">(maybe-time</span>
+             <span class=pc2 title="line 422 char 14 count 166,300">(</span><span class=pc2 title="line 422 char 15 count 166,300">eng</span><span class=pc2 title="line 422 char 14 count 166,300"> </span><span class=pc2 title="line 422 char 19 count 166,300">timeout-ticks</span>
+                  <span class=pc2 title="line 422 char 14 count 166,300">;; engine "completed" procedure</span>
+                  <span class=pc2 title="line 424 char 19 count 166,300">(lambda (ticks-left-over value)</span>
+                    <span class=pc2 title="line 425 char 21 count 152,401">(increment-counter! </span><span class=pc2 title="line 425 char 41 count 152,401">*engine-completed-counter*</span><span class=pc2 title="line 425 char 21 count 152,401">)</span>
+                    <span class=pc2 title="line 426 char 21 count 152,401">(begin-when-trace</span>
+                     <span class=pc1 title="line 427 char 22 count 0">(</span><span class=pc1 title="line 427 char 23 count 0">printf</span>
+                      <span class=pc1 title="line 428 char 23 count 0">"* underconstraint ~s engine completed after ~s of ~s ticks\n"</span>
+                      <span class=pc1 title="line 429 char 23 count 0">name</span>
+                      <span class=pc1 title="line 430 char 23 count 0">(</span><span class=pc1 title="line 430 char 24 count 0">-</span><span class=pc1 title="line 430 char 23 count 0"> </span><span class=pc1 title="line 430 char 26 count 0">timeout-ticks</span><span class=pc1 title="line 430 char 23 count 0"> </span><span class=pc1 title="line 430 char 40 count 0">ticks-left-over</span><span class=pc1 title="line 430 char 23 count 0">)</span>
+                      <span class=pc1 title="line 431 char 23 count 0">timeout-ticks</span><span class=pc1 title="line 427 char 22 count 0">)</span>
+                     <span class=pc2 title="line 432 char 22 count 152,401">value</span><span class=pc2 title="line 426 char 21 count 152,401">)</span><span class=pc2 title="line 424 char 19 count 166,300">)</span>
+                  <span class=pc2 title="line 422 char 14 count 166,300">;; engine "expired" procedure</span>
+                  <span class=pc2 title="line 434 char 19 count 166,300">(lambda (new-engine)</span>
+                    <span class=pc2 title="line 435 char 21 count 13,899">(increment-counter! </span><span class=pc2 title="line 435 char 41 count 13,899">*engine-timedout-counter*</span><span class=pc2 title="line 435 char 21 count 13,899">)</span>
+                    <span class=pc2 title="line 436 char 21 count 13,899">(begin-when-trace</span>
+                     <span class=pc1 title="line 437 char 22 count 0">(</span><span class=pc1 title="line 437 char 23 count 0">printf</span>
+                      <span class=pc1 title="line 438 char 23 count 0">"* underconstraint ~s engine ran out of gas after ~s ticks (treating as success)\n"</span>
+                      <span class=pc1 title="line 439 char 23 count 0">name</span>
+                      <span class=pc1 title="line 440 char 23 count 0">timeout-ticks</span><span class=pc1 title="line 437 char 22 count 0">)</span>
+                     <span class=pc2 title="line 436 char 21 count 13,899">;; to maintain soundness, we must treat</span>
+                     <span class=pc2 title="line 436 char 21 count 13,899">;; engine timeout timeout as</span>
+                     <span class=pc2 title="line 436 char 21 count 13,899">;; success---return the original state</span>
+                     <span class=pc2 title="line 444 char 22 count 13,899">st</span><span class=pc2 title="line 436 char 21 count 13,899">)</span><span class=pc2 title="line 434 char 19 count 166,300">)</span><span class=pc2 title="line 422 char 14 count 166,300">)</span><span class=pc2 title="line 421 char 13 count 166,300">)</span><span class=pc2 title="line 379 char 11 count 166,300">)</span><span class=pc2 title="line 336 char 7 count 166,300">)</span><span class=pc2 title="line 329 char 5 count 166,300">)</span><span class=pc2 title="line 328 char 3 count 166,300">)</span><span class=pc2 title="line 290 char 1 count 1">)</span>
+
+;; One-shot underconstraints:
+
+<span class=pc2 title="line 448 char 1 count 1">(define (one-shot-underconstraino-aux name ge g timeout-info trace?)</span>
+  <span class=pc1 title="line 449 char 3 count 0">(</span><span class=pc1 title="line 449 char 4 count 0">run-underconstraint-onceo</span><span class=pc1 title="line 449 char 3 count 0"> </span><span class=pc1 title="line 449 char 30 count 0">name</span><span class=pc1 title="line 449 char 3 count 0"> </span><span class=pc1 title="line 449 char 35 count 0">ge</span><span class=pc1 title="line 449 char 3 count 0"> </span><span class=pc1 title="line 449 char 38 count 0">g</span><span class=pc1 title="line 449 char 3 count 0"> </span><span class=pc1 title="line 449 char 40 count 0">timeout-info</span><span class=pc1 title="line 449 char 3 count 0"> </span><span class=pc1 title="line 449 char 53 count 0">trace?</span><span class=pc1 title="line 449 char 3 count 0"> </span><span class=pc1 title="line 449 char 60 count 0">#f</span><span class=pc1 title="line 449 char 3 count 0">)</span><span class=pc2 title="line 448 char 1 count 1">)</span>
+
+(define-syntax one-shot-underconstraino
+  (syntax-rules ()
+    [(_ name ge)
+     ;; use global default timeout parameter
+     (let ((g ge))
+       (one-shot-underconstraino-aux name 'ge g #f #f))]
+    [(_ name ge #f)
+     ;; no timeout (overrides global timeout parameter)
+     (let ((g ge))
+       (one-shot-underconstraino-aux name 'ge g `(timeout #f) #f))]
+    [(_ name ge timeout-ticks)
+     ;; use timeout with `timeout-ticks` ticks (gas) (overrides global
+     ;; timeout parameter)
+     (let ((g ge))
+       (one-shot-underconstraino-aux name 'ge g `(timeout ,timeout-ticks) #f))]))
+
+(define-syntax trace-one-shot-underconstraino
+  ;; same as `one-shot-underconstraino`, but with the trace flag set
+  ;; to `#t` rather than `#f`
+  (syntax-rules ()
+    [(_ name ge)
+     (let ((g ge))
+       (one-shot-underconstraino-aux name 'ge g #f #t))]
+    [(_ name ge #f)
+     (let ((g ge))
+       (one-shot-underconstraino-aux name 'ge g `(timeout #f) #t))]
+    [(_ name ge timeout-ticks)
+     (let ((g ge))
+       (one-shot-underconstraino-aux name 'ge g `(timeout ,timeout-ticks) #t))]))
+
+
+;; Full (multi-shot) underconstraints:
+
+;; Run the underconstraint's goal `g` immediately, in the current
+;; state `st`, but with the underconstraint mapping `U` and the list
+;; of newly "touched" variables `V` replaced with the empty `U/V`.
+<span class=pc2 title="line 487 char 1 count 1">(define (run-general-underconstraint underconstraint st)</span>
+  <span class=pc2 title="line 488 char 3 count 166,300">(let ((user-name </span><span class=pc2 title="line 488 char 20 count 166,300">(</span><span class=pc2 title="line 488 char 21 count 166,300">underconstraint-user-name</span><span class=pc2 title="line 488 char 20 count 166,300"> </span><span class=pc2 title="line 488 char 47 count 166,300">underconstraint</span><span class=pc2 title="line 488 char 20 count 166,300">)</span><span class=pc2 title="line 488 char 3 count 166,300">)</span>
+        <span class=pc2 title="line 488 char 3 count 166,300">(unique-name </span><span class=pc2 title="line 489 char 22 count 166,300">(</span><span class=pc2 title="line 489 char 23 count 166,300">underconstraint-unique-name</span><span class=pc2 title="line 489 char 22 count 166,300"> </span><span class=pc2 title="line 489 char 51 count 166,300">underconstraint</span><span class=pc2 title="line 489 char 22 count 166,300">)</span><span class=pc2 title="line 488 char 3 count 166,300">)</span>
+        <span class=pc2 title="line 488 char 3 count 166,300">(ge </span><span class=pc2 title="line 490 char 13 count 166,300">(</span><span class=pc2 title="line 490 char 14 count 166,300">underconstraint-ge</span><span class=pc2 title="line 490 char 13 count 166,300"> </span><span class=pc2 title="line 490 char 33 count 166,300">underconstraint</span><span class=pc2 title="line 490 char 13 count 166,300">)</span><span class=pc2 title="line 488 char 3 count 166,300">)</span>
+        <span class=pc2 title="line 488 char 3 count 166,300">(g </span><span class=pc2 title="line 491 char 12 count 166,300">(</span><span class=pc2 title="line 491 char 13 count 166,300">underconstraint-g</span><span class=pc2 title="line 491 char 12 count 166,300"> </span><span class=pc2 title="line 491 char 31 count 166,300">underconstraint</span><span class=pc2 title="line 491 char 12 count 166,300">)</span><span class=pc2 title="line 488 char 3 count 166,300">)</span>
+        <span class=pc2 title="line 488 char 3 count 166,300">(timeout-info </span><span class=pc2 title="line 492 char 23 count 166,300">(</span><span class=pc2 title="line 492 char 24 count 166,300">underconstraint-timeout-info</span><span class=pc2 title="line 492 char 23 count 166,300"> </span><span class=pc2 title="line 492 char 53 count 166,300">underconstraint</span><span class=pc2 title="line 492 char 23 count 166,300">)</span><span class=pc2 title="line 488 char 3 count 166,300">)</span>
+        <span class=pc2 title="line 488 char 3 count 166,300">(trace? </span><span class=pc2 title="line 493 char 17 count 166,300">(</span><span class=pc2 title="line 493 char 18 count 166,300">underconstraint-trace?</span><span class=pc2 title="line 493 char 17 count 166,300"> </span><span class=pc2 title="line 493 char 41 count 166,300">underconstraint</span><span class=pc2 title="line 493 char 17 count 166,300">)</span><span class=pc2 title="line 488 char 3 count 166,300">))</span>
+    <span class=pc2 title="line 494 char 5 count 166,300">(</span><span class=pc2 title="line 494 char 6 count 166,300">(</span><span class=pc2 title="line 494 char 7 count 166,300">run-underconstraint-onceo</span><span class=pc2 title="line 494 char 6 count 166,300"> </span><span class=pc2 title="line 494 char 33 count 166,300">`(,</span><span class=pc2 title="line 494 char 36 count 166,300">user-name</span><span class=pc2 title="line 494 char 33 count 166,300"> . ,</span><span class=pc2 title="line 494 char 49 count 166,300">unique-name</span><span class=pc2 title="line 494 char 33 count 166,300">)</span><span class=pc2 title="line 494 char 6 count 166,300"> </span><span class=pc2 title="line 494 char 62 count 166,300">ge</span><span class=pc2 title="line 494 char 6 count 166,300"> </span><span class=pc2 title="line 494 char 65 count 166,300">g</span><span class=pc2 title="line 494 char 6 count 166,300"> </span><span class=pc2 title="line 494 char 67 count 166,300">timeout-info</span><span class=pc2 title="line 494 char 6 count 166,300"> </span><span class=pc2 title="line 494 char 80 count 166,300">trace?</span><span class=pc2 title="line 494 char 6 count 166,300"> </span><span class=pc2 title="line 494 char 87 count 166,300">#t</span><span class=pc2 title="line 494 char 6 count 166,300">)</span>
+     <span class=pc2 title="line 495 char 6 count 166,300">(</span><span class=pc2 title="line 495 char 7 count 166,300">state-with-U/V</span><span class=pc2 title="line 495 char 6 count 166,300"> </span><span class=pc2 title="line 495 char 22 count 166,300">st</span><span class=pc2 title="line 495 char 6 count 166,300"> </span><span class=pc2 title="line 495 char 25 count 166,300">empty-U/V</span><span class=pc2 title="line 495 char 6 count 166,300">)</span><span class=pc2 title="line 494 char 5 count 166,300">)</span><span class=pc2 title="line 488 char 3 count 166,300">)</span><span class=pc2 title="line 487 char 1 count 1">)</span>
+
+;; if under is not already in the list of underconstraint records for the
+;; variable `v`, add it and return the updated state.
+<span class=pc2 title="line 499 char 1 count 1">(define (set-u/nonduplicate st v under)</span>
+  <span class=pc2 title="line 500 char 3 count 2,516,754">(let ((current-u </span><span class=pc2 title="line 500 char 20 count 2,516,754">(</span><span class=pc2 title="line 500 char 21 count 2,516,754">lookup-u</span><span class=pc2 title="line 500 char 20 count 2,516,754"> </span><span class=pc2 title="line 500 char 30 count 2,516,754">st</span><span class=pc2 title="line 500 char 20 count 2,516,754"> </span><span class=pc2 title="line 500 char 33 count 2,516,754">v</span><span class=pc2 title="line 500 char 20 count 2,516,754">)</span><span class=pc2 title="line 500 char 3 count 2,516,754">))</span>
+    <span class=pc2 title="line 501 char 5 count 2,516,754">(if </span><span class=pc2 title="line 501 char 9 count 2,516,754">(</span><span class=pc2 title="line 501 char 10 count 2,516,754">assq</span><span class=pc2 title="line 501 char 9 count 2,516,754"> </span><span class=pc2 title="line 501 char 15 count 2,516,754">(</span><span class=pc2 title="line 501 char 16 count 2,516,754">underconstraint-unique-name</span><span class=pc2 title="line 501 char 15 count 2,516,754"> </span><span class=pc2 title="line 501 char 44 count 2,516,754">under</span><span class=pc2 title="line 501 char 15 count 2,516,754">)</span><span class=pc2 title="line 501 char 9 count 2,516,754"> </span><span class=pc2 title="line 501 char 51 count 2,516,754">current-u</span><span class=pc2 title="line 501 char 9 count 2,516,754">)</span>
+        <span class=pc1 title="line 502 char 9 count 0">st</span>
+        <span class=pc2 title="line 503 char 9 count 2,516,754">(</span><span class=pc2 title="line 503 char 10 count 2,516,754">set-u</span><span class=pc2 title="line 503 char 9 count 2,516,754"> </span><span class=pc2 title="line 503 char 16 count 2,516,754">st</span><span class=pc2 title="line 503 char 9 count 2,516,754"> </span><span class=pc2 title="line 503 char 19 count 2,516,754">v</span><span class=pc2 title="line 503 char 9 count 2,516,754"> </span><span class=pc2 title="line 503 char 21 count 2,516,754">(</span><span class=pc2 title="line 503 char 22 count 2,516,754">cons</span><span class=pc2 title="line 503 char 21 count 2,516,754"> </span><span class=pc2 title="line 503 char 27 count 2,516,754">under</span><span class=pc2 title="line 503 char 21 count 2,516,754"> </span><span class=pc2 title="line 503 char 33 count 2,516,754">current-u</span><span class=pc2 title="line 503 char 21 count 2,516,754">)</span><span class=pc2 title="line 503 char 9 count 2,516,754">)</span><span class=pc2 title="line 501 char 5 count 2,516,754">)</span><span class=pc2 title="line 500 char 3 count 2,516,754">)</span><span class=pc2 title="line 499 char 1 count 1">)</span>
+
+<span class=pc2 title="line 505 char 1 count 1">(define (add-underconstraint-to-store underconstraint)</span>
+  <span class=pc2 title="line 506 char 3 count 166,300">(lambda (st)</span>
+    <span class=pc2 title="line 507 char 5 count 155,653">(let ((t </span><span class=pc2 title="line 507 char 14 count 155,653">(</span><span class=pc2 title="line 507 char 15 count 155,653">underconstraint-t</span><span class=pc2 title="line 507 char 14 count 155,653"> </span><span class=pc2 title="line 507 char 33 count 155,653">underconstraint</span><span class=pc2 title="line 507 char 14 count 155,653">)</span><span class=pc2 title="line 507 char 5 count 155,653">))</span>
+      <span class=pc2 title="line 508 char 7 count 155,653">(let ((vars-to-attribute </span><span class=pc2 title="line 508 char 32 count 155,653">(</span><span class=pc2 title="line 508 char 33 count 155,653">vars</span><span class=pc2 title="line 508 char 32 count 155,653"> </span><span class=pc2 title="line 508 char 38 count 155,653">(</span><span class=pc2 title="line 508 char 39 count 155,653">walk*</span><span class=pc2 title="line 508 char 38 count 155,653"> </span><span class=pc2 title="line 508 char 45 count 155,653">t</span><span class=pc2 title="line 508 char 38 count 155,653"> </span><span class=pc2 title="line 508 char 47 count 155,653">(</span><span class=pc2 title="line 508 char 48 count 155,653">state-S</span><span class=pc2 title="line 508 char 47 count 155,653"> </span><span class=pc2 title="line 508 char 56 count 155,653">st</span><span class=pc2 title="line 508 char 47 count 155,653">)</span><span class=pc2 title="line 508 char 38 count 155,653">)</span><span class=pc2 title="line 508 char 32 count 155,653">)</span><span class=pc2 title="line 508 char 7 count 155,653">))</span>
+        <span class=pc2 title="line 509 char 9 count 155,653">(let ((underconstraint^ </span><span class=pc2 title="line 509 char 33 count 155,653">(</span><span class=pc2 title="line 509 char 34 count 155,653">underconstraint-with-t</span><span class=pc2 title="line 509 char 33 count 155,653"> </span><span class=pc2 title="line 509 char 57 count 155,653">underconstraint</span><span class=pc2 title="line 509 char 33 count 155,653"> </span><span class=pc2 title="line 509 char 73 count 155,653">vars-to-attribute</span><span class=pc2 title="line 509 char 33 count 155,653">)</span><span class=pc2 title="line 509 char 9 count 155,653">))</span>
+          <span class=pc2 title="line 510 char 11 count 155,653">(</span><span class=pc2 title="line 510 char 12 count 155,653">fold-left</span>
+           <span class=pc2 title="line 511 char 12 count 155,653">(lambda (st v)</span>
+             <span class=pc2 title="line 512 char 14 count 2,516,754">(</span><span class=pc2 title="line 512 char 15 count 2,516,754">set-u/nonduplicate</span><span class=pc2 title="line 512 char 14 count 2,516,754"> </span><span class=pc2 title="line 512 char 34 count 2,516,754">st</span><span class=pc2 title="line 512 char 14 count 2,516,754"> </span><span class=pc2 title="line 512 char 37 count 2,516,754">v</span><span class=pc2 title="line 512 char 14 count 2,516,754"> </span><span class=pc2 title="line 512 char 39 count 2,516,754">underconstraint^</span><span class=pc2 title="line 512 char 14 count 2,516,754">)</span><span class=pc2 title="line 511 char 12 count 155,653">)</span>
+           <span class=pc2 title="line 513 char 12 count 155,653">st</span><span class=pc2 title="line 510 char 11 count 155,653"> </span><span class=pc2 title="line 513 char 15 count 155,653">vars-to-attribute</span><span class=pc2 title="line 510 char 11 count 155,653">)</span><span class=pc2 title="line 509 char 9 count 155,653">)</span><span class=pc2 title="line 508 char 7 count 155,653">)</span><span class=pc2 title="line 507 char 5 count 155,653">)</span><span class=pc2 title="line 506 char 3 count 166,300">)</span><span class=pc2 title="line 505 char 1 count 1">)</span>
+
+<span class=pc2 title="line 515 char 1 count 1">(define (underconstraino-aux user-name te t ge g timeout-info trace?)</span>
+  <span class=pc2 title="line 516 char 3 count 1">(lambda (st)</span>
+    <span class=pc2 title="line 517 char 5 count 1">(let* ((unique-name </span><span class=pc2 title="line 517 char 25 count 1">(parameterize ([</span><span class=pc2 title="line 517 char 41 count 1">gensym-prefix</span><span class=pc2 title="line 517 char 25 count 1"> </span><span class=pc2 title="line 517 char 55 count 1">user-name</span><span class=pc2 title="line 517 char 25 count 1">]) </span><span class=pc2 title="line 517 char 67 count 1">(</span><span class=pc2 title="line 517 char 68 count 1">gensym</span><span class=pc2 title="line 517 char 67 count 1">)</span><span class=pc2 title="line 517 char 25 count 1">)</span><span class=pc2 title="line 517 char 5 count 1">)</span>
+           <span class=pc2 title="line 517 char 5 count 1">(under </span><span class=pc2 title="line 518 char 19 count 1">(</span><span class=pc2 title="line 518 char 20 count 1">underconstraint</span><span class=pc2 title="line 518 char 19 count 1"> </span><span class=pc2 title="line 518 char 36 count 1">user-name</span><span class=pc2 title="line 518 char 19 count 1"> </span><span class=pc2 title="line 518 char 46 count 1">unique-name</span><span class=pc2 title="line 518 char 19 count 1"> </span><span class=pc2 title="line 518 char 58 count 1">te</span><span class=pc2 title="line 518 char 19 count 1"> </span><span class=pc2 title="line 518 char 61 count 1">t</span><span class=pc2 title="line 518 char 19 count 1"> </span><span class=pc2 title="line 518 char 63 count 1">ge</span><span class=pc2 title="line 518 char 19 count 1"> </span><span class=pc2 title="line 518 char 66 count 1">g</span><span class=pc2 title="line 518 char 19 count 1"> </span><span class=pc2 title="line 518 char 68 count 1">timeout-info</span><span class=pc2 title="line 518 char 19 count 1"> </span><span class=pc2 title="line 518 char 81 count 1">trace?</span><span class=pc2 title="line 518 char 19 count 1">)</span><span class=pc2 title="line 517 char 5 count 1">))</span>
+      <span class=pc2 title="line 519 char 7 count 1">(</span><span class=pc2 title="line 519 char 8 count 1">run-and-add-underconstraint</span><span class=pc2 title="line 519 char 7 count 1"> </span><span class=pc2 title="line 519 char 36 count 1">under</span><span class=pc2 title="line 519 char 7 count 1"> </span><span class=pc2 title="line 519 char 42 count 1">st</span><span class=pc2 title="line 519 char 7 count 1">)</span><span class=pc2 title="line 517 char 5 count 1">)</span><span class=pc2 title="line 516 char 3 count 1">)</span><span class=pc2 title="line 515 char 1 count 1">)</span>
+
+<span class=pc2 title="line 521 char 1 count 1">(define (run-and-add-underconstraint under st)</span>
+  <span class=pc2 title="line 522 char 3 count 166,300">(</span><span class=pc2 title="line 522 char 4 count 166,300">bind</span><span class=pc2 title="line 522 char 3 count 166,300"> </span><span class=pc2 title="line 522 char 9 count 166,300">(</span><span class=pc2 title="line 522 char 10 count 166,300">run-general-underconstraint</span><span class=pc2 title="line 522 char 9 count 166,300"> </span><span class=pc2 title="line 522 char 38 count 166,300">under</span><span class=pc2 title="line 522 char 9 count 166,300"> </span><span class=pc2 title="line 522 char 44 count 166,300">st</span><span class=pc2 title="line 522 char 9 count 166,300">)</span>
+        <span class=pc2 title="line 523 char 9 count 166,300">(</span><span class=pc2 title="line 523 char 10 count 166,300">add-underconstraint-to-store</span><span class=pc2 title="line 523 char 9 count 166,300"> </span><span class=pc2 title="line 523 char 39 count 166,300">under</span><span class=pc2 title="line 523 char 9 count 166,300">)</span><span class=pc2 title="line 522 char 3 count 166,300">)</span><span class=pc2 title="line 521 char 1 count 1">)</span>
+
+(define-syntax underconstraino
+  (syntax-rules ()
+    [(_ name te ge)
+     ;; use global default timeout parameter
+     (let ((t te)
+           (g ge))
+       (underconstraino-aux name 'te t 'ge g #f #f))]
+    [(_ name te ge #f)
+     ;; no timeout (overrides global timeout parameter)
+     (let ((t te)
+           (g ge))
+       (underconstraino-aux name 'te t 'ge g `(timeout #f) #f))]
+    [(_ name te ge timeout-ticks)
+     ;; use timeout with `timeout-ticks` ticks (gas) (overrides global
+     ;; timeout parameter)
+     (let ((t te)
+           (g ge))
+       (<span class=pc2 title="line 542 char 9 count 1">underconstraino-aux</span> name 'te <span class=pc2 title="line 542 char 38 count 1">t</span> 'ge <span class=pc2 title="line 542 char 44 count 1">g</span> `(timeout ,timeout-ticks) <span class=pc2 title="line 542 char 72 count 1">#f</span>))]))
+
+(define-syntax trace-underconstraino
+  ;; same as `underconstraino`, but with the trace flag set to `#t`
+  ;; rather than `#f`
+  (syntax-rules ()
+    [(_ name te ge)
+     (let ((t te)
+           (g ge))
+       (add-underconstraino name 'te t 'ge g #f #t))]
+    [(_ name te ge #f)
+     (let ((t te)
+           (g ge))
+       (add-underconstraino name 'te t 'ge g `(timeout #f) #t))]
+    [(_ name te ge timeout-ticks)
+     (let ((t te)
+           (g ge))
+       (add-underconstraino name 'te t 'ge g `(timeout ,timeout-ticks) #t))]))
+</pre></td></tr></table>
+</body>
+</html>

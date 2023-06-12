@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv=Content-Type content="text/html;charset=utf-8">
+<title>pmatch.scm</title>
+<style type="text/css">
+* { border: 0; margin: 0; outline: 0; padding: 0; vertical-align: baseline; }
+code, kbd, pre, samp { font-family: monospace, monospace; font-size: 1rem; }
+html { -moz-osx-font-smoothing: grayscale; -webkit-font-smoothing: antialiased; }
+table { border-collapse: collapse; border-spacing: 0; }
+body { padding: 1rem; }
+h1, h2, h3, h4 { line-height: 1.25; margin-bottom: 0.5rem; }
+h1 { font-size: 1.296rem; }
+h2 { font-size: 1.215rem; }
+h3 { font-size: 1.138rem; }
+h4 { font-size: 1.067rem; }
+html { font-family: monospace, monospace; font-size: 1rem; }
+p { margin-bottom: 1.25rem; }
+.pc0 { background-color: #111111; color: white; white-space: nowrap; }
+.pc1 { background-color: #607D8B; color: white; white-space: nowrap; }
+.pc2 { background-color: #9C27B0; color: black; white-space: nowrap; }
+.pc3 { background-color: #673AB7; color: white; white-space: nowrap; }
+.pc4 { background-color: #3F51B5; color: white; white-space: nowrap; }
+.pc5 { background-color: #2196F3; color: black; white-space: nowrap; }
+.pc6 { background-color: #00BCD4; color: black; white-space: nowrap; }
+.pc7 { background-color: #4CAF50; color: black; white-space: nowrap; }
+.pc8 { background-color: #CDDC39; color: black; white-space: nowrap; }
+.pc9 { background-color: #FFEB3B; color: black; white-space: nowrap; }
+.pc10 { background-color: #FFC107; color: black; white-space: nowrap; }
+.pc11 { background-color: #FF9800; color: black; white-space: nowrap; }
+.pc12 { background-color: #F44336; color: white; white-space: nowrap; }
+</style>
+</head>
+<body class=pc0>
+<h1 style="margin-bottom: 1rem">pmatch.scm<span style="opacity: 0.5"> on Mon Jun 12 01:41:21 2023</span></h1>
+<table><tr><td style="color: #666666; font-weight: bold; padding-right: 1rem; text-align: right"><pre>
+<span id=line1>1
+</span><span id=line2>2
+</span><span id=line3>3
+</span><span id=line4>4
+</span><span id=line5>5
+</span><span id=line6>6
+</span><span id=line7>7
+</span><span id=line8>8
+</span><span id=line9>9
+</span><span id=line10>10
+</span><span id=line11>11
+</span><span id=line12>12
+</span><span id=line13>13
+</span><span id=line14>14
+</span><span id=line15>15
+</span><span id=line16>16
+</span><span id=line17>17
+</span><span id=line18>18
+</span><span id=line19>19
+</span><span id=line20>20
+</span><span id=line21>21
+</span><span id=line22>22
+</span><span id=line23>23
+</span><span id=line24>24
+</span><span id=line25>25
+</span><span id=line26>26
+</span><span id=line27>27
+</span><span id=line28>28
+</span><span id=line29>29
+</span><span id=line30>30
+</span><span id=line31>31
+</span><span id=line32>32
+</span><span id=line33>33
+</span><span id=line34>34
+</span><span id=line35>35
+</span><span id=line36>36
+</span><span id=line37>37
+</span><span id=line38>38
+</span><span id=line39>39
+</span><span id=line40>40
+</span><span id=line41>41
+</span><span id=line42>42
+</span><span id=line43>43
+</span><span id=line44>44
+</span><span id=line45>45
+</span><span id=line46>46
+</span><span id=line47>47
+</span><span id=line48>48
+</span><span id=line49>49
+</span><span id=line50>50
+</span><span id=line51>51
+</span><span id=line52>52
+</span><span id=line53>53
+</span><span id=line54>54
+</span><span id=line55>55
+</span><span id=line56>56
+</span><span id=line57>57
+</span><span id=line58>58
+</span><span id=line59>59
+</span><span id=line60>60
+</span><span id=line61>61
+</span><span id=line62>62
+</span><span id=line63>63
+</span><span id=line64>64
+</span><span id=line65>65
+</span><span id=line66>66
+</span><span id=line67>67
+</span><span id=line68>68
+</span><span id=line69>69
+</span><span id=line70>70
+</span></pre></td><td><pre>
+;; This is a new version of pmatch (August 8, 2012).
+;; It has two important new features:
+;; 1.  It allows for a name to be given to the pmatch if an error ensues.
+;; 2.  A line from the specification has been removed. (see below).  Without
+;; that line removed, it was impossible for a pattern to be (quote ,x),
+;; which might be worth having especially when we write an interpreter
+;; for Scheme, which includes quote as a language form.
+
+;;; Code written by Oleg Kiselyov
+;; (http://pobox.com/~oleg/ftp/)
+;;;
+;;; Taken from leanTAP.scm
+;;; http://kanren.cvs.sourceforge.net/kanren/kanren/mini/leanTAP.scm?view=log
+
+; A simple linear pattern matcher
+; It is efficient (generates code at macro-expansion time) and simple:
+; it should work on any R5RS (and R6RS) Scheme system.
+
+; (pmatch exp &lt;clause&gt; ...[&lt;else-clause&gt;])
+; &lt;clause&gt; ::= (&lt;pattern&gt; &lt;guard&gt; exp ...)
+; &lt;else-clause&gt; ::= (else exp ...)
+; &lt;guard&gt; ::= boolean exp | ()
+; &lt;pattern&gt; :: =
+;        ,var  -- matches always and binds the var
+;                 pattern must be linear! No check is done
+;         _    -- matches always
+;        'exp  -- comparison with exp (using equal?)    REMOVED (August 8, 2012)
+;        exp   -- comparison with exp (using equal?)
+;        (&lt;pattern1&gt; &lt;pattern2&gt; ...) -- matches the list of patterns
+;        (&lt;pattern1&gt; . &lt;pattern2&gt;)  -- ditto
+;        ()    -- matches the empty list
+
+(define-syntax pmatch
+  (syntax-rules (else guard)
+    ((_ v (e ...) ...)
+     (pmatch-aux #f v (e ...) ...))
+    ((_ v name (e ...) ...)
+     (pmatch-aux name v (e ...) ...))))
+
+(define-syntax pmatch-aux
+  (syntax-rules (else guard)
+    ((_ name (rator rand ...) cs ...)
+     (let ((v (rator rand ...)))
+       (pmatch-aux name v cs ...)))
+    ((_ name v)
+     (begin
+       (if 'name
+           (printf "pmatch ~s failed\n~s\n" 'name v)
+           (printf "pmatch failed\n ~s\n" v))
+       (error 'pmatch "match failed")))
+    ((_ name v (else e0 e ...)) (begin e0 e ...))
+    ((_ name v (pat (guard g ...) e0 e ...) cs ...)
+     (let ((fk (lambda () (pmatch-aux name v cs ...))))
+       (ppat v pat (if (and g ...) (begin e0 e ...) <span class=pc1 title="line 54 char 53 count 0">(</span><span class=pc1 title="line 54 char 54 count 0">fk</span><span class=pc1 title="line 54 char 53 count 0">)</span>) <span class=pc1 title="line 54 char 59 count 0">(</span><span class=pc1 title="line 54 char 60 count 0">fk</span><span class=pc1 title="line 54 char 59 count 0">)</span>)))
+    ((_ name v (pat e0 e ...) cs ...)
+     (let ((fk (lambda () (pmatch-aux name v cs ...))))
+       (ppat v pat (begin e0 e ...) <span class=pc2 title="line 57 char 37 count 332,600">(</span><span class=pc2 title="line 57 char 38 count 332,600">fk</span><span class=pc2 title="line 57 char 37 count 332,600">)</span>)))))
+
+(define-syntax ppat
+  (syntax-rules (? comma unquote)
+    ((_ v ? kt kf) kt)
+    ((_ v () kt kf) (if (<span class=pc2 title="line 62 char 26 count 166,300">null?</span> v) kt kf))
+;   ((_ v (quote lit) kt kf) (if (equal? v (quote lit)) kt kf))
+    ((_ v (unquote var) kt kf) (let ((var v)) kt))
+    ((_ v (x . y) kt kf)
+     (if (<span class=pc2 title="line 66 char 11 count 665,200">pair?</span> v)
+       (let ((vx (<span class=pc2 title="line 67 char 19 count 665,200">car</span> v)) (vy (<span class=pc2 title="line 67 char 32 count 665,200">cdr</span> v)))
+	 (ppat <span class=pc2 title="line 68 char 9 count 665,200">vx</span> x (ppat <span class=pc2 title="line 68 char 20 count 1,164,100">vy</span> y kt kf) kf))
+       kf))
+    ((_ v lit kt kf) (if (<span class=pc2 title="line 70 char 27 count 665,200">equal?</span> v (quote lit)) kt kf))))
+</pre></td></tr></table>
+</body>
+</html>

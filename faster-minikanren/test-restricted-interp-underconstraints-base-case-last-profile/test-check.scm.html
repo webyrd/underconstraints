@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv=Content-Type content="text/html;charset=utf-8">
+<title>test-check.scm</title>
+<style type="text/css">
+* { border: 0; margin: 0; outline: 0; padding: 0; vertical-align: baseline; }
+code, kbd, pre, samp { font-family: monospace, monospace; font-size: 1rem; }
+html { -moz-osx-font-smoothing: grayscale; -webkit-font-smoothing: antialiased; }
+table { border-collapse: collapse; border-spacing: 0; }
+body { padding: 1rem; }
+h1, h2, h3, h4 { line-height: 1.25; margin-bottom: 0.5rem; }
+h1 { font-size: 1.296rem; }
+h2 { font-size: 1.215rem; }
+h3 { font-size: 1.138rem; }
+h4 { font-size: 1.067rem; }
+html { font-family: monospace, monospace; font-size: 1rem; }
+p { margin-bottom: 1.25rem; }
+.pc0 { background-color: #111111; color: white; white-space: nowrap; }
+.pc1 { background-color: #607D8B; color: white; white-space: nowrap; }
+.pc2 { background-color: #9C27B0; color: black; white-space: nowrap; }
+.pc3 { background-color: #673AB7; color: white; white-space: nowrap; }
+.pc4 { background-color: #3F51B5; color: white; white-space: nowrap; }
+.pc5 { background-color: #2196F3; color: black; white-space: nowrap; }
+.pc6 { background-color: #00BCD4; color: black; white-space: nowrap; }
+.pc7 { background-color: #4CAF50; color: black; white-space: nowrap; }
+.pc8 { background-color: #CDDC39; color: black; white-space: nowrap; }
+.pc9 { background-color: #FFEB3B; color: black; white-space: nowrap; }
+.pc10 { background-color: #FFC107; color: black; white-space: nowrap; }
+.pc11 { background-color: #FF9800; color: black; white-space: nowrap; }
+.pc12 { background-color: #F44336; color: white; white-space: nowrap; }
+</style>
+</head>
+<body class=pc0>
+<h1 style="margin-bottom: 1rem">test-check.scm<span style="opacity: 0.5"> on Mon Jun 12 01:41:21 2023</span></h1>
+<table><tr><td style="color: #666666; font-weight: bold; padding-right: 1rem; text-align: right"><pre>
+<span id=line1>1
+</span><span id=line2>2
+</span><span id=line3>3
+</span><span id=line4>4
+</span><span id=line5>5
+</span><span id=line6>6
+</span><span id=line7>7
+</span><span id=line8>8
+</span><span id=line9>9
+</span><span id=line10>10
+</span><span id=line11>11
+</span><span id=line12>12
+</span><span id=line13>13
+</span><span id=line14>14
+</span><span id=line15>15
+</span><span id=line16>16
+</span><span id=line17>17
+</span><span id=line18>18
+</span><span id=line19>19
+</span><span id=line20>20
+</span><span id=line21>21
+</span><span id=line22>22
+</span><span id=line23>23
+</span><span id=line24>24
+</span><span id=line25>25
+</span><span id=line26>26
+</span><span id=line27>27
+</span><span id=line28>28
+</span><span id=line29>29
+</span><span id=line30>30
+</span><span id=line31>31
+</span><span id=line32>32
+</span><span id=line33>33
+</span><span id=line34>34
+</span><span id=line35>35
+</span><span id=line36>36
+</span><span id=line37>37
+</span><span id=line38>38
+</span><span id=line39>39
+</span><span id=line40>40
+</span><span id=line41>41
+</span><span id=line42>42
+</span><span id=line43>43
+</span><span id=line44>44
+</span><span id=line45>45
+</span><span id=line46>46
+</span><span id=line47>47
+</span><span id=line48>48
+</span><span id=line49>49
+</span></pre></td><td><pre>
+<span class=pc2 title="line 1 char 1 count 1">(define *test-divergence-engine-timeout-param*</span>
+  <span class=pc2 title="line 2 char 3 count 1">(</span><span class=pc2 title="line 2 char 4 count 1">make-parameter</span><span class=pc2 title="line 2 char 3 count 1"> </span><span class=pc2 title="line 2 char 19 count 1">10000000</span><span class=pc2 title="line 2 char 3 count 1">)</span><span class=pc2 title="line 1 char 1 count 1">)</span>
+
+<span class=pc2 title="line 4 char 1 count 1">(define *num-tests-failed* </span><span class=pc2 title="line 4 char 28 count 1">0</span><span class=pc2 title="line 4 char 1 count 1">)</span>
+
+(define-syntax test
+  (syntax-rules ()
+    ((_ title test-expression expected-result)
+     (begin
+       (<span class=pc2 title="line 10 char 9 count 1">printf</span> <span class=pc2 title="line 10 char 16 count 1">"Testing ~s\n"</span> title)
+       (let* ((expected expected-result)
+              (produced test-expression))
+         (or <span class=pc2 title="line 13 char 14 count 1">(</span><span class=pc2 title="line 13 char 15 count 1">equal?</span><span class=pc2 title="line 13 char 14 count 1"> </span><span class=pc2 title="line 13 char 22 count 1">expected</span><span class=pc2 title="line 13 char 14 count 1"> </span><span class=pc2 title="line 13 char 31 count 1">produced</span><span class=pc2 title="line 13 char 14 count 1">)</span>
+             (begin
+               <span class=pc1 title="line 15 char 16 count 0">(set! *num-tests-failed* </span><span class=pc1 title="line 15 char 41 count 0">(</span><span class=pc1 title="line 15 char 42 count 0">add1</span><span class=pc1 title="line 15 char 41 count 0"> </span><span class=pc1 title="line 15 char 47 count 0">*num-tests-failed*</span><span class=pc1 title="line 15 char 41 count 0">)</span><span class=pc1 title="line 15 char 16 count 0">)</span>
+               <span class=pc1 title="line 16 char 16 count 0">(</span><span class=pc1 title="line 16 char 17 count 0">printf</span><span class=pc1 title="line 16 char 16 count 0"> </span><span class=pc1 title="line 16 char 24 count 0">"!! Failed:\n"</span><span class=pc1 title="line 16 char 16 count 0">)</span>
+               (<span class=pc1 title="line 17 char 17 count 0">pretty-print</span> 'test-expression)
+               <span class=pc1 title="line 18 char 16 count 0">(</span><span class=pc1 title="line 18 char 17 count 0">newline</span><span class=pc1 title="line 18 char 16 count 0">)</span>
+               <span class=pc1 title="line 19 char 16 count 0">(</span><span class=pc1 title="line 19 char 17 count 0">printf</span><span class=pc1 title="line 19 char 16 count 0"> </span><span class=pc1 title="line 19 char 24 count 0">"Expected:\n"</span><span class=pc1 title="line 19 char 16 count 0">)</span>
+               <span class=pc1 title="line 20 char 16 count 0">(</span><span class=pc1 title="line 20 char 17 count 0">pretty-print</span><span class=pc1 title="line 20 char 16 count 0"> </span><span class=pc1 title="line 20 char 30 count 0">expected</span><span class=pc1 title="line 20 char 16 count 0">)</span>
+               <span class=pc1 title="line 21 char 16 count 0">(</span><span class=pc1 title="line 21 char 17 count 0">newline</span><span class=pc1 title="line 21 char 16 count 0">)</span>
+               <span class=pc1 title="line 22 char 16 count 0">(</span><span class=pc1 title="line 22 char 17 count 0">printf</span><span class=pc1 title="line 22 char 16 count 0"> </span><span class=pc1 title="line 22 char 24 count 0">"Computed:\n"</span><span class=pc1 title="line 22 char 16 count 0">)</span>
+               <span class=pc1 title="line 23 char 16 count 0">(</span><span class=pc1 title="line 23 char 17 count 0">pretty-print</span><span class=pc1 title="line 23 char 16 count 0"> </span><span class=pc1 title="line 23 char 30 count 0">produced</span><span class=pc1 title="line 23 char 16 count 0">)</span>
+               <span class=pc1 title="line 24 char 16 count 0">(</span><span class=pc1 title="line 24 char 17 count 0">newline</span><span class=pc1 title="line 24 char 16 count 0">)</span>)))))))
+
+(define-syntax test-divergence
+  (syntax-rules ()
+    ((_ title test-expression)
+     (let ((timeout-ticks (*test-divergence-engine-timeout-param*)))
+       (printf "Testing divergence test ~s using engine with ~s ticks gas\n"
+               title
+               timeout-ticks)
+       (let ((eng (make-engine (lambda () test-expression))))
+         (time
+          (eng timeout-ticks
+               ;; engine "completed" procedure
+               (lambda (ticks-left-over value)
+                 (set! *num-tests-failed* (add1 *num-tests-failed*))
+                 (printf "!! Divergence test failed:\n")
+                 (pretty-print 'test-expression)
+                 (newline)
+                 (print "Engine unexpectedly completed after ~s of ~s ticks, returning\n"
+                        (- timeout-ticks ticks-left-over)
+                        timeout-ticks
+                        value))
+               ;; engine "expired" procedure
+               (lambda (new-engine)
+                 (printf "Engine timed out after ~s ticks, as expected\n"
+                         timeout-ticks)))))))))
+</pre></td></tr></table>
+</body>
+</html>
