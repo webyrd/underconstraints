@@ -350,10 +350,10 @@
 
 
 (*trace-underconstraint-param* #f)
-(*underconstraint-default-timeout-param* 3000000)
-(*underconstraint-how-often-param* 1)
-(*underconstraint-depth-limit-1* 30)
-(*underconstraint-depth-limit-2* 10)
+(*underconstraint-default-timeout-param* 300000)
+(*underconstraint-how-often-param* 0)
+(*underconstraint-depth-limit-1* 1000000)
+(*underconstraint-depth-limit-2* 20)
 
 
 (time (test "synthesize append no underconstraint"
@@ -368,6 +368,11 @@
               (evalo `(letrec ((append (lambda (l s) : ((list list) -> list)
                                          ,q)))
                         (append '() (cons 5 (cons 6 '())))) '(5 6))
+              #;(always-trigger-underconstraintso)
+              (user-count)
+              (lambda (st)
+                (printf "~s\n" ((reify q) st))
+                st)
               ;; ex2
               (evalo `(letrec ((append (lambda (l s) : ((list list) -> list)
                                          ,q)))
@@ -404,6 +409,11 @@
               (evalo `(letrec ((append (lambda (l s) : ((list list) -> list)
                                          ,q)))
                         (append '() (cons 5 (cons 6 '())))) '(5 6))
+              #;(always-trigger-underconstraintso)
+              (user-count)
+              (lambda (st)
+                (printf "~s\n" ((reify q) st))
+                st)
               ;; ex2
               (evalo `(letrec ((append (lambda (l s) : ((list list) -> list)
                                          ,q)))
@@ -506,7 +516,11 @@
               (evalo `(letrec ((rember (lambda (e l) : ((number list) -> list)
                                          ,q)))
                         (rember 5 '())) '())
-
+              #;(always-trigger-underconstraintso)
+              (user-count)
+              (lambda (st)
+                (printf "~s\n" ((reify q) st))
+                st)
               ;; ex2
               (evalo `(letrec ((rember (lambda (e l) : ((number list) -> list)
                                          ,q)))
@@ -550,7 +564,11 @@
               (evalo `(letrec ((rember (lambda (e l) : ((number list) -> list)
                                          ,q)))
                         (rember 5 '())) '())
-
+              #;(always-trigger-underconstraintso)
+              (user-count)
+              (lambda (st)
+                (printf "~s\n" ((reify q) st))
+                st)
               ;; ex2
               (evalo `(letrec ((rember (lambda (e l) : ((number list) -> list)
                                          ,q)))

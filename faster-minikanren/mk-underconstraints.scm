@@ -52,10 +52,13 @@
 (define *depth-limit-1-cutoff-counter* 0)
 (define *depth-limit-2-cutoff-counter* 0)
 
+(define *==-counter* 0)
+(define *==g-counter* 0)
 (define *immature-stream-counter* 0)
 (define *fail-counter* 0)
 (define *singleton-succeed-counter* 0)
 (define *non-singleton-succeed-counter* 0)
+(define *user-counter* 0)
 
 (define-syntax increment-counter!
   (syntax-rules ()
@@ -67,10 +70,13 @@
   (set! *depth-limit-1-cutoff-counter* 0)
   (set! *depth-limit-2-cutoff-counter* 0)
   ;;
+  (set! *==-counter* 0)
+  (set! *==g-counter* 0)
   (set! *immature-stream-counter* 0)
   (set! *fail-counter* 0)
   (set! *singleton-succeed-counter* 0)
-  (set! *non-singleton-succeed-counter* 0))
+  (set! *non-singleton-succeed-counter* 0)
+  (set! *user-counter* 0))
 
 (define (print-counters!)
   (printf "*engine-completed-counter*: ~s\n" *engine-completed-counter*)
@@ -79,11 +85,18 @@
   (printf "*depth-limit-2-cutoff-counter*: ~s\n" *depth-limit-2-cutoff-counter*)
   
   ;;
+  (printf "*==-counter*: ~s\n" *==-counter*)
+  (printf "*==g-counter*: ~s\n" *==g-counter*)
   (printf "*immature-stream-counter*: ~s\n" *immature-stream-counter*)
   (printf "*fail-counter*: ~s\n" *fail-counter*)
   (printf "*singleton-succeed-counter*: ~s\n" *singleton-succeed-counter*)
-  (printf "*non-singleton-succeed-counter*: ~s\n" *non-singleton-succeed-counter*))
+  (printf "*non-singleton-succeed-counter*: ~s\n" *non-singleton-succeed-counter*)
+  (printf "*user-counter*: ~s\n" *user-counter*))
 
+(define (user-count)
+  (lambda (st)
+    (increment-counter! *user-counter*)
+    st))
 
 (define-syntax run
   (syntax-rules ()
@@ -167,6 +180,7 @@
 
 (define (== u v)
   (lambda (st)
+    (increment-counter! *==-counter*)
     (let-values (((S^ added) (unify u v (state-S st))))
       (if S^
         (and-foldl update-constraints (state S^ (state-C st) (state-U/V st)) added)
@@ -182,7 +196,15 @@
           #;(printf "depth1: ~s; depth2: ~s\n" depth1 depth2)
           g)))))
 
-(define ==g (wrap-for-depth-limit ==))
+(define (==2 u v)
+  (lambda (st)
+    (increment-counter! *==g-counter*)
+    (let-values (((S^ added) (unify u v (state-S st))))
+      (if S^
+        (and-foldl update-constraints (state S^ (state-C st) (state-U/V st)) added)
+        #f))))
+
+(define ==g (wrap-for-depth-limit ==2))
 (define =/=g (wrap-for-depth-limit =/=))
 (define absentog (wrap-for-depth-limit absento))
 (define symbolog (wrap-for-depth-limit symbolo))
@@ -211,7 +233,7 @@
               (printf
                "~s\n"
                ((reify t) (state-with-scope st (new-scope)))))
-            (if (> V (*underconstraint-how-often-param*))
+            (if (>= V (*underconstraint-how-often-param*))
                 (run-and-set-underconstraint U (state-with-V st 0))
                 (state-with-V st (+ V 1))))
           st))))
