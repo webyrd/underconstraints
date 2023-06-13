@@ -19,6 +19,8 @@
       v
       (error 'check-type (format "expected ~s, got ~s" pred-e v)))) 
 
+(define *underconstraint-how-often-param*
+  (make-parameter 1))
 
 ;; Global default timeout parameter: number of ticks/gas for engine,
 ;; or `#f` if the default is no timeout.  Can be overriden by optional
@@ -79,7 +81,7 @@
               (take n
                     (suspend
                      ((fresh (q) g0 g ...
-                        (trigger-underconstraintso)
+                        (always-trigger-underconstraintso)
                         (lambda (st)
                           (let ((st (state-with-scope st nonlocal-scope)))
                             (let ((z ((reify q) st)))
@@ -97,148 +99,18 @@
   (syntax-rules ()
     ((_ (q0 q ...) g0 g ...) (run #f (q0 q ...) g0 g ...))))
 
-
-; Underconstraint record object.
-;
-; An underconstraint record object is a proper list.
-;
-; When an underconstraint is first created, it is given a unique name
-; so that duplicate underconstraints on a variable can be avoided, to
-; aid with tracing, and to help keep track of which underconstraints
-; have already been run when running all the underconstraints
-; associated with a set of variables.
-;
-; Contains:
-;
-;   user-name    - user-specified name for the underconstraint. Used for
-;                    tracing.
-;   unique-name  - generated globally-unique name for the
-;                    underconstraint.  Used for `eq?`-based lookup of the
-;                    underconstraint, to ensure no variable includes
-;                    duplicate underconstraints, and to ensure no
-;                    underconstraint is run more than once when running
-;                    underconstraints on multiple variables.
-;   te           - the original term expression specified by the user.
-;                    Used for tracing.
-;   t            - term with which that the underconstraint is currently
-;                    associated.  The same underconstraint might currently
-;                    be associated with other terms as well, since
-;                    underconstraints are "pushed down" when a fresh
-;                    variable is associated with a pair containing fresh
-;                    variables.  `t` might not be a fresh variable; if `t`
-;                    is a pair that contains fresh variables when the
-;                    underconstaint is run, the underconstraint will need
-;                    to be "pushed down" onto those fresh variables if the
-;                    underconstraint succeeds.
-;   ge           - the original goal expression specified by the user.
-;                    Used for tracing.
-;   g            - the underconstraint goal specified by the user.
-;   timeout-info - the engine timeout value specified by the user.
-;   trace?       - whether the user used a tracing version of the
-;                    `underconstraino` macro.
-
 (define (underconstraint? v)
-  (and (list? v) (= (length v) 8)))
+  (or (not v) (procedure? v)))
 
-(define (underconstraint user-name unique-name te t ge g timeout-info trace?)
-  `(,unique-name ,t ,g ,timeout-info ,trace? ,user-name ,te ,ge))
+;; Underconstraint store object.
+;; #f or a goal that is the current underconstraint
 
-(define (underconstraint-unique-name u)
-  (car u))
+(define empty-U #f)
 
-(define (underconstraint-t u)
-  (cadr u))
+;; counter; how long since we last run the underconstraint?
+(define empty-V 0)
 
-(define (underconstraint-with-t u t)
-  (cons (car u) (cons t (cddr u))))
-
-(define (underconstraint-g u)
-  (caddr u))
-
-(define (underconstraint-with-g u g)
-  (cons (car u) (cons (cadr u) (cons g (cdddr u)))))
-
-(define (underconstraint-timeout-info u)
-  (cadddr u))
-
-(define (underconstraint-trace? u)
-  (list-ref u 4))
-
-(define (underconstraint-user-name u)
-  (list-ref u 5))
-
-(define (underconstraint-te u)
-  (list-ref u 6))
-
-(define (underconstraint-ge u)
-  (list-ref u 7))
-
-
-; `u` is an association list (without duplicates) of
-;
-;   (<unique-name> . <underconstraint record object>)
-;
-; pairs associated with a variable.
-
-(define empty-u '())
-
-(define (u-unique-name u unique-name)
-  (cond
-    ((assq unique-name u) => cdr)
-    (else #f)))
-
-(define (u-with-underconstraint u underconstraint)
-  (let ((unique-name (underconstraint-unique-name u)))
-    (if (u-unique-name u unique-name)
-        u
-        `((,unique-name . ,underconstraint) . ,u))))
-
-; Underconstraint store object.
-
-; Mapping of a representative variable `x` to an association list `u`
-; (without duplicates) of
-;
-;   (<unique-name> . <underconstraint record object>)
-;
-; pairs. The association list of underconstraint record objects is
-; always on the representative element and must be moved / merged when
-; that element changes.
-
-(define empty-U empty-intmap)
-
-(define (set-u st x u)
-  (state-with-U
-    st
-    (intmap-set (state-U st) (var-idx x) u)))
-
-(define (lookup-u st x)
-  (let ((res (intmap-ref (state-U st) (var-idx x))))
-    (if (unbound? res)
-      empty-u
-      res)))
-
-; t:unbind in mk-vicare.scm either is buggy or doesn't do what I would expect, so
-; I implement remove by setting the value to the empty constraint record.
-(define (remove-u x st)
-  (state-with-U st (intmap-set (state-U st) (var-idx x) empty-u)))
-
-; "touched" variables store
-;
-; The store is a list of variables that have been updated, either
-; through unification or through "normal" constraint solving, since
-; the last time that underconstraints were run.
-;
-; The list of "touched" variables does not contain duplicates.
-
-(define empty-V '())
-
-(define (set-v st v)
-  (let ((V (state-V st)))
-    (if (memq v V)
-        st
-        (state-with-V st (cons v V)))))
-
-; underconstraint/"touched" variable store
+;; underconstraint/counter store
 
 (define empty-U/V (cons empty-U empty-V))
 
@@ -247,7 +119,7 @@
 ; Contains:
 ;   S - the substitution
 ;   C - the constraint store
-;   U/V - the underconstraint store/list of "touched" variables (without duplicates)
+;   U/V - the underconstraint store/counter
 
 (define (state? v)
   (and (list? v) (= (length v) 3)))
@@ -290,55 +162,26 @@
 (define succeed (== #f #f))
 (define fail (== #f #t))
 
-(define (remove-duplicate-underconstraints u*)
-  (cond
-    ((null? u*) '())
-    ((assq (underconstraint-unique-name (car u*)) (cdr u*))
-     (remove-duplicate-underconstraints (cdr u*)))
-    (else
-     (cons (car u*) (remove-duplicate-underconstraints (cdr u*))))))
-
-(define (trigger-underconstraintso)
+(define (always-trigger-underconstraintso)
   (lambda (st)
-    (let ((V (state-V st)))
-      (if (null? V)
-          st
-          (let ((st (state-with-V st empty-V)))
-            (let ((unders (apply append (map (lambda (x) (lookup-u st x)) V))))
-              (let ((unders (remove-duplicate-underconstraints unders)))
-                (let loop ((unders unders)
-                           (st st))
-                  (cond
-                    ((null? unders) st)
-                    (else (bind (run-and-add-committing-underconstraint (car unders) st)
-                                (lambda (st) (loop (cdr unders) st)))))))))))))
+    (let ((U (state-U st)))
+      (if U
+          (run-and-set-underconstraint U st)
+          st))))
 
-
-
-;; if under is not already in the list of underconstraint records for the
-;; variable `v`, add it and return the updated state.
-(define (set-u/nonduplicate st v under)
-  (let ((current-u (lookup-u st v)))
-    (if (assq (underconstraint-unique-name under) current-u)
-        st
-        (set-u st v (cons under current-u)))))
-
-(define (add-underconstraint-to-store underconstraint)
+(define (sometimes-trigger-underconstraintso)
   (lambda (st)
-    (let ((t (underconstraint-t underconstraint)))
-      (let ((vars-to-attribute (vars (walk* t (state-S st)))))
-        (let ((underconstraint^ (underconstraint-with-t underconstraint vars-to-attribute)))
-          (fold-left
-           (lambda (st v)
-             (set-u/nonduplicate st v underconstraint^))
-           st vars-to-attribute))))))
+    (let ((U (state-U st))
+          (V (state-V st)))
+      (if U
+          (if (> V (*underconstraint-how-often-param*))
+              (run-and-set-underconstraint U (state-with-V st 0))
+              (state-with-V st (+ V 1)))
+          st))))
 
 (define (underconstraino-aux user-name te t ge g timeout-info trace?)
   (lambda (st)
-    (let* ((unique-name (parameterize ([gensym-prefix user-name]) (gensym)))
-           (under (underconstraint user-name unique-name te t ge g timeout-info trace?)))
-      (run-and-add-committing-underconstraint under st))))
-
+    (run-and-set-underconstraint g st)))
 
 (define-syntax underconstraino
   (syntax-rules ()
@@ -425,6 +268,7 @@
               (let ([guard-result (evaluate-guard guard-stream body-g)])
                 (cond
                   [(not guard-result) (loop (cdr clauses) previously-found-clause)]
+                  [(eq? 'nondet guard-result) (nondeterministic)]
                   [else (if previously-found-clause
                             (nondeterministic)
                             (loop (cdr clauses) guard-result))]))))))))
@@ -432,9 +276,10 @@
 (define (evaluate-guard stream body-g)
   (check-type
    (case-infg stream
-              (() #f)
-              ((c) (cons c body-g))
-              ((c f) (cons c (lambda (st) (bindg (f st) body-g)))))
+     (() #f)
+     ((c) (cons c body-g))
+     ((c f) 'nondet) ;; not the declared type
+     #;((c f) (cons c (lambda (st) (bindg (f st) body-g)))))
    infg?))
   
 
@@ -469,7 +314,10 @@
 
 
 
-(define (run-committing-underconstraint-onceo name ge g timeout-info trace-arg? general?)  
+(define (run-committing-underconstraint-onceo g)
+  (define timeout-info #f)
+  (define trace-arg? #f)
+  (define name 'the-underconstraint)
   (define (trace?)
     (or trace-arg?
         (*trace-underconstraint-param*)))
@@ -541,8 +389,8 @@
       (when (trace?)
         (newline)
         (printf
-         "* underconstraint ~s with timeout ~s trying goal expression:\n~s\n"
-         name timeout-ticks ge))
+         "* running underconstraint ~s with timeout ~s\n"
+         name timeout-ticks))
 
       (if (not timeout-ticks)
           (do-run)
@@ -574,28 +422,11 @@
                      (cons st g))))))))))
 
 
-(define (run-and-add-committing-underconstraint under st)
-  (let ((user-name (underconstraint-user-name under))
-        (unique-name (underconstraint-unique-name under))
-        (t (underconstraint-t under))
-        (ge (underconstraint-ge under))
-        (g (underconstraint-g under))
-        (timeout-info (underconstraint-timeout-info under))
-        (trace? (underconstraint-trace? under)))
-  
-    (let ([$ ((run-committing-underconstraint-onceo `(,user-name . ,unique-name) ge g timeout-info trace? #t)
-              (state-with-U/V st empty-U/V))])
-      (check-type $ infg?)
-      (case-infg $
-        (() #f)
-        ((c^) c^) ;; could remove underconstraint, here
-        ((c^ f^)
-         (let ((vars-to-attribute (vars (walk* t (state-S c^)))))
-           #;(printf "~s\n" vars-to-attribute)
-           (let* ((under^ (underconstraint-with-t under vars-to-attribute))
-                  (under^ (underconstraint-with-g under^ f^)))
-             (fold-left
-              (lambda (st v)
-                (set-u/nonduplicate st v under^))
-              c^ vars-to-attribute))))))))
+(define (run-and-set-underconstraint g st)
+  (let ([$ ((run-committing-underconstraint-onceo g) st)])
+    (check-type $ infg?)
+    (case-infg $
+      (() #f)
+      ((c^) (state-with-U c^ #f))
+      ((c^ f^) (state-with-U c^ f^)))))
 

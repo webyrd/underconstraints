@@ -65,7 +65,7 @@
         (== type 'list)
         (== '(quote ()) expr)
         (== '() val)
-        (not-in-envo/g 'quote env)] [])
+        z(not-in-envo/g 'quote env)] [])
    ([e1 e2 v1 v2]
     [(== EI 'I)
      (== type 'list)

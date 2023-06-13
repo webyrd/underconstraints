@@ -312,42 +312,31 @@
       (underconstraino
        'u1
        '()
-       (evalo/g `(letrec ((rember (lambda (e l) : ((number list) -> list)
-                                    (match l
-                                      ('() l)
-                                      ((cons a d) (if (= a e) d (cons a (rember e d))))))))
-                   (rember 5 '()))
-                v1))
-
-      (underconstraino
-       'u2
-       '()
-       (evalo/g `(letrec ((rember (lambda (e l) : ((number list) -> list)
+       (freshg ()
+               (evalo/g `(letrec ((rember (lambda (e l) : ((number list) -> list)
+                                            (match l
+                                              ('() l)
+                                              ((cons a d) (if (= a e) d (cons a (rember e d))))))))
+                           (rember 5 '()))
+                        v1)
+               (evalo/g `(letrec ((rember (lambda (e l) : ((number list) -> list)
                                     ,q)))
                    (rember 6 (cons 6 '())))
-                v2))
-
-      (underconstraino
-       'u3
-       '()
-       (evalo/g `(letrec ((rember (lambda (e l) : ((number list) -> list)
+                v2)
+               (evalo/g `(letrec ((rember (lambda (e l) : ((number list) -> list)
                                     ,q)))
                    (rember 7 (cons 3 (cons 4 (cons 7 (cons 6 '()))))))
-                v3))
-
-      (underconstraino
-       'u4
-       '()
-       (evalo/g `(letrec ((rember (lambda (e l) : ((number list) -> list)
+                v3)
+               (evalo/g `(letrec ((rember (lambda (e l) : ((number list) -> list)
                                     ,q)))
                    (rember 5 (cons 3 (cons 4 (cons 6 (cons 7 '()))))))
-                v4))))
+                v4)))))
   '((() () (3 4 6) (3 4 6 7)))))
 
 
 (*trace-underconstraint-param* #f)
-(define max-ticks 100000)
-
+(*underconstraint-default-timeout-param* 300000)
+(*underconstraint-how-often-param* 10)
 
 (time (test "synthesize rember with conjoined top-level general underconstraint"
             (run 1 (q)
@@ -377,7 +366,7 @@
                        (evalo/g `(letrec ((rember (lambda (e l) : ((number list) -> list)
                                                     ,q)))
                                    (rember 5 (cons 3 (cons 4 (cons 6 (cons 7 '())))))) '(3 4 6 7)))
-               max-ticks)
+               )
 
               ;; ex1
               (evalo `(letrec ((rember (lambda (e l) : ((number list) -> list)
@@ -415,8 +404,167 @@
        ((_.1 rember)))
      (sym _.0 _.1)))))
 
+(time (test "synthesize rember no underconstraints"
+            (run 1 (q)
+              (absento 3 q)
+              (absento 4 q)
+              (absento 5 q)
+              (absento 6 q)
+              (absento 7 q)
+       
+              ;; ex1
+              (evalo `(letrec ((rember (lambda (e l) : ((number list) -> list)
+                                         ,q)))
+                        (rember 5 '())) '())
 
-(time (test "synthesize rember with conjoined top-level general underconstraint, reversed examples"
+              ;; ex2
+              (evalo `(letrec ((rember (lambda (e l) : ((number list) -> list)
+                                         ,q)))
+                        (rember 6 (cons 6 '()))) '())
+
+              ;; ex3
+              (evalo `(letrec ((rember (lambda (e l) : ((number list) -> list)
+                                         ,q)))
+                        (rember 7 (cons 3 (cons 4 (cons 7 (cons 6 '())))))) '(3 4 6))
+
+              ;; ex4
+              (evalo `(letrec ((rember (lambda (e l) : ((number list) -> list)
+                                         ,q)))
+                        (rember 5 (cons 3 (cons 4 (cons 6 (cons 7 '())))))) '(3 4 6 7))
+              
+              )
+            '(((match l
+                 ('() l)
+                 ((cons _.0 _.1) (if (= _.0 e) _.1 (cons _.0 (rember e _.1)))))
+               (=/=
+                ((_.0 _.1))
+                ((_.0 cons))
+                ((_.0 e))
+                ((_.0 if))
+                ((_.0 rember))
+                ((_.1 cons))
+       ((_.1 e))
+       ((_.1 if))
+       ((_.1 rember)))
+     (sym _.0 _.1)))))
+
+
+(time (test "synthesize rember with conjoined top-level general underconstraint swap ex1 <-> ex2"
+            (run 1 (q)
+              (absento 3 q)
+              (absento 4 q)
+              (absento 5 q)
+              (absento 6 q)
+              (absento 7 q)
+       
+              (underconstraino
+               'u1
+               q
+               (freshg ()
+                       ;; ex2
+                       (evalo/g `(letrec ((rember (lambda (e l) : ((number list) -> list)
+                                                    ,q)))
+                                   (rember 6 (cons 6 '()))) '())
+                       ;; ex1
+                       (evalo/g `(letrec ((rember (lambda (e l) : ((number list) -> list)
+                                                    ,q)))
+                                   (rember 5 '())) '())
+                       ;; ex3
+                       (evalo/g `(letrec ((rember (lambda (e l) : ((number list) -> list)
+                                                    ,q)))
+                                   (rember 7 (cons 3 (cons 4 (cons 7 (cons 6 '())))))) '(3 4 6))
+                       ;; ex4
+                       (evalo/g `(letrec ((rember (lambda (e l) : ((number list) -> list)
+                                                    ,q)))
+                                   (rember 5 (cons 3 (cons 4 (cons 6 (cons 7 '())))))) '(3 4 6 7)))
+               )
+
+              ;; ex2
+              (evalo `(letrec ((rember (lambda (e l) : ((number list) -> list)
+                                         ,q)))
+                        (rember 6 (cons 6 '()))) '())
+              
+              ;; ex1
+              (evalo `(letrec ((rember (lambda (e l) : ((number list) -> list)
+                                         ,q)))
+                        (rember 5 '())) '())
+
+              ;; ex3
+              (evalo `(letrec ((rember (lambda (e l) : ((number list) -> list)
+                                         ,q)))
+                        (rember 7 (cons 3 (cons 4 (cons 7 (cons 6 '())))))) '(3 4 6))
+
+              ;; ex4
+              (evalo `(letrec ((rember (lambda (e l) : ((number list) -> list)
+                                         ,q)))
+                        (rember 5 (cons 3 (cons 4 (cons 6 (cons 7 '())))))) '(3 4 6 7))
+              
+              )
+            '(((match l
+                 ('() l)
+                 ((cons _.0 _.1) (if (= _.0 e) _.1 (cons _.0 (rember e _.1)))))
+               (=/=
+                ((_.0 _.1))
+                ((_.0 cons))
+                ((_.0 e))
+                ((_.0 if))
+                ((_.0 rember))
+                ((_.1 cons))
+       ((_.1 e))
+       ((_.1 if))
+       ((_.1 rember)))
+     (sym _.0 _.1)))))
+
+
+(time (test "synthesize rember no underconstraints swap ex1 <-> ex2"
+            (run 1 (q)
+              (absento 3 q)
+              (absento 4 q)
+              (absento 5 q)
+              (absento 6 q)
+              (absento 7 q)
+
+              ;; ex2
+              (evalo `(letrec ((rember (lambda (e l) : ((number list) -> list)
+                                         ,q)))
+                        (rember 6 (cons 6 '()))) '())
+              
+              ;; ex1
+              (evalo `(letrec ((rember (lambda (e l) : ((number list) -> list)
+                                         ,q)))
+                        (rember 5 '())) '())
+
+
+              ;; ex3
+              (evalo `(letrec ((rember (lambda (e l) : ((number list) -> list)
+                                         ,q)))
+                        (rember 7 (cons 3 (cons 4 (cons 7 (cons 6 '())))))) '(3 4 6))
+
+              ;; ex4
+              (evalo `(letrec ((rember (lambda (e l) : ((number list) -> list)
+                                         ,q)))
+                        (rember 5 (cons 3 (cons 4 (cons 6 (cons 7 '())))))) '(3 4 6 7))
+              
+              )
+            '(((match l
+                 ('() l)
+                 ((cons _.0 _.1) (if (= _.0 e) _.1 (cons _.0 (rember e _.1)))))
+               (=/=
+                ((_.0 _.1))
+                ((_.0 cons))
+                ((_.0 e))
+                ((_.0 if))
+                ((_.0 rember))
+                ((_.1 cons))
+       ((_.1 e))
+       ((_.1 if))
+       ((_.1 rember)))
+     (sym _.0 _.1)))))
+
+
+
+
+#;(time (test "synthesize rember with conjoined top-level general underconstraint, reversed examples"
             (run 1 (q)
               (absento 3 q)
               (absento 4 q)
@@ -444,7 +592,7 @@
                        (evalo/g `(letrec ((rember (lambda (e l) : ((number list) -> list)
                                                     ,q)))
                                    (rember 5 '())) '()))
-               max-ticks)
+               )
 
               ;; ex4
               (evalo `(letrec ((rember (lambda (e l) : ((number list) -> list)
@@ -468,80 +616,6 @@
 
 
 
-              
-              )
-            '(((match l
-                 ('() l)
-                 ((cons _.0 _.1) (if (= _.0 e) _.1 (cons _.0 (rember e _.1)))))
-               (=/=
-                ((_.0 _.1))
-                ((_.0 cons))
-                ((_.0 e))
-                ((_.0 if))
-                ((_.0 rember))
-                ((_.1 cons))
-       ((_.1 e))
-       ((_.1 if))
-       ((_.1 rember)))
-     (sym _.0 _.1)))))
-
-
-#;(time (test "synthesize rember with 4 top-level general underconstraint"
-            (run 1 (q)
-              (absento 3 q)
-              (absento 4 q)
-              (absento 5 q)
-              (absento 6 q)
-              (absento 7 q)
-       
-              (underconstraino
-               'u1
-               q
-               (evalo/g `(letrec ((rember (lambda (e l) : ((number list) -> list)
-                                            ,q)))
-                        (rember 5 '())) '())
-               max-ticks)
-    
-              (underconstraino
-               'u2
-               q
-               (evalo/g `(letrec ((rember (lambda (e l) : ((number list) -> list)
-                                            ,q)))
-                           (rember 6 (cons 6 '()))) '())
-               max-ticks)
-
-              (underconstraino
-               'u3
-               q
-               (evalo/g `(letrec ((rember (lambda (e l) : ((number list) -> list)
-                                            ,q)))
-                           (rember 7 (cons 3 (cons 4 (cons 7 (cons 6 '())))))) '(3 4 6))
-               max-ticks)
-              
-              (underconstraino
-               'u4
-               q
-               (evalo/g `(letrec ((rember (lambda (e l) : ((number list) -> list)
-                                            ,q)))
-                           (rember 5 (cons 3 (cons 4 (cons 6 (cons 7 '())))))) '(3 4 6 7))
-               max-ticks)       
-
-
-              (evalo `(letrec ((rember (lambda (e l) : ((number list) -> list)
-                                         ,q)))
-                        (rember 5 '())) '())
-
-              (evalo `(letrec ((rember (lambda (e l) : ((number list) -> list)
-                                         ,q)))
-                        (rember 6 (cons 6 '()))) '())
-
-              (evalo `(letrec ((rember (lambda (e l) : ((number list) -> list)
-                                         ,q)))
-                        (rember 7 (cons 3 (cons 4 (cons 7 (cons 6 '())))))) '(3 4 6))
-
-              (evalo `(letrec ((rember (lambda (e l) : ((number list) -> list)
-                                         ,q)))
-                        (rember 5 (cons 3 (cons 4 (cons 6 (cons 7 '())))))) '(3 4 6 7))
               
               )
             '(((match l
@@ -584,7 +658,7 @@
                        (evalo/g `(letrec ((rember (lambda (e l) : ((number list) -> list)
                                             ,q)))
                            (rember 5 (cons 3 (cons 4 (cons 6 (cons 7 '())))))) '(3 4 6 7)))
-               max-ticks)
+               )
 
               (evalo `(letrec ((rember (lambda (e l) : ((number list) -> list)
                                          ,q)))
@@ -594,81 +668,3 @@
             '(((match l ['() l] [(cons _.0 _.1) _.2]) 
                (sym _.0 _.1)
                (absento (3 _.2) (4 _.2) (5 _.2) (6 _.2) (7 _.2))))))
-
-;; TODO: why is this succeeding with just `l`? Shouldn't match all the underconstraints.
-;; Hypothesis: committed results from one underconstraint aren't triggering others.
-#;(time (test "synthesize rember with 4 top-level general underconstraint, just 1 evalo"
-            (run 1 (q)
-              (absento 3 q)
-              (absento 4 q)
-              (absento 5 q)
-              (absento 6 q)
-              (absento 7 q)
-       
-              (trace-underconstraino
-               'u1
-               q
-               (evalo/g `(letrec ((rember (lambda (e l) : ((number list) -> list)
-                                            ,q)))
-                        (rember 5 '())) '())
-               max-ticks)
-    
-              (trace-underconstraino
-               'u2
-               q
-               (evalo/g `(letrec ((rember (lambda (e l) : ((number list) -> list)
-                                            ,q)))
-                           (rember 6 (cons 6 '()))) '())
-               max-ticks)
-
-              (trace-underconstraino
-               'u3
-               q
-               (evalo/g `(letrec ((rember (lambda (e l) : ((number list) -> list)
-                                            ,q)))
-                           (rember 7 (cons 3 (cons 4 (cons 7 (cons 6 '())))))) '(3 4 6))
-               max-ticks)
-              
-              (trace-underconstraino
-               'u4
-               q
-               (evalo/g `(letrec ((rember (lambda (e l) : ((number list) -> list)
-                                            ,q)))
-                           (rember 5 (cons 3 (cons 4 (cons 6 (cons 7 '())))))) '(3 4 6 7))
-               max-ticks)
-
-
-              (evalo `(letrec ((rember (lambda (e l) : ((number list) -> list)
-                                         ,q)))
-                        (rember 5 '())) '())
-              
-              #;(
-              
-
-              (evalo `(letrec ((rember (lambda (e l) : ((number list) -> list)
-                                         ,q)))
-                        (rember 6 (cons 6 '()))) '())
-
-              (evalo `(letrec ((rember (lambda (e l) : ((number list) -> list)
-                                         ,q)))
-                        (rember 7 (cons 3 (cons 4 (cons 7 (cons 6 '())))))) '(3 4 6))
-
-              (evalo `(letrec ((rember (lambda (e l) : ((number list) -> list)
-                                         ,q)))
-                        (rember 5 (cons 3 (cons 4 (cons 6 (cons 7 '())))))) '(3 4 6 7))
-              )
-              )
-            '(((match l
-                 ('() l)
-                 ((cons _.0 _.1) (if (= _.0 e) _.1 (cons _.0 (rember e _.1)))))
-               (=/=
-                ((_.0 _.1))
-                ((_.0 cons))
-                ((_.0 e))
-                ((_.0 if))
-                ((_.0 rember))
-                ((_.1 cons))
-       ((_.1 e))
-       ((_.1 if))
-       ((_.1 rember)))
-     (sym _.0 _.1)))))
