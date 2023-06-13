@@ -147,6 +147,18 @@
           (== p 2)))
       '((1 2)))
 
+(test "condg interp partial refute"
+      (run* (e v)
+        (fresh (e1 v1)
+          (== e `(cons ,e1 (cons 5 '())))
+          (== v `(,v1 6))
+          (underconstraino
+           'u1
+           (list p)
+           (evalo/g e v))
+          (evalo e v)))
+      '())
+
 
 (test "condg interp partial 3 resume"
       (run 1 (q)
@@ -339,8 +351,125 @@
 
 (*trace-underconstraint-param* #f)
 (*underconstraint-default-timeout-param* 3000000)
-(*underconstraint-how-often-param* 5)
+(*underconstraint-how-often-param* 1)
 (*underconstraint-depth-limit* 10)
+
+
+(time (test "synthesize append no underconstraint"
+            (run 1 (q)
+              (absento '3 q)
+              (absento '4 q)
+              (absento '5 q)
+              (absento '6 q)
+              (absento '7 q)
+
+              ;; ex1
+              (evalo `(letrec ((append (lambda (l s) : ((list list) -> list)
+                                         ,q)))
+                        (append '() (cons 5 (cons 6 '())))) '(5 6))
+              ;; ex2
+              (evalo `(letrec ((append (lambda (l s) : ((list list) -> list)
+                                         ,q)))
+                        (append (cons 3 (cons 4 (cons 5 '()))) (cons 6 (cons 7 '())))) '(3 4 5 6 7))
+              )
+            '(((match l
+                 ('() s)
+                 ((cons _.0 _.1) (cons _.0 (append _.1 s))))
+               (=/= ((_.0 _.1)) ((_.0 append)) ((_.0 cons)) ((_.0 s)) ((_.1 append)) ((_.1 cons)) ((_.1 s))) (sym _.0 _.1)))))
+
+(time (test "synthesize append with conjoined top-level general underconstraint"
+            (run 1 (q)
+              (absento '3 q)
+              (absento '4 q)
+              (absento '5 q)
+              (absento '6 q)
+              (absento '7 q)
+
+              (underconstraino
+               'u1
+               q
+               (freshg ()
+                       ;; ex1
+                       (evalo/g `(letrec ((append (lambda (l s) : ((list list) -> list)
+                                                    ,q)))
+                                   (append '() (cons 5 (cons 6 '())))) '(5 6))
+                       ;; ex2
+                       (evalo/g `(letrec ((append (lambda (l s) : ((list list) -> list)
+                                                    ,q)))
+                                   (append (cons 3 (cons 4 (cons 5 '()))) (cons 6 (cons 7 '())))) '(3 4 5 6 7))
+                       ))
+
+              ;; ex1
+              (evalo `(letrec ((append (lambda (l s) : ((list list) -> list)
+                                         ,q)))
+                        (append '() (cons 5 (cons 6 '())))) '(5 6))
+              ;; ex2
+              (evalo `(letrec ((append (lambda (l s) : ((list list) -> list)
+                                         ,q)))
+                        (append (cons 3 (cons 4 (cons 5 '()))) (cons 6 (cons 7 '())))) '(3 4 5 6 7)))
+          
+            '(((match l
+                 ('() s)
+                 ((cons _.0 _.1) (cons _.0 (append _.1 s))))
+               (=/= ((_.0 _.1)) ((_.0 append)) ((_.0 cons)) ((_.0 s)) ((_.1 append)) ((_.1 cons)) ((_.1 s))) (sym _.0 _.1)))))
+
+(time (test "synthesize append with conjoined top-level general underconstraint swapped"
+            (run 1 (q)
+              (absento '3 q)
+              (absento '4 q)
+              (absento '5 q)
+              (absento '6 q)
+              (absento '7 q)
+
+              (underconstraino
+               'u1
+               q
+               (freshg ()
+                       ;; ex2
+                       (evalo/g `(letrec ((append (lambda (l s) : ((list list) -> list)
+                                                    ,q)))
+                                   (append (cons 3 (cons 4 (cons 5 '()))) (cons 6 (cons 7 '())))) '(3 4 5 6 7))
+                       ;; ex1
+                       (evalo/g `(letrec ((append (lambda (l s) : ((list list) -> list)
+                                                    ,q)))
+                                   (append '() (cons 5 (cons 6 '())))) '(5 6))
+                       ))
+
+              ;; ex2
+              (evalo `(letrec ((append (lambda (l s) : ((list list) -> list)
+                                         ,q)))
+                        (append (cons 3 (cons 4 (cons 5 '()))) (cons 6 (cons 7 '())))) '(3 4 5 6 7))
+              ;; ex1
+              (evalo `(letrec ((append (lambda (l s) : ((list list) -> list)
+                                         ,q)))
+                        (append '() (cons 5 (cons 6 '())))) '(5 6)))
+          
+            '(((match l
+                 ('() s)
+                 ((cons _.0 _.1) (cons _.0 (append _.1 s))))
+               (=/= ((_.0 _.1)) ((_.0 append)) ((_.0 cons)) ((_.0 s)) ((_.1 append)) ((_.1 cons)) ((_.1 s))) (sym _.0 _.1)))))
+
+(time (test "synthesize append no underconstraint swapped"
+            (run 1 (q)
+              (absento '3 q)
+              (absento '4 q)
+              (absento '5 q)
+              (absento '6 q)
+              (absento '7 q)
+              ;; ex2
+              (evalo `(letrec ((append (lambda (l s) : ((list list) -> list)
+                                         ,q)))
+                        (append (cons 3 (cons 4 (cons 5 '()))) (cons 6 (cons 7 '())))) '(3 4 5 6 7))
+              ;; ex1
+              (evalo `(letrec ((append (lambda (l s) : ((list list) -> list)
+                                         ,q)))
+                        (append '() (cons 5 (cons 6 '())))) '(5 6))
+              )
+            '(((match l
+                 ('() s)
+                 ((cons _.0 _.1) (cons _.0 (append _.1 s))))
+               (=/= ((_.0 _.1)) ((_.0 append)) ((_.0 cons)) ((_.0 s)) ((_.1 append)) ((_.1 cons)) ((_.1 s))) (sym _.0 _.1)))))
+
 
 (time (test "synthesize rember with conjoined top-level general underconstraint"
             (run 1 (q)
