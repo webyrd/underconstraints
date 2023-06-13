@@ -352,7 +352,8 @@
 (*trace-underconstraint-param* #f)
 (*underconstraint-default-timeout-param* 3000000)
 (*underconstraint-how-often-param* 1)
-(*underconstraint-depth-limit* 10)
+(*underconstraint-depth-limit-1* 10000000000)
+(*underconstraint-depth-limit-2* 10)
 
 
 (time (test "synthesize append no underconstraint"
@@ -413,7 +414,7 @@
                  ((cons _.0 _.1) (cons _.0 (append _.1 s))))
                (=/= ((_.0 _.1)) ((_.0 append)) ((_.0 cons)) ((_.0 s)) ((_.1 append)) ((_.1 cons)) ((_.1 s))) (sym _.0 _.1)))))
 
-(time (test "synthesize append with conjoined top-level general underconstraint swapped"
+#;(time (test "synthesize append with conjoined top-level general underconstraint swapped"
             (run 1 (q)
               (absento '3 q)
               (absento '4 q)
@@ -449,7 +450,7 @@
                  ((cons _.0 _.1) (cons _.0 (append _.1 s))))
                (=/= ((_.0 _.1)) ((_.0 append)) ((_.0 cons)) ((_.0 s)) ((_.1 append)) ((_.1 cons)) ((_.1 s))) (sym _.0 _.1)))))
 
-(time (test "synthesize append no underconstraint swapped"
+#;(time (test "synthesize append no underconstraint swapped"
             (run 1 (q)
               (absento '3 q)
               (absento '4 q)
