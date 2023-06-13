@@ -4,12 +4,12 @@
 
 (load "pmatch.scm")
 
-(define-syntax check-type
+#;(define-syntax check-type
   (syntax-rules ()
     [(_ v pred)
      (check-type-runtime v pred 'pred)]))
 
-#;(define-syntax check-type
+(define-syntax check-type
   (syntax-rules ()
     [(_ v pred)
      v]))
@@ -179,6 +179,7 @@
         (check-type depth1 number?)
         (lambda (depth2)
           (check-type depth2 number?)
+          #;(printf "depth1: ~s; depth2: ~s\n" depth1 depth2)
           g)))))
 
 (define ==g (wrap-for-depth-limit ==))
@@ -217,7 +218,7 @@
 
 (define (underconstraino-aux user-name te t ge g timeout-info trace?)
   (lambda (st)
-    (run-and-set-underconstraint (cons (g (*underconstraint-depth-limit-1*)) t) st)))
+    (run-and-set-underconstraint (cons (g 0) t) st)))
 
 (define-syntax underconstraino
   (syntax-rules ()
@@ -280,10 +281,10 @@
       (check-type depth2 number?)
       (lambda (st)
         (check-type st state?)
-        (if (<= depth1 0)
+        (if (> depth1 (*underconstraint-depth-limit-1*))
             (begin (increment-counter! *depth-limit-1-cutoff-counter*)
                    #f) ;; UNSOUND!
-            (((g (- depth1 1)) depth2) st))))))
+            (((g (+ depth1 1)) depth2) st))))))
 
 ;; Suspend when reaching depth-2-limit
 (define (check-depth-2 g-on-fallback-thunk g)
@@ -291,9 +292,9 @@
     (check-type depth2 number?)
     (lambda (st)
       (check-type st state?)
-      (if (<= depth2 0)
+      (if (> depth2 (*underconstraint-depth-limit-2*))
           (begin (increment-counter! *depth-limit-2-cutoff-counter*) (cons st (g-on-fallback-thunk)))
-          ((g (- depth2 1)) st)))))
+          ((g (+ depth2 1)) st)))))
 
 (define-syntax (condg stx)
   (syntax-case stx ()
@@ -436,7 +437,7 @@
     (let ((st (state-with-scope st (new-scope)))
           (timeout-ticks (get-timeout-ticks)))
       (define (do-run)
-        (let ([$ ((g (*underconstraint-depth-limit-2*)) st)])
+        (let ([$ ((g 0) st)])
           (case-infg $
             (()
              (begin-when-trace

@@ -352,7 +352,7 @@
 (*trace-underconstraint-param* #f)
 (*underconstraint-default-timeout-param* 3000000)
 (*underconstraint-how-often-param* 1)
-(*underconstraint-depth-limit-1* 10000000000)
+(*underconstraint-depth-limit-1* 30)
 (*underconstraint-depth-limit-2* 10)
 
 
