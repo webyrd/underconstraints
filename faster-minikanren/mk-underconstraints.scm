@@ -229,7 +229,7 @@
           (V (state-V st)))
       (if U
           (begin
-            #;(let ([t (cdr U)])
+            (let ([t (cdr U)])
               (printf
                "~s\n"
                ((reify t) (state-with-scope st (new-scope)))))
