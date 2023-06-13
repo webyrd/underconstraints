@@ -4,12 +4,12 @@
 
 (load "pmatch.scm")
 
-#;(define-syntax check-type
+(define-syntax check-type
   (syntax-rules ()
     [(_ v pred)
      (check-type-runtime v pred 'pred)]))
 
-(define-syntax check-type
+#;(define-syntax check-type
   (syntax-rules ()
     [(_ v pred)
      v]))
@@ -46,6 +46,7 @@
 
 (define *engine-completed-counter* 0)
 (define *engine-timedout-counter* 0)
+(define *depth-limit-cutoff-counter* 0)
 
 (define *immature-stream-counter* 0)
 (define *fail-counter* 0)
@@ -59,6 +60,7 @@
 (define (reset-counters!)
   (set! *engine-completed-counter* 0)
   (set! *engine-timedout-counter* 0)
+  (set! *depth-limit-cutoff-counter* 0)
   ;;
   (set! *immature-stream-counter* 0)
   (set! *fail-counter* 0)
@@ -68,6 +70,7 @@
 (define (print-counters!)
   (printf "*engine-completed-counter*: ~s\n" *engine-completed-counter*)
   (printf "*engine-timedout-counter*: ~s\n" *engine-timedout-counter*)
+  (printf "*depth-limit-cutoff-counter*: ~s\n" *depth-limit-cutoff-counter*)
   ;;
   (printf "*immature-stream-counter*: ~s\n" *immature-stream-counter*)
   (printf "*fail-counter*: ~s\n" *fail-counter*)
@@ -166,6 +169,7 @@
   (lambda args
     (let ([g (apply gc args)])
       (lambda (depth)
+        (check-type depth number?)
         g))))
 
 (define ==g (wrap-for-depth-limit ==))
@@ -199,7 +203,7 @@
 
 (define (underconstraino-aux user-name te t ge g timeout-info trace?)
   (lambda (st)
-    (run-and-set-underconstraint (cons (g (*underconstraint-depth-limit*)) t) st)))
+    (run-and-set-underconstraint (cons g t) st)))
 
 (define-syntax underconstraino
   (syntax-rules ()
@@ -254,60 +258,68 @@
          (else (let ((c (car stream)) (f (cdr stream)))
                  e3)))))))
 
-(define (check-depth g)
+(define (check-depth g-on-fallback-thunk g)
   (lambda (depth)
+    (check-type depth number?)
     (lambda (st)
-      (if (= depth 0)
-          st
+      (check-type st state?)
+      (if (<= depth 0)
+          (begin (increment-counter! *depth-limit-cutoff-counter*) (cons st (g-on-fallback-thunk)))
           ((g (- depth 1)) st)))))
 
 (define-syntax (condg stx)
   (syntax-case stx ()
     ((_ ((x ...) (g ...) (b ...)) ...)
-     #`(check-depth
-        (lambda (depth)
-          (letrec ([condg-g (condg-runtime
-                             (list
-                              (lambda (st)
-                                (let ([scope (subst-scope (state-S st))])
-                                  (let ([x (var scope)] ...)
-                                    (cons
-                                     (bindg* st (g depth) ...)
-                                     (lambda (st) (bindg* st (b depth) ...))))))
-                              ...)
-                             (lambda () condg-g))])
-            condg-g))))))
+     #`(letrec ([condg-g (condg-runtime
+                          (list
+                           (lambda (depth)
+                             (check-type depth number?)
+                             (lambda (st)
+                               (check-type st state?)
+                               (let ([scope (subst-scope (state-S st))])
+                                 (let ([x (var scope)] ...)
+                                   (cons
+                                    (bindg* st (g depth) ...)
+                                    (lambda (depth) (check-type depth number?) (lambda (st) (bindg* st (b depth) ...))))))))
+                           ...)
+                          (lambda () condg-g))])
+            condg-g))))
 
 (define (condg-runtime clauses g-thunk)
-  (lambda (st)
-    (define (nondeterministic) (check-type (cons st (g-thunk)) infg?))
-    (let ((st (state-with-scope st (new-scope)))) ;; for set-var-val at choice point entry
-      (let loop ([clauses clauses] [previously-found-clause #f])
-        (if (null? clauses)
-            (and previously-found-clause
-                 (let ([guard-result (car previously-found-clause)]
-                       [body (cdr previously-found-clause)])
-                   ;; commit, evaluate body
-                   (body guard-result)))
-            (let* ([clause-evaluated ((car clauses) st)]
-                   [guard-stream (car clause-evaluated)]
-                   [body-g (cdr clause-evaluated)])
-              (let ([guard-result (evaluate-guard guard-stream body-g)])
-                (cond
-                  [(not guard-result) (loop (cdr clauses) previously-found-clause)]
-                  [(eq? 'nondet guard-result) (nondeterministic)]
-                  [else (if previously-found-clause
-                            (nondeterministic)
-                            (loop (cdr clauses) guard-result))]))))))))
+  (check-depth g-thunk
+   (lambda (depth)
+     #;(printf "depth: ~s\n" depth)
+     (check-type depth number?)
+     (lambda (st)
+       (define (nondeterministic) (check-type (cons st (g-thunk)) infg?))
+       (check-type st state?)
+       (let ((st (state-with-scope st (new-scope)))) ;; for set-var-val at choice point entry
+         (let loop ([clauses clauses] [previously-found-clause #f])
+           (if (null? clauses)
+               (and previously-found-clause
+                    (let ([guard-result (car previously-found-clause)]
+                          [body (cdr previously-found-clause)])
+                      ;; commit, evaluate body
+                      ((body depth) guard-result)))
+               (let* ([clause-evaluated (((car clauses) depth) st)]
+                      [guard-stream (car clause-evaluated)]
+                      [body-g (cdr clause-evaluated)])
+                 (let ([guard-result (evaluate-guard guard-stream body-g)])
+                   (cond
+                     [(not guard-result) (loop (cdr clauses) previously-found-clause)]
+                     [(eq? 'nondet guard-result) (nondeterministic)]
+                     [else (if previously-found-clause
+                               (nondeterministic)
+                               (loop (cdr clauses) guard-result))]))))))))))
 
 (define (evaluate-guard stream body-g)
-  (check-type
    (case-infg stream
      (() #f)
      ((c) (cons c body-g))
      ((c f) 'nondet) ;; not the declared type
-     #;((c f) (cons c (lambda (st) (bindg (f st) body-g)))))
-   infg?))
+     #;((c f) (cons c (lambda (depth) (check-type depth number?) (lambda (st) (check-type st state?)
+                                                                   (bindg ((f depth) st) (body-g depth)))))))
+   )
   
 
 
@@ -315,15 +327,15 @@
   (check-type stream infg?)
   (check-type
    (case-infg stream
-              (() #f)
-              ((c) (g c))   ;; committed and finished, so just g left to do
-              ((c1 f1)      ;; committed but suspened...
-               (let ([s2 (g c1)])
-                 (case-infg s2
-                            (() #f)              ;; g fails, so whole thing fails
-                            ((c2) (cons c2 f1))  ;; committed and finished, so just f1 to return to
-                            ;; when we return we need to do both f1 and f2
-                            ((c2 f2) (cons c2 (lambda (st) (bindg (f1 st) f2))))))))
+     (() #f)
+     ((c) (g c))   ;; committed and finished, so just g left to do
+     ((c1 f1)      ;; committed but suspened...
+      (let ([s2 (g c1)])
+        (case-infg s2
+          (() #f)              ;; g fails, so whole thing fails
+          ((c2) (cons c2 f1))  ;; committed and finished, so just f1 to return to
+          ;; when we return we need to do both f1 and f2
+          ((c2 f2) (cons c2 (lambda (depth) (lambda (st) (bindg ((f1 depth) st) (f2 depth))))))))))
    infg?))
 
 (define-syntax bindg*
@@ -335,10 +347,11 @@
   (syntax-rules ()
     ((_ (x ...) g0 g ...)
      (lambda (depth)
-       (lambda (st)
-         (let ((scope (subst-scope (state-S st))))
-           (let ((x (var scope)) ...)
-             (bindg* ((g0 depth) st) (g depth) ...))))))))
+        (check-type depth number?)
+        (lambda (st)
+          (let ((scope (subst-scope (state-S st))))
+            (let ((x (var scope)) ...)
+              (bindg* ((g0 depth) st) (g depth) ...))))))))
 
 
 
@@ -387,7 +400,7 @@
     (let ((st (state-with-scope st (new-scope)))
           (timeout-ticks (get-timeout-ticks)))
       (define (do-run)
-        (let ([$ (g st)])
+        (let ([$ ((g (*underconstraint-depth-limit*)) st)])
           (case-infg $
             (()
              (begin-when-trace
@@ -435,9 +448,7 @@
                       name
                       (- timeout-ticks ticks-left-over)
                       timeout-ticks)
-                     (begin
-                       #;(printf "ticks: ~s\n" (- timeout-ticks ticks-left-over))
-                       value)))
+                     value))
                   ;; engine "expired" procedure
                   (lambda (new-engine)
                     (increment-counter! *engine-timedout-counter*)
@@ -447,7 +458,6 @@
                       name
                       timeout-ticks)
                      (begin
-                       #;(printf "ticks: ~s\n" timeout-ticks)
                        #;(printf
                         "term: ~s\n"
                         ((reify t) st))

@@ -338,9 +338,9 @@
 
 
 (*trace-underconstraint-param* #f)
-(*underconstraint-default-timeout-param* 300000)
-(*underconstraint-how-often-param* 10)
-(*underconstraint-depth-limit* 20)
+(*underconstraint-default-timeout-param* 3000000)
+(*underconstraint-how-often-param* 5)
+(*underconstraint-depth-limit* 10)
 
 (time (test "synthesize rember with conjoined top-level general underconstraint"
             (run 1 (q)
