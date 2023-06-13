@@ -154,7 +154,7 @@
           (== v `(,v1 6))
           (underconstraino
            'u1
-           (list p)
+           '()
            (evalo/g e v))
           (evalo e v)))
       '())
