@@ -7,11 +7,14 @@
 
 (test "condg commit"
  (run* (q)
-   (freshg (x)
-     (== x 1)
-     (condg
-      ([] [(== x 1)] [(== q 1)])
-      ([] [(== x 2)] [(== q 2)]))))
+   (underconstraino
+    'u1
+    '()
+    (freshg (x)
+            (==g x 1)
+            (condg
+             ([] [(==g x 1)] [(==g q 1)])
+             ([] [(==g x 2)] [(==g q 2)])))))
  '(1))
 
 
@@ -22,8 +25,8 @@
     '()
     (freshg (x)
       (condg
-       ([] [(== x 1)] [(== q 1)])
-       ([] [(== x 2)] [(== q 2)])))))
+       ([] [(==g x 1)] [(==g q 1)])
+       ([] [(==g x 2)] [(==g q 2)])))))
  '(_.0))
 
 (test "condg commit outer, nondet inner, nested"
@@ -32,18 +35,18 @@
          'u1
          '()
          (freshg (x y a b)
-                 (== q (cons a b))
-                 (== x 1)
+                 (==g q (cons a b))
+                 (==g x 1)
                  (condg
                   ([]
-                   [(== x 1)]
-                   [(== a 1)
+                   [(==g x 1)]
+                   [(==g a 1)
                     (condg
-                     ([] [(== y 1)] [(== b 1)])
-                     ([] [(== y 2)] [(== b 2)]))])
+                     ([] [(==g y 1)] [(==g b 1)])
+                     ([] [(==g y 2)] [(==g b 2)]))])
                   ([]
-                   [(== x 2)]
-                   [(== a 2)])))))
+                   [(==g x 2)]
+                   [(==g a 2)])))))
       '((1 . _.0)))
 
 
@@ -53,14 +56,14 @@
          'u1
          '()
          (freshg (x y a b)
-                 (== q (cons a b))
-                 (== x 1)
+                 (==g q (cons a b))
+                 (==g x 1)
                  (condg
-                  ([] [(== x 1)] [(== a 1)])
-                  ([] [(== x 2)] [(== a 2)]))
+                  ([] [(==g x 1)] [(==g a 1)])
+                  ([] [(==g x 2)] [(==g a 2)]))
                  (condg
-                  ([] [(== y 1)] [(== b 1)])
-                  ([] [(== y 2)] [(== b 2)])))))
+                  ([] [(==g y 1)] [(==g b 1)])
+                  ([] [(==g y 2)] [(==g b 2)])))))
       '((1 . _.0)))
 
 (test "condg nondet first, det second; commits second"
@@ -69,14 +72,14 @@
          'u1
          '()
          (freshg (x y a b)
-           (== q (cons a b))
-           (== y 1)
+           (==g q (cons a b))
+           (==g y 1)
            (condg
-            ([] [(== x 1)] [(== a 1)])
-            ([] [(== x 2)] [(== a 2)]))
+            ([] [(==g x 1)] [(==g a 1)])
+            ([] [(==g x 2)] [(==g a 2)]))
            (condg
-            ([] [(== y 1)] [(== b 1)])
-            ([] [(== y 2)] [(== b 2)])))))
+            ([] [(==g y 1)] [(==g b 1)])
+            ([] [(==g y 2)] [(==g b 2)])))))
       '((_.0 . 1)))
 
 (test "condg nondet first, det second; commits second; return to first"
@@ -86,14 +89,14 @@
            'u1
            (list x y a b)
            (freshg ()
-                   (== q (cons a b))
-                   (== y 1)
+                   (==g q (cons a b))
+                   (==g y 1)
                    (condg
-                    ([] [(== x 1)] [(== a 1)])
-                    ([] [(== x 2)] [(== a 2)]))
+                    ([] [(==g x 1)] [(==g a 1)])
+                    ([] [(==g x 2)] [(==g a 2)]))
                    (condg
-                    ([] [(== y 1)] [(== b 1)])
-                    ([] [(== y 2)] [(== b 2)]))))
+                    ([] [(==g y 1)] [(==g b 1)])
+                    ([] [(==g y 2)] [(==g b 2)]))))
           (== x 1)))
       '((1 . 1)))
 
@@ -337,6 +340,7 @@
 (*trace-underconstraint-param* #f)
 (*underconstraint-default-timeout-param* 300000)
 (*underconstraint-how-often-param* 10)
+(*underconstraint-depth-limit* 20)
 
 (time (test "synthesize rember with conjoined top-level general underconstraint"
             (run 1 (q)

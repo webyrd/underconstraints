@@ -6,52 +6,52 @@
 
 (define (lookupo/g x env t type)
   (freshg (y b rest)
-    (== `((,y . ,b) . ,rest) env)
+    (==g `((,y . ,b) . ,rest) env)
     (condg
      ([]
-      [(== x y)]
+      [(==g x y)]
       [(condg
-        ([] [(== `(val ,type . ,t) b)] [])
-        ([lam-expr] [(== `(rec ,type . ,lam-expr) b) (== `(closure ,lam-expr ,env) t)] []))])
-     ([] [(=/= x y)] [(lookupo/g x rest t type)]))))
+        ([] [(==g `(val ,type . ,t) b)] [])
+        ([lam-expr] [(==g `(rec ,type . ,lam-expr) b) (==g `(closure ,lam-expr ,env) t)] []))])
+     ([] [(=/=g x y)] [(lookupo/g x rest t type)]))))
 
 ;; TODO: is it good or bad that this stalls when it gets to ambiguity, despite being used in guard?
 #;(define (not-in-envo/g x env)
   (condg
-   ([] [(== empty-env/g env)] [])
+   ([] [(==g empty-env/g env)] [])
    ([y b rest]
-    [(== `((,y . ,b) . ,rest) env)
-     (=/= y x)]
+    [(==g `((,y . ,b) . ,rest) env)
+     (=/=g y x)]
     [(not-in-envo/g x rest)])))
 
 (define (list-of-symbolso/g los)
   (condg
-   ([] [(== '() los)] [])
+   ([] [(==g '() los)] [])
    ([a d]
-    [(== `(,a . ,d) los)
-     (symbolo a)]
+    [(==g `(,a . ,d) los)
+     (symbolog a)]
     [(list-of-symbolso/g d)])))
 
 (define (eval-listo/g expr env val type)
   (condg
-   ([] [(== '() expr) (== '() val)] [])
+   ([] [(==g '() expr) (==g '() val)] [])
    ([a d v-a v-d t-a t-d]
-    [(== `(,a . ,d) expr)
-     (== `(,v-a . ,v-d) val)
-     (== `(,t-a . ,t-d) type)]
+    [(==g `(,a . ,d) expr)
+     (==g `(,v-a . ,v-d) val)
+     (==g `(,t-a . ,t-d) type)]
     [(eval-expo/g a env v-a 'I t-a)
      (eval-listo/g d env v-d t-d)])))
 
 (define (ext-env*o/g x* a* t* env out)
   (condg
-   ([] [(== '() x*) (== '() a*) (== env out)] [])
+   ([] [(==g '() x*) (==g '() a*) (==g env out)] [])
    ([x a dx* da* env2 t dt*]
-    [(== `(,x . ,dx*) x*)
-     (== `(,a . ,da*) a*)
-     (== `(,t . ,dt*) t*)
-     (== `((,x . (val ,t . ,a)) . ,env2) out)
-     (symbolo x)
-     (symbolo t)]
+    [(==g `(,x . ,dx*) x*)
+     (==g `(,a . ,da*) a*)
+     (==g `(,t . ,dt*) t*)
+     (==g `((,x . (val ,t . ,a)) . ,env2) out)
+     (symbolog x)
+     (symbolog t)]
     [(ext-env*o/g dx* da* dt* env env2)])))
 
 (define (evalo/g expr val)
@@ -60,32 +60,32 @@
 
 (define (eval-expo/g expr env val EI type)
   (condg
-   ([] [(symbolo expr)] [(lookupo/g expr env val type)])
-   ([] [(== EI 'I)
-        (== type 'list)
-        (== '(quote ()) expr)
-        (== '() val)
+   ([] [(symbolog expr)] [(lookupo/g expr env val type)])
+   ([] [(==g EI 'I)
+        (==g type 'list)
+        (==g '(quote ()) expr)
+        (==g '() val)
         #;(not-in-envo/g 'quote env)] [])
    ([e1 e2 v1 v2]
-    [(== EI 'I)
-     (== type 'list)
-     (== `(cons ,e1 ,e2) expr)
-     (== `(,v1 . ,v2) val)
+    [(==g EI 'I)
+     (==g type 'list)
+     (==g `(cons ,e1 ,e2) expr)
+     (==g `(,v1 . ,v2) val)
      #;(not-in-envo/g 'cons env)]
     [(eval-expo/g e1 env v1 'I 'number)
      (eval-expo/g e2 env v2 'I 'list)])
    ([rator x* rands body env^ a* at* res]
-    [(== `(,rator . ,rands) expr)
+    [(==g `(,rator . ,rands) expr)
      (condg ;; need to make nonoverlapping with syntactic forms
-      ([cv ct] [(symbolo rator)] [(absento rator '(quote cons letrec match if))]) ;; rator is var
-      ([a d] [(== rator (cons a d))] []))]       ;; rator is pair
+      ([cv ct] [(symbolog rator)] [(absentog rator '(quote cons letrec match if))]) ;; rator is var
+      ([a d] [(==g rator (cons a d))] []))]       ;; rator is pair
     [(eval-expo/g rator env `(closure (lambda ,x* ,body) ,env^) 'E `(,at* -> ,type))
      (eval-listo/g rands env a* at*)
      (ext-env*o/g x* a* at* env^ res)
      (eval-expo/g body res val 'I type)])
    ([p-name x body letrec-body ftype]
-    [(== EI 'I)
-     (== `(letrec ((,p-name (lambda ,x : ,ftype ,body)))
+    [(==g EI 'I)
+     (==g `(letrec ((,p-name (lambda ,x : ,ftype ,body)))
             ,letrec-body)
          expr)
      #;(not-in-envo/g 'letrec env)]
@@ -94,33 +94,33 @@
                   `((,p-name . (rec ,ftype . (lambda ,x ,body))) . ,env)
                   val 'I type)])
    ([e1 e2 e3 v1 s1 s2]
-    [(== EI 'I)
-     (== `(match ,e1
+    [(==g EI 'I)
+     (==g `(match ,e1
             ('() ,e2)
             ((cons ,s1 ,s2) ,e3)) expr)
-     (symbolo s1)
-     (symbolo s2)
+     (symbolog s1)
+     (symbolog s2)
      #;(not-in-envo/g 'match env)]
     [(eval-expo/g e1 env v1 'E 'list)
      (condg
-      ([] [(== '() v1)] [(eval-expo/g e2 env val 'I type)])
+      ([] [(==g '() v1)] [(eval-expo/g e2 env val 'I type)])
       ([a d]
-       [(== `(,a . ,d) v1)
-        (=/= a 'closure)]
+       [(==g `(,a . ,d) v1)
+        (=/=g a 'closure)]
        [(eval-expo/g e3 `((,s1 . (val number . ,a)) (,s2 . (val list . ,d)) . ,env) val 'I type)]))])
    ([e1 e2 e3 e4 v1 v2]
-    [(== EI 'I)
-     (== `(if (= ,e1 ,e2)
+    [(==g EI 'I)
+     (==g `(if (= ,e1 ,e2)
               ,e3
               ,e4) expr)
      #;(not-in-envo/g 'if env)]
     [(eval-expo/g e1 env v1 'E 'number)
      (eval-expo/g e2 env v2 'E 'number)
      (condg
-      ([] [(== v1 v2)] [(eval-expo/g e3 env val 'I type)])
-      ([] [(=/= v1 v2)] [(eval-expo/g e4 env val 'I type)]))])
+      ([] [(==g v1 v2)] [(eval-expo/g e3 env val 'I type)])
+      ([] [(=/=g v1 v2)] [(eval-expo/g e4 env val 'I type)]))])
       
    
-   ([] [(== EI 'I) (== type 'number) (numbero expr) (== expr val)] [])
+   ([] [(==g EI 'I) (==g type 'number) (numberog expr) (==g expr val)] [])
 
    ))

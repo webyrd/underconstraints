@@ -22,6 +22,9 @@
 (define *underconstraint-how-often-param*
   (make-parameter 1))
 
+(define *underconstraint-depth-limit*
+  (make-parameter 100))
+
 ;; Global default timeout parameter: number of ticks/gas for engine,
 ;; or `#f` if the default is no timeout.  Can be overriden by optional
 ;; timeout argument (number ticks or `#f`) to individual
@@ -159,6 +162,21 @@
         (and-foldl update-constraints (state S^ (state-C st) (state-U/V st)) added)
         #f))))
 
+(define (wrap-for-depth-limit gc)
+  (lambda args
+    (let ([g (apply gc args)])
+      (lambda (depth)
+        g))))
+
+(define ==g (wrap-for-depth-limit ==))
+(define =/=g (wrap-for-depth-limit =/=))
+(define absentog (wrap-for-depth-limit absento))
+(define symbolog (wrap-for-depth-limit symbolo))
+(define numberog (wrap-for-depth-limit numbero))
+(define stringog (wrap-for-depth-limit stringo))
+
+
+
 (define succeed (== #f #f))
 (define fail (== #f #t))
 
@@ -181,7 +199,7 @@
 
 (define (underconstraino-aux user-name te t ge g timeout-info trace?)
   (lambda (st)
-    (run-and-set-underconstraint g st)))
+    (run-and-set-underconstraint (cons (g (*underconstraint-depth-limit*)) t) st)))
 
 (define-syntax underconstraino
   (syntax-rules ()
@@ -236,20 +254,29 @@
          (else (let ((c (car stream)) (f (cdr stream)))
                  e3)))))))
 
+(define (check-depth g)
+  (lambda (depth)
+    (lambda (st)
+      (if (= depth 0)
+          st
+          ((g (- depth 1)) st)))))
+
 (define-syntax (condg stx)
   (syntax-case stx ()
-   ((_ ((x ...) (g ...) (b ...)) ...)
-    #`(letrec ([condg-g (condg-runtime
-                          (list
-                            (lambda (st)
-                              (let ([scope (subst-scope (state-S st))])
-                                (let ([x (var scope)] ...)
-                                  (cons
-                                    (bindg* st g ...)
-                                    (lambda (st) (bindg* st b ...))))))
-                            ...)
-                            (lambda () condg-g))])
-         condg-g))))
+    ((_ ((x ...) (g ...) (b ...)) ...)
+     #`(check-depth
+        (lambda (depth)
+          (letrec ([condg-g (condg-runtime
+                             (list
+                              (lambda (st)
+                                (let ([scope (subst-scope (state-S st))])
+                                  (let ([x (var scope)] ...)
+                                    (cons
+                                     (bindg* st (g depth) ...)
+                                     (lambda (st) (bindg* st (b depth) ...))))))
+                              ...)
+                             (lambda () condg-g))])
+            condg-g))))))
 
 (define (condg-runtime clauses g-thunk)
   (lambda (st)
@@ -307,14 +334,15 @@
 (define-syntax freshg
   (syntax-rules ()
     ((_ (x ...) g0 g ...)
-     (lambda (st)
-       (let ((scope (subst-scope (state-S st))))
-         (let ((x (var scope)) ...)
-           (bindg* (g0 st) g ...)))))))
+     (lambda (depth)
+       (lambda (st)
+         (let ((scope (subst-scope (state-S st))))
+           (let ((x (var scope)) ...)
+             (bindg* ((g0 depth) st) (g depth) ...))))))))
 
 
 
-(define (run-committing-underconstraint-onceo g)
+(define (run-committing-underconstraint-onceo g t)
   (define timeout-info #f)
   (define trace-arg? #f)
   (define name 'the-underconstraint)
@@ -407,7 +435,9 @@
                       name
                       (- timeout-ticks ticks-left-over)
                       timeout-ticks)
-                     value))
+                     (begin
+                       #;(printf "ticks: ~s\n" (- timeout-ticks ticks-left-over))
+                       value)))
                   ;; engine "expired" procedure
                   (lambda (new-engine)
                     (increment-counter! *engine-timedout-counter*)
@@ -416,17 +446,25 @@
                       "* underconstraint ~s engine ran out of gas after ~s ticks (treating as success)\n"
                       name
                       timeout-ticks)
+                     (begin
+                       #;(printf "ticks: ~s\n" timeout-ticks)
+                       #;(printf
+                        "term: ~s\n"
+                        ((reify t) st))
+                     #;(error 'uc "done")
                      ;; to maintain soundness, we must treat
                      ;; engine timeout timeout as
                      ;; success---return the original state
-                     (cons st g))))))))))
+                     (cons st g)))))))))))
 
 
-(define (run-and-set-underconstraint g st)
-  (let ([$ ((run-committing-underconstraint-onceo g) st)])
-    (check-type $ infg?)
-    (case-infg $
-      (() #f)
-      ((c^) (state-with-U c^ #f))
-      ((c^ f^) (state-with-U c^ f^)))))
+(define (run-and-set-underconstraint U st)
+  (let ([g (car U)]
+        [t (cdr U)])
+    (let ([$ ((run-committing-underconstraint-onceo g t) st)])
+      (check-type $ infg?)
+      (case-infg $
+        (() #f)
+        ((c^) (state-with-U c^ #f))
+        ((c^ f^) (state-with-U c^ (cons f^ t)))))))
 
