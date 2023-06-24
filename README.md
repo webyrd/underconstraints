@@ -1,5 +1,7 @@
 # underconstraints
 
+Joint work with Michael Ballantyne.
+
 [Would the cons case in evalo benefit from underconstraints?]
 
 [How much overhead does an underconstraint impose in practice?]
