@@ -386,18 +386,16 @@ individually before trying the full synthesis problem, but made
 available at the user level.
 
 For example, for a Barliman example-based program synthesis problem,
-augmented with type inference, we might write the following:
+we might write the following:
 
 ```
 (fresh (prog)
-  (underconstraino (!-exampleo prog inputN outputN))
-  ...
   (underconstraino (eval-exampleo prog input-expr1 output-val11))
   (underconstraino (eval-exampleo prog input-expr2 output-val12))
   (underconstraino (eval-exampleo prog input-expr3 output-val13))
   ...
   (underconstraino (eval-exampleo prog input-exprN output-val1N))
-  <normal evalo call>
+  <normal evalo calls>
   )
 ```
 
@@ -409,7 +407,7 @@ Running underconstraints at the end of a `run` is harmless but useless
 
 ```
 (fresh (prog)
-  <normal evalo call>
+  <normal evalo calls>
   (underconstraino (eval-exampleo prog input-expr1 output-val1))
   (underconstraino (eval-exampleo prog input-expr2 output-val2))
   (underconstraino (eval-exampleo prog input-expr3 output-val3))
@@ -442,8 +440,8 @@ Adding a type inferencer for synthesis might work well now:
   (underconstraino (eval-exampleo prog input-expr3 output-val3))
   ...
   (underconstraino (eval-exampleo prog input-exprN output-typeN))
-  <normal evalo call>
-  <normal !-o call>
+  <normal evalo calls>
+  <normal !-o calls>
   )
 ```
 
