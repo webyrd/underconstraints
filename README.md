@@ -2,6 +2,11 @@
 
 Joint work with Michael Ballantyne.
 
+This README file has accumulated a fair amount of cruft, and needs to
+be edited.  Since I first created this README, Michael Ballantyne has
+worked closely with me on both refining the idea of an underconstraint
+and on implementing (and attempting to optimize) underconstraints.
+
 [Would the cons case in evalo benefit from underconstraints?]
 
 [How much overhead does an underconstraint impose in practice?]
