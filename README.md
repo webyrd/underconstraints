@@ -385,8 +385,8 @@ Barliman to check that each input/output example pair is consistent
 individually before trying the full synthesis problem, but made
 available at the user level.
 
-For a Barliman typed synthesis program, for example, we might write
-the following:
+For example, for a Barliman example-based program synthesis problem,
+augmented with type inference, we might write the following:
 
 ```
 (fresh (prog)
