@@ -1,3 +1,5 @@
+(load "load.scm")
+
 (test "one-shot-underconstraino-trivial-classic"
   ;; classic miniKanren
   (run* (x)

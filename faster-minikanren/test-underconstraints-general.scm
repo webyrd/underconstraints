@@ -1,3 +1,5 @@
+(load "load.scm")
+
 ;; Start with a few very trivial examples showing sound/unsound uses
 ;; of underconstraints and basic goal ordering concerns.
 ;;
