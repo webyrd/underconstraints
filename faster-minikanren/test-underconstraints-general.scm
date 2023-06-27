@@ -1,6 +1,3 @@
-;; ** These examples do not run yet, since I have not yet implemented
-;; general `underconstraino`! **
-
 ;; Start with a few very trivial examples showing sound/unsound uses
 ;; of underconstraints and basic goal ordering concerns.
 ;;
