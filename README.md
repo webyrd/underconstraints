@@ -72,7 +72,8 @@ example, consider the `run*` expression:
 => ()
 ```
 
-Replacing the calls to `==` with underconstrained calls to `==` is unsound: 
+Replacing the calls to `==` with underconstrained calls to `==` is
+unsound:
 
 ```
 (run* (x)
@@ -81,9 +82,13 @@ Replacing the calls to `==` with underconstrained calls to `==` is unsound:
 => (_.0)
 ```
 
-This `run*` returns an answer because the underconstraints are checked individually and independently, and do not extend the constraint store upon success.
+This `run*` returns an answer because the underconstraints are checked
+individually and independently, and do not extend the constraint store
+upon success.
 
-The sound way to use underconstraints is to augment the existing relations or constraints with underconstraints that are *no stronger* than the existing constraints:
+The sound way to use underconstraints is to augment the existing
+relations or constraints with underconstraints that are *no stronger*
+than the existing constraints:
 
 ```
 (run* (x)
@@ -147,7 +152,8 @@ A slightly more realistic example:
       ((== 4 x)))))
 ```
 
-This `run*` returns `()`, since `x` cannot be two different numbers simultaneously:
+This `run*` returns `()`, since `x` cannot be two different numbers
+simultaneously:
 
 ```
 (run* (x)
@@ -156,7 +162,8 @@ This `run*` returns `()`, since `x` cannot be two different numbers simultaneous
 => ()
 ```
 
-Replacing the relations with underconstraints is unsound, and results in the `run*` producing an answer:
+Replacing the relations with underconstraints is unsound, and results
+in the `run*` producing an answer:
 
 ```
 (run* (x)
@@ -176,7 +183,8 @@ A sound use of underconstraints would be:
 => ()
 ```
 
-However, a more typical usage, which might benefit from failing fast, might be:
+However, a more typical usage, which might benefit from failing fast,
+might be:
 
 ```
 (run* (x)
@@ -198,7 +206,7 @@ or:
 ```
 
 since there is no need to underconstrain `one-or-two-choiceo` if we
-are going to call that relation first.  
+are going to call that relation first.
 
 
 
@@ -215,7 +223,9 @@ normal miniKanren:
 => ()
 ```
 
-This `run*` expression returns `()` because no value can simultaneously be both a symbol and a number.  However, the pure underconstraint equivalent returns `(_.0)`:
+This `run*` expression returns `()` because no value can
+simultaneously be both a symbol and a number.  However, the pure
+underconstraint equivalent returns `(_.0)`:
 
 ```
 (run* (x)
@@ -225,7 +235,11 @@ This `run*` expression returns `()` because no value can simultaneously be both 
 (_.0)
 ```
 
-Since both underconstraints succeed individually, and since underconstraints do not interact with each other, the `run*` produces an answer.  For this reason, underconstraints should only be used in conjunction with non-underconstrained predicates or constraints, such as:
+Since both underconstraints succeed individually, and since
+underconstraints do not interact with each other, the `run*` produces
+an answer.  For this reason, underconstraints should only be used in
+conjunction with non-underconstrained predicates or constraints, such
+as:
 
 
 or the equivalent:
@@ -240,7 +254,9 @@ or the equivalent:
 ()
 ```
 
-typical usage (although pointless in this case, since `symbolo` and `numbero` are already lazy constaints, so underconstraints are no use in this particular example):
+typical usage (although pointless in this case, since `symbolo` and
+`numbero` are already lazy constaints, so underconstraints are no use
+in this particular example):
 
 ```
 (run* (x)
@@ -264,7 +280,9 @@ or the simpler:
 ```
 
 
-[TODO give an example of underconstraints that make use of `symbolo`, `numbero`, and/or `absento`, but in an intellegent way as part of a more complex relation that might benefit from underconstraints]
+[TODO give an example of underconstraints that make use of `symbolo`,
+`numbero`, and/or `absento`, but in an intellegent way as part of a
+more complex relation that might benefit from underconstraints]
 
 
 
@@ -346,13 +364,18 @@ numeral).
 
 General rules for using underconstraints:
 
-1. for each underconstraint used, there should be a corresponding relation that enforces the underconstraint, to ensure soundness;
+1. for each underconstraint used, there should be a corresponding
+relation that enforces the underconstraint, to ensure soundness;
 
-2. while it is sound to use `symbolo`, `numbero`, and `absento` contraints within an underconstraint, keep in mind that these constraints are already lazy, and already fail fast;
+2. while it is sound to use `symbolo`, `numbero`, and `absento`
+contraints within an underconstraint, keep in mind that these
+constraints are already lazy, and already fail fast;
 
-3. underconstraints should come early in the conjunction, possibly at the very end;
+3. underconstraints should come early in the conjunction, possibly at
+the very end;
 
-4. the normal relations corresponding to underconstraints should come late in the conjuntion, possible at the very end.
+4. the normal relations corresponding to underconstraints should come
+late in the conjuntion, possible at the very end.
 
 
 
