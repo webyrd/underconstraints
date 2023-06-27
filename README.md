@@ -372,7 +372,7 @@ contraints within an underconstraint, keep in mind that these
 constraints are already lazy, and already fail fast;
 
 3. underconstraints should come early in the conjunction, possibly at
-the very end;
+the very beginning;
 
 4. the normal relations corresponding to underconstraints should come
 late in the conjuntion, possible at the very end.
