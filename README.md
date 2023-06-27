@@ -7,13 +7,6 @@ be edited.  Since I first created this README, Michael Ballantyne has
 worked closely with me on both refining the idea of an underconstraint
 and on implementing (and attempting to optimize) underconstraints.
 
-[Would the cons case in evalo benefit from underconstraints?]
-
-[How much overhead does an underconstraint impose in practice?]
-
-[How should you use underconstraints with dynamic goal reordering?
-Simple: the underconstraints should be dynamically generated in that
-case, with only the desired unconstrained created.]
 
 Underconstraints for miniKanren, inspired by a conversation with
 Youyou Cong about the `presento` constraint (a dual to the `absento`
@@ -430,3 +423,11 @@ Adding a type inferencer for synthesis might work well now:
   <normal !-o call>
   )
 ```
+
+[Would the cons case in evalo benefit from underconstraints?]
+
+[How much overhead does an underconstraint impose in practice?]
+
+[How should you use underconstraints with dynamic goal reordering?
+Simple: the underconstraints should be dynamically generated in that
+case, with only the desired unconstrained created.]
